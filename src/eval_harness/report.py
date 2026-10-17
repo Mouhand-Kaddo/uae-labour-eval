@@ -1,4 +1,5 @@
-"""`eval report`: a static, self-contained HTML page for one run, plus one page per trace."""
+"""`eval report`: a static, self-contained HTML page for one run, one page per trace, and the
+run's spend summary, all linked relatively so the folder can be committed or moved."""
 
 import json
 from html import escape
@@ -106,13 +107,30 @@ RESULT_FIELDS = frozenset(
 )
 
 
-def write_report(run_dir: Path) -> Path:
-    """Write `<run_dir>/report/index.html` and one page per trace; return the index path."""
+SPEND_FILE = "spend.json"
+SPEND_FIELDS = (
+    "run_id",
+    "model",
+    "status",
+    "run_spend_usd",
+    "cumulative_usd",
+    "remaining_usd",
+    "estimate_usd",
+    "ledger_total_at_start_usd",
+    "key_usage_at_start_usd",
+)
+
+
+def write_report(run_dir: Path, out: Path | None = None) -> Path:
+    """Write `index.html`, one page per trace and `spend.json` into `out` (default
+    `<run_dir>/report`); return the index path."""
     summary = read_run(run_dir)
     results = summary["cases"]
     numbers = report_numbers(results)
-    out = run_dir / "report"
+    out = run_dir / "report" if out is None else out
     (out / "traces").mkdir(parents=True, exist_ok=True)
+    spend = {name: summary.get(name) for name in SPEND_FIELDS}
+    (out / SPEND_FILE).write_text(json.dumps(spend, indent=2) + "\n", encoding="utf-8")
 
     trace_links: dict[tuple[str, int], str] = {}
     verdicts: dict[tuple[str, int], Any] = {}
@@ -250,7 +268,8 @@ def _cost_section(summary: dict[str, Any], numbers: ReportNumbers) -> str:
     )
     return f"""<section id="cost">
 <h2>Latency and cost</h2>
-<p class="note">Percentiles over every case result in the run, reviewed or not.</p>
+<p class="note">Percentiles over every case result in the run, reviewed or not.
+Spend summary: <a href="{SPEND_FILE}">{SPEND_FILE}</a>.</p>
 <div class="tiles">{html}</div>
 </section>"""
 

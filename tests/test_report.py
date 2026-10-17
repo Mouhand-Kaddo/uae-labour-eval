@@ -66,8 +66,8 @@ def project(tmp_path):
     return tmp_path
 
 
-def report(project, run):
-    return main(["--config", str(project / "config.toml"), "report", run])
+def report(project, run, *options):
+    return main(["--config", str(project / "config.toml"), "report", run, *options])
 
 
 def links(html: str) -> list[str]:
@@ -321,6 +321,30 @@ def test_report_accepts_a_run_directory_path(project):
     assert report(project, str(project / "elsewhere" / "run-a")) == 0
 
     assert (project / "elsewhere" / "run-a" / "report" / "index.html").is_file()
+
+
+def test_report_out_writes_a_self_contained_folder_with_relative_links_and_spend(project):
+    cases = [fixture_case("calc-1", "calc", True), fixture_case("cite-1", "cite", False)]
+    write_run(project / "runs" / "run-a", cases, estimate_usd=0.02, key_usage_at_start_usd=1.4)
+    out = project / "reports" / "run-a"
+
+    assert report(project, "run-a", "--out", str(out)) == 0
+
+    index = out / "index.html"
+    hrefs = links(index.read_text())
+    assert {"traces/calc-1.1.html", "traces/cite-1.1.html", "spend.json"} <= set(hrefs)
+    for href in hrefs:
+        assert not href.startswith("/") and ":" not in href and ".." not in href, href
+        assert (out / href).is_file(), href
+    for page in (out / "traces").iterdir():
+        assert links(page.read_text()) == ["../index.html"]
+    spend = json.loads((out / "spend.json").read_text())
+    assert spend["run_id"] == "run-a"
+    assert spend["run_spend_usd"] == 0.0123
+    assert spend["cumulative_usd"] == 1.5
+    assert spend["estimate_usd"] == 0.02
+    assert spend["key_usage_at_start_usd"] == 1.4
+    assert not (project / "runs" / "run-a" / "report").exists()
 
 
 def test_report_refuses_a_missing_or_broken_run(project, capsys):

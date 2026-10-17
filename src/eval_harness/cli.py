@@ -42,7 +42,7 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
         return _ingest(config)
 
     if args.command == "report":
-        return _report(config, args.run)
+        return _report(config, args.run, args.out)
     if args.command == "compare":
         return _compare(config, args.run_a, args.run_b)
     if args.command == "judge-agreement":
@@ -138,9 +138,9 @@ def _run_dir(config: Config, run: str) -> Path:
     return run_dir
 
 
-def _report(config: Config, run: str) -> int:
+def _report(config: Config, run: str, out: str | None) -> int:
     try:
-        index = write_report(_run_dir(config, run))
+        index = write_report(_run_dir(config, run), None if out is None else Path(out))
     except ReportError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_REFUSED
@@ -246,6 +246,10 @@ def _parser() -> argparse.ArgumentParser:
 
     report = commands.add_parser("report", help="write the HTML report for a run")
     report.add_argument("run", help="run ID under runs_dir, or a path to a run directory")
+    report.add_argument(
+        "--out",
+        help="folder to write the report into (default: <run>/report), e.g. reports/<run-id>",
+    )
 
     compare = commands.add_parser("compare", help="show two runs side by side")
     compare.add_argument("run_a", help="run ID under runs_dir, or a path to a run directory")
