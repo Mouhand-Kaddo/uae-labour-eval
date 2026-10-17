@@ -180,6 +180,11 @@ NOT_APPLICABLE = [
         "temporary_work",
         id="ER30(2)-temporary-work",
     ),
+    pytest.param(
+        service(*THREE_YEARS, work_pattern="flexible"),
+        "flexible_work_undecided",
+        id="Art52+OQ-009-flexible-work",
+    ),
 ]
 
 
@@ -240,6 +245,12 @@ REFS_AND_QUESTIONS = [
         {"Executive Regulations Art 30(2)"},
         ["OQ-006"],
         id="ER30(2)-temporary-work",
+    ),
+    pytest.param(
+        service(*THREE_YEARS, work_pattern="flexible"),
+        {"Labour Law Art 52", "Executive Regulations Art 30(1)"},
+        ["OQ-009"],
+        id="Art52+OQ-009-flexible-work",
     ),
 ]
 
@@ -307,7 +318,7 @@ BAD_ARGUMENTS = [
     pytest.param({"unpaid_absence_days": -1}, "unpaid_absence_days", id="negative-absence"),
     pytest.param({"unpaid_absence_days": 1.5}, "unpaid_absence_days", id="part-day-absence"),
     pytest.param({"unpaid_absence_days": 366}, "unpaid_absence_days", id="absence-over-service"),
-    pytest.param({"work_pattern": "flexible"}, "OQ-009", id="flexible-work-OQ-009"),
+    pytest.param({"work_pattern": "remote"}, "work_pattern", id="unknown-work-pattern"),
     pytest.param({"work_pattern": "part_time"}, "part_time_hours_ratio", id="part-time-no-ratio"),
     pytest.param(
         {"work_pattern": "part_time", "part_time_hours_ratio": 1.5},
@@ -324,6 +335,14 @@ BAD_ARGUMENTS = [
 def test_tool_rejects_bad_arguments_with_a_message_naming_the_problem(changes, named):
     with pytest.raises(ValueError, match=named):
         GRATUITY_TOOL.run({**TOOL_ARGS, **changes})
+
+
+def test_tool_answers_flexible_work_with_the_open_question_instead_of_an_amount():
+    result = GRATUITY_TOOL.run({**TOOL_ARGS, "work_pattern": "flexible"})
+
+    assert (result["outcome"], result["gratuity"]) == ("flexible_work_undecided", None)
+    assert result["open_questions"] == ["OQ-009"]
+    assert {"instrument": "Labour Law", "article": "52", "clause": None} in result["refs"]
 
 
 def test_tool_rejects_missing_required_arguments():

@@ -1,4 +1,4 @@
-"""Gratuity calculation: Labour Law Art 51 and Art 67, Executive Regulations Art 30."""
+"""Gratuity calculation: Labour Law Arts 51, 52 and 67, Executive Regulations Art 30."""
 
 from dataclasses import asdict, dataclass, field
 from datetime import date
@@ -37,12 +37,14 @@ PART_YEARS = Ref(LABOUR_LAW, "51", "3")
 UNPAID_ABSENCE = Ref(LABOUR_LAW, "51", "4")
 LAST_BASIC_WAGE = Ref(LABOUR_LAW, "51", "5")
 CAP = Ref(LABOUR_LAW, "51", "6")
+OTHER_WORK_PATTERNS = Ref(LABOUR_LAW, "52")
 PRO_RATA = Ref(EXECUTIVE_REGULATIONS, "30", "1")
 TEMPORARY_WORK = Ref(EXECUTIVE_REGULATIONS, "30", "2")
 
 CAP_QUESTION = "OQ-002"
 PRO_RATA_QUESTION = "OQ-008"
 TEMPORARY_WORK_QUESTION = "OQ-006"
+FLEXIBLE_WORK_QUESTION = "OQ-009"
 
 FIRST_YEARS_DAYS = 5 * DAYS_IN_YEAR
 DAYS_PER_YEAR_FIRST_FIVE = 21
@@ -85,6 +87,13 @@ def calculate_gratuity(
         return GratuityResult("national_worker", None, [NATIONAL_WORKER])
     if work_pattern == TEMPORARY:
         return GratuityResult("temporary_work", None, [TEMPORARY_WORK], [TEMPORARY_WORK_QUESTION])
+    if work_pattern == FLEXIBLE:
+        return GratuityResult(
+            "flexible_work_undecided",
+            None,
+            [OTHER_WORK_PATTERNS, PRO_RATA],
+            [FLEXIBLE_WORK_QUESTION],
+        )
 
     service_days = (end_date - start_date).days + 1
     counted_days = service_days - unpaid_absence_days
@@ -138,7 +147,7 @@ def calculate_gratuity(
     )
 
 
-WORK_PATTERNS = (FULL_TIME, *PRO_RATA_PATTERNS, TEMPORARY)
+WORK_PATTERNS = (FULL_TIME, *PRO_RATA_PATTERNS, TEMPORARY, FLEXIBLE)
 NATIONALITIES = ("foreign", "national")
 
 PARAMETERS: dict[str, Any] = {
@@ -188,8 +197,6 @@ def _run(args: dict[str, Any]) -> dict[str, Any]:
     if absence > (end - start).days + 1:
         raise ValueError("unpaid_absence_days cannot exceed the days of service")
 
-    if args["work_pattern"] == FLEXIBLE:
-        raise ValueError("gratuity for flexible work is undecided (open question OQ-009)")
     pattern = work_pattern_arg(args, WORK_PATTERNS)
     ratio = hours_ratio_arg(args, pattern, PRO_RATA_PATTERNS)
     if args["nationality"] not in NATIONALITIES:

@@ -122,7 +122,7 @@ Until this is decided, the gratuity tool applies the percentage to a full-time g
 - **ER Art 30** covers only "a part-time or employment sharing model" (30(1)) and temporary work (30(2)). ER Art 10(4)(d) lists a "Flexible employment contract" as a contract type.
 - Remote work is not a gap: ER Art 5(1)(a) says it applies "whether the work was parttime or fulltime", so the full-time or part-time rule follows.
 
-Is a flexible worker's gratuity computed like part-time under ER Art 30(1), like full-time under Art 51, or not at all? The gratuity tool rejects the flexible work pattern until this is decided.
+Is a flexible worker's gratuity computed like part-time under ER Art 30(1), like full-time under Art 51, or not at all? Until this is decided the gratuity tool answers a flexible worker with outcome `flexible_work_undecided`, no amount, and this question.
 
 **Decision:** _open_
 
