@@ -17,6 +17,7 @@ from eval_harness.config import Config
 from eval_harness.final_answer import FinalAnswer
 from eval_harness.ledger import Ledger
 from eval_harness.openrouter import ChatResponse, OpenRouterClient, OpenRouterError
+from eval_harness.pack import PackError, load_pack_tools
 from eval_harness.scorers import SCORERS, score_case
 from eval_harness.trace import Trace
 
@@ -71,6 +72,10 @@ def run_eval(
     cases_hash = case_set_hash(config.pack / "evals" / "cases")
     manifest_hash = _manifest_hash(config)
     system_prompt = (config.pack / "system_prompt.md").read_text(encoding="utf-8")
+    try:
+        tools = load_pack_tools(config.pack)
+    except PackError as exc:
+        raise RunRefused(str(exc)) from exc
 
     ledger = Ledger(config.ledger_path)
     ledger_total = ledger.total()
@@ -142,7 +147,7 @@ def run_eval(
                         model=model,
                         system_prompt=system_prompt,
                         user_input=case.input,
-                        tools=[],
+                        tools=tools,
                         settings=config.agent,
                         trace=trace,
                         on_response=record,
