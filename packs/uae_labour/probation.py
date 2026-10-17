@@ -8,7 +8,7 @@ from typing import Any
 from eval_harness.agent import Tool
 from eval_harness.refs import Ref
 
-from .arguments import check_names, date_arg, number_arg
+from .arguments import check_names, number_arg, ordered_dates_arg, positive_number_arg
 from .rules import DAILY_RATE_QUESTION, DAYS_IN_MONTH, LABOUR_LAW, PERIODS, daily_rate, money
 
 MAXIMUM_AND_EMPLOYER_NOTICE = Ref(LABOUR_LAW, "9", "1")
@@ -125,14 +125,9 @@ def _run(args: dict[str, Any]) -> dict[str, Any]:
     if any(has_dates):
         if not all(has_dates):
             raise ValueError("give both notice_date and termination_date, or neither")
-        notice_date = date_arg(args, "notice_date")
-        termination_date = date_arg(args, "termination_date")
-        if termination_date < notice_date:
-            raise ValueError("termination_date must not be before notice_date")
+        notice_date, termination_date = ordered_dates_arg(args, "notice_date", "termination_date")
 
-    wage = args.get("monthly_wage")
-    if wage is not None and number_arg(args, "monthly_wage") <= 0:
-        raise ValueError("monthly_wage must be positive")
+    wage = positive_number_arg(args, "monthly_wage")
 
     return asdict(
         check_probation(

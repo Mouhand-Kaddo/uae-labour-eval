@@ -9,13 +9,22 @@ from typing import Any
 from eval_harness.agent import Tool
 from eval_harness.refs import Ref
 
-from .arguments import check_names, date_arg, number_arg, wages_args, whole_days_arg
+from .arguments import (
+    check_names,
+    hours_ratio_arg,
+    ordered_dates_arg,
+    wages_args,
+    whole_days_arg,
+    work_pattern_arg,
+)
 from .rules import (
     DAILY_RATE_QUESTION,
     DAYS_IN_MONTH,
     DAYS_IN_YEAR,
     EXECUTIVE_REGULATIONS,
+    FULL_TIME,
     LABOUR_LAW,
+    PART_TIME,
     PERIODS,
     daily_rate,
     money,
@@ -36,7 +45,7 @@ SIX_MONTHS_DAYS = 6 * DAYS_IN_MONTH
 DAYS_PER_MONTH_UNDER_ONE_YEAR = 2
 DAYS_PER_YEAR = 30
 PART_TIME_MINIMUM_DAYS_PER_YEAR = 5
-WORK_PATTERNS = ("full_time", "part_time")
+WORK_PATTERNS = (FULL_TIME, PART_TIME)
 
 
 @dataclass(frozen=True)
@@ -59,7 +68,7 @@ def calculate_annual_leave(
     *,
     start_date: date,
     end_date: date,
-    work_pattern: str = "full_time",
+    work_pattern: str = FULL_TIME,
     part_time_hours_ratio: float | None = None,
     leave_days_taken: int = 0,
     monthly_basic_wage: float | None = None,
@@ -91,7 +100,7 @@ def calculate_annual_leave(
             open_questions.append(BOUNDARIES_QUESTION)
 
     entitlement = full_time_days
-    if work_pattern == "part_time":
+    if work_pattern == PART_TIME:
         refs += [PART_TIME_LEAVE, PART_TIME_HOURS]
         open_questions.append(PART_TIME_QUESTION)
         share = max(
@@ -179,22 +188,12 @@ PARAMETERS: dict[str, Any] = {
 
 def _run(args: dict[str, Any]) -> dict[str, Any]:
     check_names(args, PARAMETERS)
-    start = date_arg(args, "start_date")
-    end = date_arg(args, "end_date")
-    if end < start:
-        raise ValueError("end_date must not be before start_date")
+    start, end = ordered_dates_arg(args, "start_date", "end_date")
     basic = wages_args(args)
     taken = whole_days_arg(args, "leave_days_taken")
 
-    pattern = args.get("work_pattern") or "full_time"
-    if pattern not in WORK_PATTERNS:
-        raise ValueError(f"work_pattern must be one of {list(WORK_PATTERNS)}")
-    ratio = args.get("part_time_hours_ratio")
-    if pattern == "part_time":
-        if ratio is None or not 0 < number_arg(args, "part_time_hours_ratio") <= 1:
-            raise ValueError("part_time_hours_ratio between 0 and 1 is needed for part_time")
-    elif ratio is not None:
-        raise ValueError("part_time_hours_ratio applies only to part_time")
+    pattern = work_pattern_arg(args, WORK_PATTERNS, default=FULL_TIME)
+    ratio = hours_ratio_arg(args, pattern, (PART_TIME,))
 
     return asdict(
         calculate_annual_leave(

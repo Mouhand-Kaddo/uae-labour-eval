@@ -7,7 +7,7 @@ from typing import Any
 from eval_harness.agent import Tool
 from eval_harness.refs import Ref
 
-from .arguments import check_names, number_arg, whole_days_arg
+from .arguments import check_names, positive_number_arg, whole_days_arg
 from .rules import DAILY_RATE_QUESTION, LABOUR_LAW, PERIODS, daily_rate, money
 
 NOTICE_RANGE = Ref(LABOUR_LAW, "43", "1")
@@ -95,9 +95,7 @@ def _run(args: dict[str, Any]) -> dict[str, Any]:
     worked = whole_days_arg(args, "notice_days_worked")
     if worked > notice_days:
         raise ValueError("notice_days_worked cannot exceed notice_days")
-    wage = args.get("monthly_wage")
-    if wage is not None and number_arg(args, "monthly_wage") <= 0:
-        raise ValueError("monthly_wage must be positive")
+    wage = positive_number_arg(args, "monthly_wage")
 
     return asdict(
         check_notice_period(notice_days=notice_days, notice_days_worked=worked, monthly_wage=wage)

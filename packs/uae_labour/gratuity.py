@@ -8,13 +8,25 @@ from typing import Any
 from eval_harness.agent import Tool
 from eval_harness.refs import Ref
 
-from .arguments import check_names, date_arg, number_arg, wages_args, whole_days_arg
+from .arguments import (
+    check_names,
+    hours_ratio_arg,
+    ordered_dates_arg,
+    wages_args,
+    whole_days_arg,
+    work_pattern_arg,
+)
 from .rules import (
     DAILY_RATE_QUESTION,
     DAYS_IN_YEAR,
     EXECUTIVE_REGULATIONS,
+    FLEXIBLE,
+    FULL_TIME,
+    JOB_SHARING,
     LABOUR_LAW,
+    PART_TIME,
     PERIODS,
+    TEMPORARY,
     daily_rate,
     money,
 )
@@ -36,7 +48,7 @@ FIRST_YEARS_DAYS = 5 * DAYS_IN_YEAR
 DAYS_PER_YEAR_FIRST_FIVE = 21
 DAYS_PER_YEAR_AFTER_FIVE = 30
 CAP_MONTHS = 24
-PRO_RATA_PATTERNS = ("part_time", "job_sharing")
+PRO_RATA_PATTERNS = (PART_TIME, JOB_SHARING)
 
 
 @dataclass(frozen=True)
@@ -71,7 +83,7 @@ def calculate_gratuity(
     """Gratuity for service from the first day to the last day of service, both inclusive."""
     if nationality == "national":
         return GratuityResult("national_worker", None, [NATIONAL_WORKER])
-    if work_pattern == "temporary":
+    if work_pattern == TEMPORARY:
         return GratuityResult("temporary_work", None, [TEMPORARY_WORK], [TEMPORARY_WORK_QUESTION])
 
     service_days = (end_date - start_date).days + 1
@@ -126,7 +138,7 @@ def calculate_gratuity(
     )
 
 
-WORK_PATTERNS = ("full_time", *PRO_RATA_PATTERNS, "temporary")
+WORK_PATTERNS = (FULL_TIME, *PRO_RATA_PATTERNS, TEMPORARY)
 NATIONALITIES = ("foreign", "national")
 
 PARAMETERS: dict[str, Any] = {
@@ -169,27 +181,17 @@ PARAMETERS: dict[str, Any] = {
 
 def _run(args: dict[str, Any]) -> dict[str, Any]:
     check_names(args, PARAMETERS)
-    start = date_arg(args, "start_date")
-    end = date_arg(args, "end_date")
-    if end < start:
-        raise ValueError("end_date must not be before start_date")
+    start, end = ordered_dates_arg(args, "start_date", "end_date")
     basic = wages_args(args)
 
     absence = whole_days_arg(args, "unpaid_absence_days")
     if absence > (end - start).days + 1:
         raise ValueError("unpaid_absence_days cannot exceed the days of service")
 
-    pattern = args["work_pattern"]
-    if pattern == "flexible":
+    if args["work_pattern"] == FLEXIBLE:
         raise ValueError("gratuity for flexible work is undecided (open question OQ-009)")
-    if pattern not in WORK_PATTERNS:
-        raise ValueError(f"work_pattern must be one of {list(WORK_PATTERNS)}")
-    ratio = args.get("part_time_hours_ratio")
-    if pattern in PRO_RATA_PATTERNS:
-        if ratio is None or not 0 < number_arg(args, "part_time_hours_ratio") <= 1:
-            raise ValueError(f"part_time_hours_ratio between 0 and 1 is needed for {pattern}")
-    elif ratio is not None:
-        raise ValueError("part_time_hours_ratio applies only to part_time or job_sharing")
+    pattern = work_pattern_arg(args, WORK_PATTERNS)
+    ratio = hours_ratio_arg(args, pattern, PRO_RATA_PATTERNS)
     if args["nationality"] not in NATIONALITIES:
         raise ValueError(f"nationality must be one of {list(NATIONALITIES)}")
 

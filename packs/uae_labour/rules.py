@@ -14,6 +14,14 @@ DAYS_IN_MONTH = 30
 
 DAILY_RATE_QUESTION = "OQ-001"
 
+FULL_TIME, PART_TIME, JOB_SHARING, TEMPORARY, FLEXIBLE = WORK_PATTERNS = (
+    "full_time",
+    "part_time",
+    "job_sharing",
+    "temporary",
+    "flexible",
+)
+
 
 def daily_rate(monthly_amount: Fraction) -> Fraction:
     """A day's wage or basic wage: monthly × 12 ÷ 365 (Art 67 year, decided in OQ-001)."""
