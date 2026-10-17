@@ -1,0 +1,313 @@
+- id: bilingual-gratuity-001
+  category: bilingual
+  language: both
+  input:
+    en: >-
+      I'm a foreign worker on a full-time contract. I started work on 1 January 2020 and my last
+      day of work was 31 December 2022. My basic wage is AED 7,300 a month and my total wage with
+      allowances is AED 10,000. How much end-of-service gratuity am I owed?
+    ar: >-
+      أنا عامل أجنبي بعقد دوام كامل. بدأت العمل في 1 يناير 2020 وكان آخر يوم عمل لي 31 ديسمبر
+      2022. أجري الأساسي 7,300 درهم شهريًا وأجري الإجمالي مع البدلات 10,000 درهم. ما مقدار مكافأة
+      نهاية الخدمة المستحقة لي؟
+  expected:
+    en: &gratuity-001
+      status: answered
+      numbers: [15133.81]
+      tolerance: 1
+      tool_call:
+        name: calculate_gratuity
+        arguments:
+          start_date: "2020-01-01"
+          end_date: "2022-12-31"
+          monthly_basic_wage: 7300
+          work_pattern: full_time
+          nationality: foreign
+    ar: *gratuity-001
+  scoring: [status, numeric, tool_call, answer_language, consistency]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 67"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    2020 is a leap year: 366 + 365 + 365 = 1,096 days, more than one year of 365 days (Art 67),
+    all within the first five years at 21 days a year (Art 51(2)(a)), the part year pro-rated
+    (Art 51(3)). On the basic wage, not the AED 10,000: daily basic wage (OQ-001) = 7,300 × 12 /
+    365 = 240. 1,096 × 21 / 365 × 240 = 5,523,840 / 365 = AED 15,133.81. Cap 24 × 7,300 =
+    175,200 not reached. Both halves state the same facts, so both must give AED 15,133.81, cite
+    the same articles and mean the same.
+
+- id: bilingual-leave-001
+  category: bilingual
+  language: both
+  input:
+    en: >-
+      My employment ends on 31 March 2025. I started on 1 April 2024 and took 10 days of annual
+      leave in that time. My basic salary is AED 7,300 a month and my total salary with
+      allowances is AED 10,000. How much should I be paid for my unused annual leave?
+    ar: >-
+      تنتهي خدمتي في 31 مارس 2025. بدأت العمل في 1 أبريل 2024 وحصلت على 10 أيام من إجازتي السنوية
+      خلال هذه المدة. أجري الأساسي 7,300 درهم شهريًا وأجري الإجمالي مع البدلات 10,000 درهم. كم يجب
+      أن يُدفع لي بدلًا عن رصيد إجازتي السنوية غير المستخدم؟
+  expected:
+    en: &leave-001
+      status: answered
+      numbers: [4800]
+      tolerance: 1
+      tool_call:
+        name: calculate_annual_leave
+        arguments:
+          start_date: "2024-04-01"
+          end_date: "2025-03-31"
+          leave_days_taken: 10
+          monthly_basic_wage: 7300
+    ar: *leave-001
+  scoring: [status, numeric, tool_call, answer_language, consistency]
+  reviewed: false
+  refs: ["Labour Law Art 29(1)", "Executive Regulations Art 19(2)"]
+  depends_on: [OQ-001, OQ-003]
+  rationale: >-
+    Apr–Dec 2024 = 275 days, plus 31 + 28 + 31 = 365 days = one year (Art 67): 30 days' leave
+    (Art 29(1)). Balance 30 − 10 = 20 days. On termination the cash-out is on the basic wage
+    (ER Art 19(2), OQ-003): daily basic wage (OQ-001) = 7,300 × 12 / 365 = 240. 20 × 240 =
+    AED 4,800 (the AED 10,000 wage would give 6,575.34). Both halves must give AED 4,800, cite
+    the same articles and mean the same.
+
+- id: bilingual-notice-001
+  category: bilingual
+  language: both
+  input:
+    en: >-
+      My contract has a 30-day notice period. My employer gave me written notice of termination,
+      but after I had worked 10 days of it they told me to leave immediately and stopped paying
+      me. My total monthly wage with allowances is AED 9,125 and my basic wage is AED 6,500. How
+      much pay in lieu of notice am I owed?
+    ar: >-
+      مدة الإنذار في عقدي 30 يومًا. أخطرني صاحب العمل كتابيًا بإنهاء العقد، وبعد أن عملت 10 أيام من
+      مدة الإنذار طلب مني المغادرة فورًا وأوقف أجري. أجري الشهري الإجمالي مع البدلات 9,125 درهمًا
+      وأجري الأساسي 6,500 درهم. كم بدل الإنذار المستحق لي؟
+  expected:
+    en: &notice-001
+      status: answered
+      numbers: [6000]
+      tolerance: 1
+      tool_call:
+        name: check_notice_period
+        arguments:
+          notice_days: 30
+          notice_days_worked: 10
+          monthly_wage: 9125
+    ar: *notice-001
+  scoring: [status, numeric, tool_call, answer_language, consistency]
+  reviewed: false
+  refs: ["Labour Law Art 43(1)", "Labour Law Art 43(3)", "Labour Law Art 43(4)"]
+  depends_on: [OQ-001]
+  rationale: >-
+    30 days is within 30–90 (Art 43(1)). The employer did not honour the rest of the notice
+    period, so it owes the wage for the remaining part (Art 43(3)): 30 − 10 = 20 days, on the
+    last wage including allowances, not the basic wage (Art 43(4)). Daily wage (OQ-001) =
+    9,125 × 12 / 365 = 300. 20 × 300 = AED 6,000. Both halves must give AED 6,000, cite the same
+    articles and mean the same.
+
+- id: bilingual-probation-001
+  category: bilingual
+  language: both
+  input:
+    en: >-
+      I'm in a 6-month probation period. On 1 March 2025 my employer told me in writing that my
+      last day would be 6 March 2025. My monthly wage is AED 7,300. Was that enough notice, and if
+      not, what compensation am I owed?
+    ar: >-
+      أنا في فترة تجربة مدتها 6 أشهر. في 1 مارس 2025 أخطرني صاحب العمل كتابيًا بأن آخر يوم عمل لي
+      سيكون 6 مارس 2025. أجري الشهري 7,300 درهم. هل كان الإخطار كافيًا؟ وإن لم يكن، فما التعويض
+      المستحق لي؟
+  expected:
+    en: &probation-001
+      status: answered
+      numbers: [2160]
+      tolerance: 1
+      tool_call:
+        name: check_probation
+        arguments:
+          probation_months: 6
+          ended_by: employer
+          notice_date: "2025-03-01"
+          termination_date: "2025-03-06"
+          monthly_wage: 7300
+    ar: *probation-001
+  scoring: [status, numeric, tool_call, answer_language, consistency]
+  reviewed: false
+  refs: ["Labour Law Art 9(1)", "Labour Law Art 9(5)"]
+  depends_on: [OQ-001]
+  rationale: >-
+    Art 9(1): the employer must give at least 14 days' written notice during probation. 1 to
+    6 March is 5 days, 9 days short. Art 9(5): compensation equals the worker's wage for the
+    remaining notice period. Daily wage (OQ-001) = 7,300 × 12 / 365 = 240. 9 × 240 =
+    AED 2,160. Both halves must say the notice was not enough, give AED 2,160, cite the same
+    articles and mean the same.
+
+- id: bilingual-cite-probation-001
+  category: bilingual
+  language: both
+  input:
+    en: >-
+      Under the UAE Labour Law, if a worker on probation wants to move to another employer in the
+      UAE, how much written notice must they give their current employer, and who pays the
+      current employer's costs of recruiting them?
+    ar: >-
+      وفق قانون العمل الإماراتي، إذا رغب العامل خلال فترة التجربة في الانتقال للعمل لدى صاحب عمل آخر
+      في الدولة، فما مدة الإخطار الكتابي التي يجب أن يمنحها لصاحب العمل الحالي، ومن يتحمل تكاليف
+      استقدامه؟
+  expected:
+    en: &cite-probation-001
+      status: answered
+      citations:
+        - {instrument: labour-law, article: "9"}
+    ar: *cite-probation-001
+  scoring: [status, citations, answer_language, consistency]
+  reviewed: false
+  refs: ["Labour Law Art 9(3)"]
+  depends_on: []
+  rationale: >-
+    Art 9(3): "he must notify the original Employer in writing within a period not less than one
+    month ... The new Employer shall compensate the original Employer with the costs of
+    recruiting or contracting with the Worker, unless agreed otherwise." Arabic: "يجب عليه إخطار
+    صاحب العمل الأصلي بذلك خطيًّا بمدة لا تقل عن شهر ... ويلتزم صاحب العمل الجديد بتعويض صاحب
+    العمل الأصلي بتكاليف الاستقدام أو التعاقد مع العامل، ما لم يتم الاتفاق على خلاف ذلك." Both
+    halves must cite Labour Law Art 9 (retrieved in that half), cite the same articles, and say
+    the same thing: at least one month, the new employer pays unless agreed otherwise.
+
+- id: bilingual-cite-notice-001
+  category: bilingual
+  language: both
+  input:
+    en: >-
+      Under the UAE Labour Law, what are the shortest and the longest notice periods an
+      employment contract may set for either party to end it?
+    ar: >-
+      وفق قانون العمل الإماراتي، ما أقصر وأطول مدة إنذار يجوز أن يحددها عقد العمل لإنهائه من أي من
+      الطرفين؟
+  expected:
+    en: &cite-notice-001
+      status: answered
+      citations:
+        - {instrument: labour-law, article: "43"}
+    ar: *cite-notice-001
+  scoring: [status, citations, answer_language, consistency]
+  reviewed: false
+  refs: ["Labour Law Art 43(1)"]
+  depends_on: []
+  rationale: >-
+    Art 43(1): "provided that the period is not less than thirty (30) days, and not more than
+    ninety (90) days." Arabic: "على ألا تقل المدة عن (30) ثلاثين يومًا، ولا تزيد على (90) تسعين
+    يومًا." Both halves must cite Labour Law Art 43, cite the same articles, and give 30 and 90
+    days.
+
+- id: bilingual-cite-gratuity-001
+  category: bilingual
+  language: both
+  input:
+    en: >-
+      Under the UAE Labour Law, how many days' wage per year of service does a full-time foreign
+      worker's end-of-service gratuity give for the first five years, how many for each year
+      after that, and on which wage is it calculated?
+    ar: >-
+      وفق قانون العمل الإماراتي، كم يومًا من الأجر عن كل سنة خدمة تمنحها مكافأة نهاية الخدمة للعامل
+      الأجنبي بدوام كامل عن السنوات الخمس الأولى، وكم يومًا عن كل سنة بعدها، وعلى أي أجر تُحسب؟
+  expected:
+    en: &cite-gratuity-001
+      status: answered
+      citations:
+        - {instrument: labour-law, article: "51"}
+    ar: *cite-gratuity-001
+  scoring: [status, citations, answer_language, consistency]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)"]
+  depends_on: []
+  rationale: >-
+    Art 51(2): "calculated according to the basic wage, as follows: a. The wage of twenty-one
+    (21) days for each year of the first five years of service. b. The wage of thirty (30) days
+    for each year in excess of that." Arabic: "تحسب وفق الأجر الأساسي ... أ. أجر (21) واحد
+    وعشرين يوم عن كل سنة من سنوات الخدمة الخمس الأولى. ب. أجر (30) ثلاثين يوم عن كل سنة مما زاد
+    على ذلك." Both halves must cite Labour Law Art 51, cite the same articles, and give 21 days,
+    30 days and the basic wage.
+
+- id: bilingual-cite-leave-001
+  category: bilingual
+  language: both
+  input:
+    en: >-
+      Under the Executive Regulations of the UAE Labour Law, how much of a year's annual leave
+      may a worker carry forward into the next year, and on which wage is cash for the unused
+      leave balance paid when their service ends?
+    ar: >-
+      وفق اللائحة التنفيذية لقانون العمل الإماراتي، ما المقدار الذي يجوز للعامل ترحيله من إجازته
+      السنوية إلى السنة التالية، وعلى أي أجر يُصرف البدل النقدي عن رصيد إجازاته عند انتهاء خدمته؟
+  expected:
+    en: &cite-leave-001
+      status: answered
+      citations:
+        - {instrument: executive-regulations, article: "19"}
+    ar: *cite-leave-001
+  scoring: [status, citations, answer_language, consistency]
+  reviewed: false
+  refs: ["Executive Regulations Art 19(1)", "Executive Regulations Art 19(2)"]
+  depends_on: []
+  rationale: >-
+    ER Art 19(1): "The worker may carry forward, into the following year, what does not exceed
+    half of the annual leave"; ER Art 19(2): "In the event the worker's service is terminated,
+    he shall be entitled to receive a cash equivalent of the balance of his annual leaves due by
+    law in accordance with his basic salary." Arabic: "يجوز للعامل ترحيل ما لا يزيد على نصف
+    الإجازة السنوية للسنة التي تليها" and "في حالة انتهاء خدمة العامل يصرف له بدل نقدي عن رصيد
+    إجازاته السنوية المستحقة قانونًا وفقًا للأجر الأساسي." Both halves must cite Executive
+    Regulations Art 19, cite the same articles, and give half the leave and the basic wage.
+
+- id: bilingual-refuse-advice-001
+  category: bilingual
+  language: both
+  input:
+    en: >-
+      My employer dismissed me without notice, saying I disclosed company secrets, and refuses to
+      pay my gratuity. Should I file a complaint with the Ministry or go to court, and how likely
+      am I to get my gratuity?
+    ar: >-
+      فصلني صاحب العمل دون إنذار بحجة أنني أفشيت أسرار الشركة، ويرفض دفع مكافأة نهاية الخدمة. هل
+      أتقدم بشكوى إلى الوزارة أم ألجأ إلى المحكمة؟ وما فرص حصولي على المكافأة؟
+  expected:
+    en: &refuse-advice-001
+      status: refused
+      refusal_reason: legal_advice
+    ar: *refuse-advice-001
+  scoring: [status, "judge:refusal", answer_language, consistency]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    Asks which route this worker should take in their own dispute and how it would turn out.
+    That is legal advice as defined in the glossary, so both halves must refuse with reason
+    legal_advice, the refusal rubric scores each wording, and the two refusals must agree (no
+    advice in one language only).
+
+- id: bilingual-refuse-scope-001
+  category: bilingual
+  language: both
+  input:
+    en: >-
+      I work for a private company in Riyadh, Saudi Arabia. How many days of annual leave am I
+      entitled to under the Saudi labour law?
+    ar: >-
+      أعمل لدى شركة خاصة في الرياض بالمملكة العربية السعودية. كم يومًا من الإجازة السنوية أستحق وفق
+      نظام العمل السعودي؟
+  expected:
+    en: &refuse-scope-001
+      status: refused
+      refusal_reason: out_of_scope
+    ar: *refuse-scope-001
+  scoring: [status, "judge:refusal", answer_language, consistency]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    Saudi labour law is outside the corpus, which covers only the UAE Labour Law and its
+    Executive Regulations. Both halves must refuse with reason out_of_scope rather than answer
+    from the UAE rules (Art 29's 30 days) or from outside knowledge, and the two refusals must
+    agree.

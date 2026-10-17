@@ -3,7 +3,7 @@
 import hashlib
 import re
 from collections.abc import Collection, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -30,8 +30,17 @@ class Case:
     rationale: str
     planted_chunks: list[Chunk] | None = None
 
+    def half(self, language: str) -> "Case":
+        """One language of a bilingual pair, as a single-language case with that language's
+        input and expectations."""
+        return replace(
+            self, language=language, input=self.input[language], expected=self.expected[language]
+        )
+
 
 LANGUAGES = ("ar", "both", "en")
+PAIR_LANGUAGES = ("en", "ar")
+CONSISTENCY = "consistency"
 CASE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
 QUESTION_ID = re.compile(r"OQ-\d{3}")
 QUESTION_HEADING = re.compile(r"^## (?=OQ-\d{3}:)", re.MULTILINE)
@@ -149,6 +158,7 @@ def _parse_case(filename: str, entry: Any, scorer_names: Collection[str]) -> Cas
         raise CaseError(f"{label}: language must be one of {list(LANGUAGES)}")
     _check_input(label, entry["language"], entry["input"])
     _check_scoring(label, entry["scoring"], scorer_names)
+    _check_pair(label, entry)
     if not _non_empty_strings(entry["refs"]):
         raise CaseError(f"{label}: refs must be a list of non-empty strings")
     for question in entry["depends_on"]:
@@ -213,6 +223,21 @@ def _check_scoring(label: str, scoring: list[Any], scorer_names: Collection[str]
     unknown_scorers = set(scoring) - set(scorer_names)
     if unknown_scorers:
         raise CaseError(f"{label}: unknown scorers {sorted(unknown_scorers)}")
+
+
+def _check_pair(label: str, entry: dict[str, Any]) -> None:
+    if entry["language"] != "both":
+        if CONSISTENCY in entry["scoring"]:
+            raise CaseError(f"{label}: {CONSISTENCY!r} compares the halves of a bilingual pair")
+        return
+    expected = entry["expected"]
+    if not (
+        expected.keys() == set(PAIR_LANGUAGES)
+        and all(isinstance(expected[language], dict) for language in PAIR_LANGUAGES)
+    ):
+        raise CaseError(f"{label}: expected must be a mapping with 'en' and 'ar' expectations")
+    if CONSISTENCY not in entry["scoring"]:
+        raise CaseError(f"{label}: a bilingual pair must be scored on {CONSISTENCY!r}")
 
 
 def _check_input(label: str, language: str, value: Any) -> None:

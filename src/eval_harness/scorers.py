@@ -169,3 +169,81 @@ def score_case(
         all(v.passed for v in verdicts.values()),
         {name: {"passed": v.passed, **v.details} for name, v in verdicts.items()},
     )
+
+
+PairScorer = Callable[[Case, Mapping[str, FinalAnswer], Mapping[str, Trace]], Verdict]
+
+
+def consistency_scorer(judge: PairScorer) -> PairScorer:
+    """A bilingual pair's halves agree: each number the case expects is reported with the same
+    value in both answers, both answers cite the same articles, and `judge` confirms the answers
+    mean the same."""
+
+    def score(
+        case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Trace]
+    ) -> Verdict:
+        expected = sorted({n for lang in finals for n in case.expected[lang].get("numbers", [])})
+        reported = {
+            lang: [
+                _reported(number, final.answer, case.expected[lang].get("tolerance", 0))
+                for number in expected
+            ]
+            for lang, final in finals.items()
+        }
+        numbers_match = all(
+            all(v is not None for v in values) and _same_values(values)
+            for values in zip(*reported.values(), strict=True)
+        )
+        cited = {
+            lang: sorted({article_key(c.instrument, c.article) for c in final.citations})
+            for lang, final in finals.items()
+        }
+        citations_match = len({tuple(articles) for articles in cited.values()}) == 1
+        judged = judge(case, finals, traces)
+        return Verdict(
+            numbers_match and citations_match and judged.passed,
+            {
+                "numbers": {"expected": expected, **reported, "match": numbers_match},
+                "citations": {**cited, "match": citations_match},
+                "judge": {"passed": judged.passed, **judged.details},
+            },
+        )
+
+    return score
+
+
+def _reported(number: float, text: str, tolerance: float) -> float | None:
+    """The number in `text` closest to `number`, if one is within tolerance."""
+    close = [f for f in numbers_in(text) if abs(number - f) <= tolerance + FLOAT_NOISE]
+    return min(close, key=lambda f: abs(number - f), default=None)
+
+
+def _same_values(values: tuple[float | None, ...]) -> bool:
+    first, *rest = values
+    return all(abs(first - v) <= FLOAT_NOISE for v in rest)
+
+
+def score_pair(
+    case: Case,
+    finals: Mapping[str, FinalAnswer],
+    traces: Mapping[str, Trace],
+    scorers: Mapping[str, Scorer],
+    pair_scorers: Mapping[str, PairScorer],
+) -> Verdict:
+    """Score a bilingual pair. A pair scorer compares the halves; every other scorer runs on each
+    half against that language's expectations and passes only if both halves pass."""
+    verdicts: dict[str, dict[str, Any]] = {}
+    for name in case.scoring:
+        if name in pair_scorers:
+            verdict = pair_scorers[name](case, finals, traces)
+            verdicts[name] = {"passed": verdict.passed, **verdict.details}
+            continue
+        halves = {
+            lang: scorers[name](case.half(lang), final, traces[lang])
+            for lang, final in finals.items()
+        }
+        verdicts[name] = {
+            "passed": all(v.passed for v in halves.values()),
+            **{lang: {"passed": v.passed, **v.details} for lang, v in halves.items()},
+        }
+    return Verdict(all(v["passed"] for v in verdicts.values()), verdicts)

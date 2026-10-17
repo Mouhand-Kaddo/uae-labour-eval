@@ -169,6 +169,10 @@ _Avoid_: test, example, sample, item
 The kind of behaviour a case measures: calc, cite, grounding, refuse, inject or bilingual.
 _Avoid_: type, suite
 
+**Bilingual pair**:
+A bilingual case: the same question in English and Arabic (its two halves), run separately and scored as one case that passes only if each half is right and the two agree.
+_Avoid_: translation case, parallel case
+
 **Reviewed case**:
 A case whose expected result the project owner has checked; only reviewed cases count towards headline scores.
 _Avoid_: verified case, gold case

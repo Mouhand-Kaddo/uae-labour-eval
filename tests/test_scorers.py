@@ -3,7 +3,7 @@ import pytest
 from eval_harness.cases import Case
 from eval_harness.final_answer import Citation, FinalAnswer
 from eval_harness.ingest import Chunk
-from eval_harness.scorers import score_case
+from eval_harness.scorers import SCORERS, Verdict, consistency_scorer, score_case, score_pair
 
 
 def refuse_case(expected):
@@ -355,3 +355,114 @@ def test_answer_language_scorer_checks_the_answer_is_in_the_case_language(langua
     verdict = score_case(language_case(language), answered(text), [])
 
     assert verdict.passed is passes
+
+
+def gratuity_pair():
+    half = {
+        "status": "answered",
+        "numbers": [6904.11],
+        "tolerance": 1,
+        "citations": [{"instrument": "labour-law", "article": "51"}],
+    }
+    return Case(
+        id="bilingual-gratuity-001",
+        category="bilingual",
+        language="both",
+        input={"en": "What gratuity after one year?", "ar": "كم مكافأة نهاية الخدمة بعد سنة؟"},
+        expected={"en": half, "ar": half},
+        scoring=["status", "numeric", "citations", "consistency"],
+        reviewed=False,
+        refs=[],
+        depends_on=[],
+        rationale="One year at AED 10,000 basic: 21 days' basic wage.",
+    )
+
+
+GRATUITY_RETRIEVED = [retrieval(("labour-law", "51"), ("labour-law", "67"))]
+
+
+def judge_finds(same):
+    def judge(case, finals, traces):
+        return Verdict(same, {"criteria": {"same_meaning": {"passed": same, "reason": "..."}}})
+
+    return judge
+
+
+def score_gratuity_pair(en, ar, judge=None):
+    return score_pair(
+        gratuity_pair(),
+        {"en": en, "ar": ar},
+        {"en": GRATUITY_RETRIEVED, "ar": GRATUITY_RETRIEVED},
+        SCORERS,
+        {"consistency": consistency_scorer(judge or judge_finds(True))},
+    )
+
+
+EN_GRATUITY = answer("Your gratuity is AED 6,904.11.", ("labour-law", "51"))
+AR_GRATUITY = answer("مكافأتك ٦٬٩٠٤٫١١ درهم.", ("labour-law", "51(2)"))
+
+
+def test_a_pair_passes_when_both_halves_are_right_and_agree():
+    verdict = score_gratuity_pair(EN_GRATUITY, AR_GRATUITY)
+
+    assert verdict.passed
+    consistency = verdict.details["consistency"]
+    assert consistency["numbers"] == {
+        "expected": [6904.11],
+        "en": [6904.11],
+        "ar": [6904.11],
+        "match": True,
+    }
+    assert consistency["citations"] == {
+        "en": ["labour-law 51"],
+        "ar": ["labour-law 51"],
+        "match": True,
+    }
+
+
+def test_a_pair_fails_when_its_halves_cite_different_articles():
+    en = answer("Your gratuity is AED 6,904.11.", ("labour-law", "51"), ("labour-law", "67"))
+
+    verdict = score_gratuity_pair(en, AR_GRATUITY)
+
+    assert not verdict.passed
+    citations = verdict.details["citations"]
+    assert citations["en"]["passed"] and citations["ar"]["passed"]
+    consistency = verdict.details["consistency"]
+    assert not consistency["passed"]
+    assert consistency["citations"] == {
+        "en": ["labour-law 51", "labour-law 67"],
+        "ar": ["labour-law 51"],
+        "match": False,
+    }
+
+
+def test_a_pair_fails_when_its_halves_report_different_figures_within_tolerance():
+    ar = answer("مكافأتك 6904.50 درهم.", ("labour-law", "51"))
+
+    verdict = score_gratuity_pair(EN_GRATUITY, ar)
+
+    assert verdict.details["numeric"]["passed"]
+    assert not verdict.passed
+    assert verdict.details["consistency"]["numbers"]["ar"] == [6904.5]
+    assert verdict.details["consistency"]["numbers"]["match"] is False
+
+
+def test_a_pair_fails_when_the_judge_finds_the_answers_mean_different_things():
+    verdict = score_gratuity_pair(EN_GRATUITY, AR_GRATUITY, judge_finds(False))
+
+    assert not verdict.passed
+    consistency = verdict.details["consistency"]
+    assert consistency["numbers"]["match"] and consistency["citations"]["match"]
+    assert consistency["judge"]["passed"] is False
+
+
+def test_each_half_of_a_pair_is_scored_against_its_own_expectations():
+    ar = answer("لا أعرف.", ("labour-law", "51"))
+
+    verdict = score_gratuity_pair(EN_GRATUITY, ar)
+
+    assert not verdict.passed
+    assert verdict.details["numeric"]["en"]["passed"]
+    assert verdict.details["numeric"]["ar"]["missing"] == [6904.11]
+    assert verdict.details["consistency"]["numbers"]["ar"] == [None]

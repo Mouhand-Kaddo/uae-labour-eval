@@ -12,16 +12,25 @@ from typing import Any
 
 from eval_harness.agent import run_agent
 from eval_harness.budget import decide_start, estimate_run_cost, remaining_budget, should_abort
-from eval_harness.cases import Case, CaseError, case_set_hash, load_cases, load_open_questions
+from eval_harness.cases import (
+    CONSISTENCY,
+    PAIR_LANGUAGES,
+    Case,
+    CaseError,
+    case_set_hash,
+    load_cases,
+    load_open_questions,
+)
 from eval_harness.config import Config, same_family
 from eval_harness.final_answer import FinalAnswer
 from eval_harness.ingest import Chunk, IngestError
 from eval_harness.judge import (
+    PAIR_RUBRIC,
     STRUCTURED_OUTPUT_PARAMETERS,
-    Rubric,
     RubricError,
     judge_scorer,
     load_rubrics,
+    pair_judge,
 )
 from eval_harness.ledger import Ledger
 from eval_harness.manifest import Manifest, ManifestError, load_manifest
@@ -33,7 +42,15 @@ from eval_harness.openrouter import (
     OpenRouterError,
 )
 from eval_harness.pack import PackError, load_pack_tools
-from eval_harness.scorers import SCORERS, Scorer, article_key, score_case
+from eval_harness.scorers import (
+    SCORERS,
+    PairScorer,
+    Scorer,
+    article_key,
+    consistency_scorer,
+    score_case,
+    score_pair,
+)
 from eval_harness.search import SearchIndex, search_tools
 from eval_harness.trace import Trace
 
@@ -94,8 +111,17 @@ def run_eval(
         rubrics = load_rubrics(config.pack)
     except RubricError as exc:
         raise RunRefused(str(exc)) from exc
-    cases = _select_cases(config, category, case_id, limit, rubrics)
-    judged_per_repeat = sum(name in rubrics for case in cases for name in case.scoring)
+    pair_rubric = rubrics.pop(PAIR_RUBRIC, None)
+    cases = _select_cases(config, category, case_id, limit, [*SCORERS, *rubrics, CONSISTENCY])
+    pairs = sum(case.language == "both" for case in cases)
+    if pairs and pair_rubric is None:
+        raise RunRefused(
+            f"bilingual cases need the rubric {config.pack / 'evals' / 'rubrics' / 'bilingual.md'}"
+        )
+    agent_runs = sum(len(_inputs(case)) for case in cases)
+    judged_per_repeat = pairs + sum(
+        len(_inputs(case)) for case in cases for name in case.scoring if name in rubrics
+    )
     judge = _judge_model(config, models) if judged_per_repeat else None
     manifest, index = _load_corpus(config)
     _check_planted_chunks(cases, index)
@@ -113,7 +139,7 @@ def run_eval(
     ledger = Ledger(config.ledger_path)
     ledger_total = ledger.total()
     estimate = estimate_run_cost(
-        case_count=len(cases) * repeats,
+        case_count=agent_runs * repeats,
         history_per_case_usd=ledger.per_case_average(model=model_id, category=category),
         prompt_price_usd=model.prompt_price_usd,
         completion_price_usd=model.completion_price_usd,
@@ -215,25 +241,32 @@ def run_eval(
                     repeat=repeat,
                 )
                 started = time.monotonic()
+                finals: dict[str, FinalAnswer] | None = {}
+                halves: dict[str, list[dict[str, Any]]] = {}
                 try:
-                    final = run_agent(
-                        client,
-                        model=model,
-                        system_prompt=system_prompt,
-                        user_input=case.input,
-                        tools=[
-                            *search_tools(
-                                index, instruments, record_retrieval, embed_query, planted
-                            ),
-                            *tools,
-                        ],
-                        settings=config.agent,
-                        trace=trace,
-                        on_response=record,
-                    )
+                    for language, user_input in _inputs(case).items():
+                        if case.language == "both":
+                            trace.add("half", language=language, input=user_input)
+                        first_step = len(trace.steps)
+                        finals[language] = run_agent(
+                            client,
+                            model=model,
+                            system_prompt=system_prompt,
+                            user_input=user_input,
+                            tools=[
+                                *search_tools(
+                                    index, instruments, record_retrieval, embed_query, planted
+                                ),
+                                *tools,
+                            ],
+                            settings=config.agent,
+                            trace=trace,
+                            on_response=record,
+                        )
+                        halves[language] = trace.steps[first_step:]
                 except OpenRouterError as exc:
                     trace.add("error", message=str(exc))
-                    final = None
+                    finals = None
                 except _BudgetCrossed:
                     results.append(
                         _aborted(case, repeat, trace, case_spend, time.monotonic() - started)
@@ -242,20 +275,45 @@ def run_eval(
                 latency = round(time.monotonic() - started, 3)
 
                 scorers = SCORERS
+                pair_scorers: dict[str, PairScorer] = {}
                 if judge is not None:
+
+                    def record_judge(response: ChatResponse, record=record) -> None:
+                        record(response, "judge", judge.id)
+
                     scorers = SCORERS | {
                         name: judge_scorer(
                             client,
                             model=judge,
                             rubric=rubric,
                             settings=config.judge,
-                            on_response=lambda response: record(response, "judge", judge.id),
+                            on_response=record_judge,
                         )
                         for name, rubric in rubrics.items()
                     }
+                    if pair_rubric is not None:
+                        pair_scorers[CONSISTENCY] = consistency_scorer(
+                            pair_judge(
+                                client,
+                                model=judge,
+                                rubric=pair_rubric,
+                                settings=config.judge,
+                                on_response=record_judge,
+                            )
+                        )
                 agent_spend = case_spend
                 try:
-                    result = _score(case, repeat, final, trace, agent_spend, latency, scorers)
+                    result = _score(
+                        case,
+                        repeat,
+                        finals,
+                        halves,
+                        trace,
+                        agent_spend,
+                        latency,
+                        scorers,
+                        pair_scorers,
+                    )
                 except _BudgetCrossed:
                     results.append(_aborted(case, repeat, trace, agent_spend, latency))
                     raise
@@ -347,11 +405,11 @@ def _select_cases(
     category: str | None,
     case_id: str | None,
     limit: int | None,
-    rubrics: dict[str, Rubric],
+    scorer_names: list[str],
 ) -> list[Case]:
     try:
         questions = load_open_questions(config.open_questions) if config.open_questions else None
-        cases = load_cases(config.pack / "evals" / "cases", [*SCORERS, *rubrics], questions)
+        cases = load_cases(config.pack / "evals" / "cases", scorer_names, questions)
     except CaseError as exc:
         raise RunRefused(f"invalid cases: {exc}") from exc
     selected = [c for c in cases if category in (None, c.category) and case_id in (None, c.id)]
@@ -359,10 +417,14 @@ def _select_cases(
         selected = selected[:limit]
     if not selected:
         raise RunRefused("no cases match the selection")
-    unsupported = [c.id for c in selected if not isinstance(c.input, str)]
-    if unsupported:
-        raise RunRefused(f"bilingual inputs are not supported by the runner yet: {unsupported}")
     return selected
+
+
+def _inputs(case: Case) -> dict[str, str]:
+    """The questions to put to the agent: one, or both halves of a bilingual pair."""
+    if isinstance(case.input, dict):
+        return {language: case.input[language] for language in PAIR_LANGUAGES}
+    return {case.language: case.input}
 
 
 def _manifest_hash(config: Config) -> str | None:
@@ -401,21 +463,32 @@ def _tally(results: list[CaseResult], *, reviewed: bool) -> dict[str, Any]:
 def _score(
     case: Case,
     repeat: int,
-    final: FinalAnswer | None,
+    finals: dict[str, FinalAnswer] | None,
+    halves: dict[str, list[dict[str, Any]]],
     trace: Trace,
     cost: float,
     latency: float,
     scorers: dict[str, Scorer],
+    pair_scorers: dict[str, PairScorer],
 ) -> CaseResult:
-    if final is None:
+    if finals is None:
         trace.add("verdict", passed=False, details={"error": "the case did not finish"})
         return CaseResult(
             case.id, repeat, case.category, case.reviewed, "error", False, cost, latency
         )
-    verdict = score_case(case, final, trace.steps, scorers)
+    if case.language == "both":
+        verdict = score_pair(case, finals, halves, scorers, pair_scorers)
+    else:
+        verdict = score_case(case, finals[case.language], trace.steps, scorers)
     trace.add("verdict", passed=verdict.passed, details=verdict.details)
+    statuses = {final.status for final in finals.values()}
+    status = (
+        statuses.pop()
+        if len(statuses) == 1
+        else " ".join(f"{language}={final.status}" for language, final in finals.items())
+    )
     return CaseResult(
-        case.id, repeat, case.category, case.reviewed, final.status, verdict.passed, cost, latency
+        case.id, repeat, case.category, case.reviewed, status, verdict.passed, cost, latency
     )
 
 
