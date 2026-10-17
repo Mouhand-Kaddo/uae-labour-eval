@@ -123,3 +123,84 @@ def test_bm25_finds_arabic_articles_despite_spelling_variants(arabic_chunks):
     assert bm25_only("فتره التجربه")[0] == "9"
     assert "51" in bm25_only("مكافاة نهاية الخدمة")
     assert "29" in bm25_only("الاجازة السنويه")
+
+
+def fetched_source(source_id):
+    [source] = [s for s in MANIFEST.sources if s.id == source_id]
+    path = source_path(CONFIG.sources_dir, source)
+    if not verified(path, source):
+        pytest.skip(f"{source_id} not fetched; run `eval fetch`")
+    return source, path
+
+
+@pytest.fixture(scope="module")
+def regulations_chunks():
+    source, path = fetched_source("executive-regulations-en")
+    return chunk_text(source_text(path, source), source)
+
+
+def test_every_article_of_the_english_executive_regulations_is_chunked(regulations_chunks):
+    assert list(dict.fromkeys(c.article for c in regulations_chunks)) == [
+        str(n) for n in range(1, 40)
+    ]
+    assert all(c.instrument == "executive-regulations" for c in regulations_chunks)
+    assert not any("Regulating Labour\nRelations" in c.text for c in regulations_chunks)
+    assert (
+        "2. In the event the worker’s service is terminated, he shall be entitled to receive a cash"
+        " equivalent\nof the balance of his annual leaves due by law in accordance with his basic"
+        " salary." in article(regulations_chunks, "19")
+    )
+
+
+@pytest.fixture(scope="module")
+def arabic_regulations_text():
+    source, path = fetched_source("executive-regulations-ar")
+    return source_text(path, source)
+
+
+@pytest.fixture(scope="module")
+def arabic_regulations_chunks(arabic_regulations_text):
+    source, _ = fetched_source("executive-regulations-ar")
+    return chunk_text(arabic_regulations_text, source)
+
+
+def test_the_arabic_executive_regulations_have_the_same_articles_as_the_english(
+    regulations_chunks, arabic_regulations_chunks
+):
+    assert list(dict.fromkeys(c.article for c in arabic_regulations_chunks)) == [
+        str(n) for n in range(1, 40)
+    ]
+    check_article_sets(regulations_chunks + arabic_regulations_chunks)
+
+
+def test_arabic_regulations_page_footers_are_gone(arabic_regulations_chunks):
+    assert not any("بشأن تنظيم علاقات العمل 20" in c.text for c in arabic_regulations_chunks)
+
+
+def test_arabic_regulations_are_plain_letters_without_presentation_forms_or_tatweel(
+    arabic_regulations_text,
+):
+    assert "�" not in arabic_regulations_text
+    assert "ـ" not in arabic_regulations_text
+    assert not any("ﭐ" <= c <= "﷿" or "ﹰ" <= c <= "﻿" or c == "ھ" for c in arabic_regulations_text)
+
+
+def test_unmapped_glyphs_are_repaired_into_known_words(arabic_regulations_text):
+    words = {w.strip("،.:؛()") for w in arabic_regulations_text.split()}
+
+    repaired = ["أحكام", "إلى", "على", "بين", "فيها", "التي", "المختصة", "المهني", "بشأن", "عليه"]
+    assert set(repaired) <= words
+    assert "فعليًّا" in words
+
+
+def test_repaired_arabic_regulations_read_like_the_official_text(arabic_regulations_chunks):
+    article_19 = article(arabic_regulations_chunks, "19")
+
+    assert article_19.startswith(
+        "المادة (19)\nترحيل الإجازة السنوية أو الحصول على بدل نقدي عنها\n"
+        "مع مراعاة أحكام البندين رقمي (8) و(9) من المادة رقم (29) من المرسوم بقانون، فإنه:"
+    )
+    assert (
+        "2. في حالة انتهاء خدمة العامل يصرف له بدل نقدي عن رصيد إجازاته السنوية المستحقة قانونًا"
+        " وفقًا\nللأجر الأساسي." in article_19
+    )

@@ -18,6 +18,25 @@
     Worker's service during this period after notifying the Worker in writing at least fourteen
     (14) days prior to the date specified for termination of service." Both facts come from Art 9, so the answer must cite Labour Law Art 9 and
     every cited article must appear in a chunk retrieved during the case.
+- id: cite-en-002
+  category: cite
+  language: en
+  input: >-
+    Under the UAE Labour Law's Executive Regulations, when a worker's service ends, on which wage
+    is the cash payment for their unused annual leave balance calculated?
+  expected:
+    status: answered
+    citations:
+      - {instrument: executive-regulations, article: "19"}
+  scoring: [status, citations]
+  reviewed: false
+  refs: ["Executive Regulations Art 19(2)"]
+  depends_on: []
+  rationale: >-
+    ER Art 19(2): "In the event the worker's service is terminated, he shall be entitled to
+    receive a cash equivalent of the balance of his annual leaves due by law in accordance with
+    his basic salary." The answer comes from the Executive Regulations, so it must cite ER Art 19,
+    and every cited article must appear in a chunk retrieved during the case.
 - id: cite-ar-001
   category: cite
   language: ar

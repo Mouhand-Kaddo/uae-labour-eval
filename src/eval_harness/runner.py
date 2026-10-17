@@ -74,6 +74,7 @@ def run_eval(
     *,
     model_id: str,
     category: str | None = None,
+    case_id: str | None = None,
     limit: int | None = None,
     repeats: int = 1,
     echo: Callable[[str], None] = print,
@@ -93,7 +94,7 @@ def run_eval(
         rubrics = load_rubrics(config.pack)
     except RubricError as exc:
         raise RunRefused(str(exc)) from exc
-    cases = _select_cases(config, category, limit, rubrics)
+    cases = _select_cases(config, category, case_id, limit, rubrics)
     judged_per_repeat = sum(name in rubrics for case in cases for name in case.scoring)
     judge = _judge_model(config, models) if judged_per_repeat else None
     manifest, index = _load_corpus(config)
@@ -277,7 +278,12 @@ def run_eval(
                 "embedding": config.embedding_model,
             },
             "pricing": asdict(model) | {"supported_parameters": sorted(model.supported_parameters)},
-            "selection": {"category": category, "limit": limit, "repeats": repeats},
+            "selection": {
+                "category": category,
+                "case": case_id,
+                "limit": limit,
+                "repeats": repeats,
+            },
             "estimate_usd": estimate,
             "ledger_total_at_start_usd": ledger_total,
             "key_usage_at_start_usd": key_usage,
@@ -318,14 +324,18 @@ def _judge_model(config: Config, models: dict[str, ModelInfo]) -> ModelInfo:
 
 
 def _select_cases(
-    config: Config, category: str | None, limit: int | None, rubrics: dict[str, Rubric]
+    config: Config,
+    category: str | None,
+    case_id: str | None,
+    limit: int | None,
+    rubrics: dict[str, Rubric],
 ) -> list[Case]:
     try:
         questions = load_open_questions(config.open_questions) if config.open_questions else None
         cases = load_cases(config.pack / "evals" / "cases", [*SCORERS, *rubrics], questions)
     except CaseError as exc:
         raise RunRefused(f"invalid cases: {exc}") from exc
-    selected = [c for c in cases if category is None or c.category == category]
+    selected = [c for c in cases if category in (None, c.category) and case_id in (None, c.id)]
     if limit is not None:
         selected = selected[:limit]
     if not selected:

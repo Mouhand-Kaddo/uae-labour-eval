@@ -152,6 +152,27 @@ def test_refuse_case_runs_end_to_end(project, capsys):
     assert [c["case_id"] for c in summary["cases"]] == ["refuse-en-001"]
 
 
+def test_case_option_runs_only_that_case(project):
+    fake = FakeOpenRouter([final_answer_response("refused", "out_of_scope")])
+
+    exit_code = run(project, fake, "run", "--model", HAIKU, "--case", "refuse-en-002")
+
+    assert exit_code == 0
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert [c["case_id"] for c in summary["cases"]] == ["refuse-en-002"]
+    assert summary["selection"]["case"] == "refuse-en-002"
+
+
+def test_an_unknown_case_id_is_refused_before_any_spend(project, capsys):
+    fake = FakeOpenRouter([])
+
+    exit_code = run(project, fake, "run", "--model", HAIKU, "--case", "refuse-en-999")
+
+    assert exit_code == 2
+    assert "no cases match" in capsys.readouterr().err
+    assert fake.chat_requests == []
+
+
 def test_the_key_never_appears_in_traces_ledger_summary_or_output(project, capsys):
     fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
 

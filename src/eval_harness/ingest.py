@@ -3,6 +3,7 @@
 import hashlib
 import json
 import re
+import unicodedata
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -16,6 +17,7 @@ MAX_PART_CHARS = 1500
 CLAUSE_START = re.compile(r"\d+\.\s")
 CHUNKS_FILE = "chunks.jsonl"
 RIGHT_TO_LEFT_LANGUAGES = {"ar"}
+TATWEEL = "\u0640"
 
 
 class IngestError(Exception):
@@ -117,9 +119,11 @@ def extract_pdf_text(path: Path) -> str:
 
 
 def source_text(path: Path, source: Source) -> str:
-    """A source's text; right-to-left languages are rebuilt glyph by glyph (ADR-0004)."""
+    """A source's text; right-to-left languages are rebuilt glyph by glyph (ADR-0004), with
+    presentation forms folded to plain letters (NFKC) and justification tatweel removed."""
     if source.language in RIGHT_TO_LEFT_LANGUAGES:
-        return pdf_text(path, source.glyphs)
+        text = unicodedata.normalize("NFKC", pdf_text(path, source.glyphs))
+        return text.replace(TATWEEL, "")
     return extract_pdf_text(path)
 
 

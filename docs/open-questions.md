@@ -96,7 +96,7 @@ Not used by any calculation tool. Recorded so `cite` cases on penalties use the 
 - **ER Art 30(1) (EN):** "The annual number of working hours stipulated in the employment contract divided by the annual number of working hours under a full-time contract, multiplied by 100 equals the percentage multiplied by the value of the end of service pay under a full-time employment contract."
 - **Art 51(5):** the gratuity is calculated "according to the last basic wage received by the foreign Worker".
 - **ER Art 5(1)(b) (EN), job sharing:** tasks are shared between workers "and it shall reflect on the wage due to each of them in order to be proportionate. Workers shall be treated in accordance with the controls of parttime jobs."
-- The Arabic ER Art 30 is not quoted yet: its text layer still has unmapped glyphs (ADR-0004).
+- **ER Art 30(1) (AR):** "عدد ساعات العمل الواردة بعقد العمل في السنة مقسومًا على عدد ساعات العمل في عقد الدوام الكامل بالسنة مضروبًا في 100 يساوي النسبة مضروبة في قيمة مكافأة نهاية الخدمة لعقد العمل بالدوام الكامل." Like the English, it names no wage.
 
 "The value of the end of service pay under a full-time employment contract" doesn't say whose wage that value is computed on. A part-time worker's own basic wage is usually already reduced for the hours worked, so applying the percentage to a gratuity computed on that wage would reduce it twice.
 
@@ -122,7 +122,7 @@ Is a flexible worker's gratuity computed like part-time under ER Art 30(1), like
 
 - **Art 29(2) (EN):** "The part-time Worker is entitled to an annual leave according to the actual working hours spent by the Worker with the Employer ... in accordance with what is determined by the Executive Regulation".
 - **ER Art 18 (EN):** the duration "shall be determined based upon the total working hours after converting it to working days, divided by the number of working days per annum, multiplied by the leaves determined by law, with a minimum limit of five working days per annum for annual leaves; and in calculating these due leaves, the part of a day shall be considered as a full day". Clause 4: the percentage is the yearly part-time hours ÷ full-time hours × 100.
-- The Arabic ER Art 18 is not quoted yet: its text layer still has unmapped glyphs (ADR-0004).
+- **ER Art 18 (AR):** "وتحدد مدتها على أساس مجموع ساعات العمل بعد تحويلها إلى أيام عمل، مقسومًا على عدد أيام العمل في السنة، مضروبًا في الإجازات المقررة قانونًا، وذلك بحد أدنى خمسة أيام عمل في السنة للإجازات السنوية، وفي حساب هذه الإجازات المستحقة يعد الجزء من اليوم يومًا كاملاً".
 
 Questions:
 1. For service that is not a whole year, is the five-day minimum pro-rated, applied in full, or not applied?

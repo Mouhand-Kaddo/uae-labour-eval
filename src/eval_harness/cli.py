@@ -53,6 +53,7 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
             client,
             model_id=args.model or config.agent_model,
             category=args.category,
+            case_id=args.case,
             limit=args.limit,
             repeats=args.repeats,
         )
@@ -141,6 +142,7 @@ def _parser() -> argparse.ArgumentParser:
     run = commands.add_parser("run", help="run cases against a model")
     run.add_argument("--model", help="OpenRouter model ID (default: agent model from config)")
     run.add_argument("--category", help="only run cases in this category")
+    run.add_argument("--case", help="only run the case with this ID")
     run.add_argument("--limit", type=_positive_int, help="run at most N cases")
     run.add_argument("--repeats", type=_positive_int, default=1, help="run each case K times")
 
