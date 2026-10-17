@@ -307,7 +307,7 @@ def run_eval(
                             )
                         )
                 try:
-                    status, passed = _score(
+                    case_status, case_passed = _score(
                         case, finals, halves, trace, scorers, pair_scorers, rubrics
                     )
                 except _BudgetCrossed:
@@ -318,8 +318,8 @@ def run_eval(
                     repeat,
                     case.category,
                     case.reviewed,
-                    status,
-                    passed,
+                    case_status,
+                    case_passed,
                     case_spend,
                     latency,
                 )

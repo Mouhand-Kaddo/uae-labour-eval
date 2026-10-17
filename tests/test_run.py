@@ -148,6 +148,7 @@ def test_refuse_case_runs_end_to_end(project, capsys):
 
     summary = json.loads((only_run_dir(project) / "summary.json").read_text())
     assert summary["model"] == HAIKU
+    assert summary["status"] == "completed"
     assert summary["run_spend_usd"] == 0.00042
     assert [c["case_id"] for c in summary["cases"]] == ["refuse-en-001"]
 
