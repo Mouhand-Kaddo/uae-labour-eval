@@ -11,6 +11,11 @@ class BudgetDecision:
     reason: str
 
 
+def remaining_budget(ceiling_usd: float, ledger_total_usd: float, key_usage_usd: float) -> float:
+    """Ceiling minus the larger of local ledger spend and the key's reported usage."""
+    return ceiling_usd - max(ledger_total_usd, key_usage_usd)
+
+
 def decide_start(
     *,
     estimate_usd: float,
@@ -23,8 +28,7 @@ def decide_start(
         return BudgetDecision(
             False, estimate_usd, None, "key usage is unreachable; refusing to run blind"
         )
-    spent = max(ledger_total_usd, key_usage_usd)
-    remaining = ceiling_usd - spent
+    remaining = remaining_budget(ceiling_usd, ledger_total_usd, key_usage_usd)
     numbers = (
         f"estimate USD {estimate_usd:.4f}, remaining USD {remaining:.4f} "
         f"(ceiling {ceiling_usd:.4f} - max(ledger {ledger_total_usd:.4f}, "
