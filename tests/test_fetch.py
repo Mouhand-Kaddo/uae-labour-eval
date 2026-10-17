@@ -32,7 +32,7 @@ indexed = false
 
 @pytest.fixture
 def project(tmp_path, monkeypatch):
-    (tmp_path / "pack" / "corpus").mkdir(parents=True)
+    (tmp_path / "pack").mkdir()
     (tmp_path / "config.toml").write_text(
         """
 pack = "pack"
@@ -89,7 +89,7 @@ def saved(project):
 
 
 def write_manifest(project, expected_sha256):
-    (project / "pack" / "corpus" / "manifest.toml").write_text(manifest(expected_sha256))
+    (project / "pack" / "manifest.toml").write_text(manifest(expected_sha256))
 
 
 def test_fetch_saves_the_official_file_when_its_hash_matches(project):
@@ -156,7 +156,7 @@ def test_fetch_replaces_a_saved_file_whose_hash_no_longer_matches(project):
 
 
 def test_fetch_rejects_a_manifest_entry_missing_a_field(project, capsys):
-    (project / "pack" / "corpus" / "manifest.toml").write_text(
+    (project / "pack" / "manifest.toml").write_text(
         manifest(sha256(OFFICIAL)).replace('language = "en"\n', "")
     )
 
@@ -166,7 +166,7 @@ def test_fetch_rejects_a_manifest_entry_missing_a_field(project, capsys):
 
 
 def test_ingest_refuses_a_source_that_has_not_been_fetched(project, capsys):
-    (project / "pack" / "corpus" / "manifest.toml").write_text(
+    (project / "pack" / "manifest.toml").write_text(
         manifest(sha256(OFFICIAL)).replace(
             "indexed = false", "indexed = true\nheading_pattern = 'Article \\((\\d+)\\)'"
         )

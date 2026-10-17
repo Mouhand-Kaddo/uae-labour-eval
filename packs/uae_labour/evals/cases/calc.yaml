@@ -1,0 +1,424 @@
+- id: calc-gratuity-en-001
+  category: calc
+  language: en
+  input: >-
+    I'm a foreign worker on a full-time contract in Abu Dhabi. My first day of work was
+    1 March 2024 and my last day of work was 27 February 2025. My basic wage is AED 8,000 a
+    month. How much end-of-service gratuity am I owed?
+  expected:
+    status: answered
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2024-03-01"
+        end_date: "2025-02-27"
+        monthly_basic_wage: 8000
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
+  depends_on: []
+  rationale: >-
+    1 Mar 2024 to 27 Feb 2025 inclusive: Mar–Dec 2024 = 31+30+31+30+31+31+30+31+30+31 = 306
+    days, plus 31 (Jan) + 27 (Feb) = 364 days. A year is 365 days (Art 67), so one year of
+    continuous service is not complete and Art 51(2) gives no gratuity. Expected answer: no
+    gratuity is due.
+
+- id: calc-gratuity-en-002
+  category: calc
+  language: en
+  input: >-
+    Full-time foreign worker here. I started on 1 March 2024 and my last working day was
+    28 February 2025. Basic salary AED 10,000 per month, total package AED 14,000 with
+    housing. What gratuity should I get?
+  expected:
+    status: answered
+    numbers: [6904.11]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2024-03-01"
+        end_date: "2025-02-28"
+        monthly_basic_wage: 10000
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    306 days (Mar–Dec 2024) + 31 + 28 = 365 days = exactly one year (Art 67), so the worker
+    qualifies (Art 51(2)). Gratuity on the basic wage, not the AED 14,000 package: 21 days.
+    Daily basic wage (OQ-001) = 10,000 × 12 / 365 = 328.767. 21 × 10,000 × 12 / 365 =
+    2,520,000 / 365 = AED 6,904.11. Cap 24 × 10,000 = 240,000 not reached.
+
+- id: calc-gratuity-en-003
+  category: calc
+  language: en
+  input: >-
+    I worked full time for a Dubai company from 1 January 2019 to 30 December 2023 (both days
+    included). I'm not a UAE national. My last basic wage was AED 15,000 a month. What is my
+    end-of-service gratuity?
+  expected:
+    status: answered
+    numbers: [51780.82]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2019-01-01"
+        end_date: "2023-12-30"
+        monthly_basic_wage: 15000
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    2019 (365) + 2020 (366) + 2021 (365) + 2022 (365) + 2023 to 30 Dec (364) = 1,825 days =
+    exactly 5 years of 365 days, all at the 21-day rate (Art 51(2)(a)); nothing at 30 days yet.
+    5 × 21 = 105 days × (15,000 × 12 / 365) = 105 × 180,000 / 365 = 18,900,000 / 365 =
+    AED 51,780.82. Cap 24 × 15,000 = 360,000 not reached.
+
+- id: calc-gratuity-en-004
+  category: calc
+  language: en
+  input: >-
+    I'm an expat who worked full time for the same employer from 1 January 1994 until
+    31 December 2023. My last basic wage was AED 20,000 a month and my total monthly wage with
+    allowances was AED 30,000. How much gratuity am I entitled to?
+  expected:
+    status: answered
+    numbers: [480000]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "1994-01-01"
+        end_date: "2023-12-31"
+        monthly_basic_wage: 20000
+        monthly_wage: 30000
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 51(6)"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    30 calendar years with 7 leap days (1996, 2000, 2004, 2008, 2012, 2016, 2020) =
+    30 × 365 + 7 = 10,957 days. First 1,825 days at 21 days/year = 105 days; remaining
+    9,132 days at 30 days/year = 273,960 / 365 = 750.58 days; total 855.58 days ×
+    (20,000 × 12 / 365 = 657.53) = AED 562,570.09 before the cap. Cap (Art 51(6), OQ-002):
+    two years of basic wage = 24 × 20,000 = AED 480,000, which applies. A cap on the
+    AED 30,000 wage (720,000) would not bite, so this case separates the two readings.
+
+- id: calc-gratuity-en-005
+  category: calc
+  language: en
+  input: >-
+    Foreign worker, full time. First day 1 January 2021, last day 31 December 2023. During
+    that time I took 45 days of unpaid leave. My basic wage is AED 12,000 a month. What is my
+    gratuity?
+  expected:
+    status: answered
+    numbers: [23833.36]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2021-01-01"
+        end_date: "2023-12-31"
+        monthly_basic_wage: 12000
+        unpaid_absence_days: 45
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 51(4)"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    3 × 365 = 1,095 calendar days (no leap day in 2021–2023), minus 45 unpaid days
+    (Art 51(4)) = 1,050 days. 1,050 × 21 / 365 = 22,050 / 365 = 60.411 days (part year
+    pro-rated, Art 51(3)). Daily basic wage 12,000 × 12 / 365 = 394.52. 22,050 × 144,000 /
+    365² = 3,175,200,000 / 133,225 = AED 23,833.36.
+
+- id: calc-gratuity-en-006
+  category: calc
+  language: en
+  input: >-
+    I'm a foreign part-time worker. My contract is for 1,040 working hours a year, and a
+    full-time contract at my company is 2,080 hours a year. I worked from 1 January 2021 to
+    31 December 2023, and my own basic wage is AED 6,000 a month. What end-of-service
+    gratuity do I get?
+  expected:
+    status: answered
+    numbers: [6213.70]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2021-01-01"
+        end_date: "2023-12-31"
+        monthly_basic_wage: 6000
+        work_pattern: part_time
+        part_time_hours_ratio: 0.5
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Executive Regulations Art 30", "Labour Law Art 51(2)"]
+  depends_on: [OQ-001, OQ-002, OQ-008]
+  rationale: >-
+    1,095 days = 3 years → 63 days. Full-time value on the worker's own basic wage:
+    63 × 6,000 × 12 / 365 = 4,536,000 / 365 = 12,427.40. ER Art 30(1): 1,040 / 2,080 = 50%;
+    12,427.40 × 50% = AED 6,213.70. Depends on OQ-008 (whether the full-time value uses the
+    worker's own basic wage or a full-time equivalent), so it cannot be reviewed until that
+    is decided.
+
+- id: calc-gratuity-en-007
+  category: calc
+  language: en
+  input: >-
+    I was hired on a temporary work contract for a project, from 1 January 2023 to
+    30 June 2024. I'm a foreign worker and my basic wage was AED 9,000 a month. How much
+    end-of-service gratuity am I owed?
+  expected:
+    status: answered
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2023-01-01"
+        end_date: "2024-06-30"
+        monthly_basic_wage: 9000
+        work_pattern: temporary
+        nationality: foreign
+  scoring: [status, tool_call]
+  reviewed: false
+  refs: ["Executive Regulations Art 30"]
+  depends_on: []
+  rationale: >-
+    ER Art 30(2): the end of service pay does not apply to the temporary work pattern,
+    whatever the length of service (547 days here). Expected answer: no gratuity is due under
+    the Executive Regulations.
+
+- id: calc-gratuity-en-008
+  category: calc
+  language: en
+  input: >-
+    I resigned from my full-time job. I'm a foreign worker; my first day was 1 January 2021
+    and my last day 31 December 2023, on a basic wage of AED 12,000 a month. Online
+    calculators say resigning cuts my gratuity to a third. How much do I actually get?
+  expected:
+    status: answered
+    numbers: [24854.79]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2021-01-01"
+        end_date: "2023-12-31"
+        monthly_basic_wage: 12000
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    Trap: Art 51 draws no distinction between resignation and termination (the one-third
+    reduction was a 1980-law rule), so the full amount is due. 1,095 days = 3 years × 21 =
+    63 days × 12,000 × 12 / 365 = 9,072,000 / 365 = AED 24,854.79. A third (8,284.93) is
+    wrong.
+
+- id: calc-gratuity-ar-001
+  category: calc
+  language: ar
+  input: >-
+    أنا مواطن إماراتي أعمل بدوام كامل في شركة خاصة في الشارقة. بدأت العمل في 1 يناير 2018
+    وكان آخر يوم عمل لي 31 ديسمبر 2023، وأجري الأساسي 25,000 درهم شهريًا. كم تبلغ مكافأة نهاية
+    الخدمة وفق قانون العمل؟
+  expected:
+    status: answered
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2018-01-01"
+        end_date: "2023-12-31"
+        monthly_basic_wage: 25000
+        work_pattern: full_time
+        nationality: national
+  scoring: [status, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(1)"]
+  depends_on: []
+  rationale: >-
+    المادة 51(1): يستحق العامل المواطن مكافأة نهاية الخدمة وفق تشريعات المعاشات والتأمينات
+    الاجتماعية، لا وفق حساب المادة 51(2). Art 51(1): the national worker's gratuity follows
+    pensions legislation, so the Labour Law calculation does not apply. Expected answer: no
+    Labour Law amount; points to the pensions regime.
+
+- id: calc-gratuity-ar-002
+  category: calc
+  language: ar
+  input: >-
+    أنا عامل أجنبي بدوام كامل. أول يوم عمل لي كان 1 يناير 2024 وآخر يوم عمل 31 ديسمبر 2024،
+    وأجري الأساسي 18,250 درهمًا في الشهر. ما مقدار مكافأة نهاية الخدمة؟
+  expected:
+    status: answered
+    numbers: [12634.52]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2024-01-01"
+        end_date: "2024-12-31"
+        monthly_basic_wage: 18250
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 67"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    2024 is a leap year: 366 days. The year is 365 days (Art 67), so this is one year and
+    one day; the extra day is pro-rated (Art 51(3)). Daily basic wage 18,250 × 12 / 365 =
+    600. 366 × 21 / 365 × 600 = 4,611,600 / 365 = AED 12,634.52.
+
+- id: calc-gratuity-ar-003
+  category: calc
+  language: ar
+  input: >-
+    عملت بدوام كامل لدى صاحب العمل نفسه من 1 يناير 2018 حتى 30 ديسمبر 2023 (شاملًا اليومين)،
+    وأنا لست مواطنًا. آخر أجر أساسي لي 18,250 درهمًا شهريًا. احسب لي مكافأة نهاية الخدمة.
+  expected:
+    status: answered
+    numbers: [81000]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2018-01-01"
+        end_date: "2023-12-30"
+        monthly_basic_wage: 18250
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    2018–2022 = 365 × 5 + 1 (2020) = 1,826 days, plus 364 days of 2023 = 2,190 days = 6
+    years. First 5 years × 21 = 105 days (Art 51(2)(a)); sixth year × 30 = 30 days
+    (Art 51(2)(b)); 135 days × 600 (18,250 × 12 / 365) = AED 81,000.
+
+- id: calc-gratuity-ar-004
+  category: calc
+  language: ar
+  input: >-
+    عامل أجنبي بدوام كامل، بدأت في 1 يناير 2022 وانتهت خدمتي في 1 يوليو 2023 (آخر يوم عمل)،
+    وأجري الأساسي 18,250 درهمًا شهريًا. كم مكافأتي؟
+  expected:
+    status: answered
+    numbers: [18882.74]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2022-01-01"
+        end_date: "2023-07-01"
+        monthly_basic_wage: 18250
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    365 days (2022) + 31+28+31+30+31+30+1 = 182 days of 2023 = 547 days: one full year
+    plus a part year, pro-rated once a year is complete (Art 51(3)). 547 × 21 / 365 ×
+    600 = 6,892,200 / 365 = AED 18,882.74.
+
+- id: calc-gratuity-ar-005
+  category: calc
+  language: ar
+  input: >-
+    أنا عامل أجنبي بدوام كامل. أول يوم عمل 1 يناير 2023 وآخر يوم عمل 10 يناير 2024، وأخذت
+    خلال هذه المدة 11 يومًا إجازة بدون أجر. أجري الأساسي 9,000 درهم. هل أستحق مكافأة نهاية
+    الخدمة؟
+  expected:
+    status: answered
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2023-01-01"
+        end_date: "2024-01-10"
+        monthly_basic_wage: 9000
+        unpaid_absence_days: 11
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(4)"]
+  depends_on: []
+  rationale: >-
+    365 + 10 = 375 calendar days, minus 11 unpaid days (Art 51(4)) = 364 days < 365
+    (Art 67), so one year of continuous service is not complete (Art 51(2)). Expected
+    answer: no gratuity is due.
+
+- id: calc-gratuity-ar-006
+  category: calc
+  language: ar
+  input: >-
+    قدمت استقالتي من عملي بدوام كامل بعد أن عملت من 1 يناير 2019 حتى 30 ديسمبر 2023، وأنا
+    عامل أجنبي وأجري الأساسي ١٨٬٢٥٠ درهمًا شهريًا. قيل لي إن الاستقالة تنقص المكافأة. كم أستحق؟
+  expected:
+    status: answered
+    numbers: [63000]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2019-01-01"
+        end_date: "2023-12-30"
+        monthly_basic_wage: 18250
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    Trap: Art 51 does not reduce the gratuity for resignation. 1,825 days = 5 years × 21 =
+    105 days × 600 (18,250 × 12 / 365) = AED 63,000, the same as on termination.
+
+- id: calc-gratuity-ar-007
+  category: calc
+  language: ar
+  input: >-
+    أعمل بدوام جزئي 24 ساعة أسبوعيًا، بينما الدوام الكامل في الشركة 40 ساعة أسبوعيًا. عملت من
+    1 يناير 2020 حتى 31 ديسمبر 2022، وأنا عامل أجنبي وأجري الأساسي 7,300 درهم شهريًا. ما مكافأة
+    نهاية الخدمة؟
+  expected:
+    status: answered
+    numbers: [9080.28]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2020-01-01"
+        end_date: "2022-12-31"
+        monthly_basic_wage: 7300
+        work_pattern: part_time
+        part_time_hours_ratio: 0.6
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Executive Regulations Art 30", "Labour Law Art 51(2)", "Labour Law Art 51(3)"]
+  depends_on: [OQ-001, OQ-002, OQ-008]
+  rationale: >-
+    366 + 365 + 365 = 1,096 days. Daily basic wage 7,300 × 12 / 365 = 240. Full-time value
+    1,096 × 21 / 365 × 240 = 5,523,840 / 365 = 15,133.81. ER Art 30(1): 24 / 40 = 60% of
+    the hours (the same ratio per year); 5,523,840 × 0.6 / 365 = 3,314,304 / 365 =
+    AED 9,080.28. Depends on OQ-008.

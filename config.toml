@@ -2,6 +2,7 @@ pack = "packs/uae_labour"
 runs_dir = "runs"
 sources_dir = "data/sources"
 index_dir = "data/index"
+open_questions = "docs/open-questions.md"
 
 [models]
 agent = "anthropic/claude-haiku-5.5"

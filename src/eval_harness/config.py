@@ -35,6 +35,7 @@ class Config:
     embedding_model: str
     agent: AgentSettings
     budget: BudgetSettings
+    open_questions: Path | None = None
 
     @property
     def ledger_path(self) -> Path:
@@ -51,13 +52,14 @@ def load_config(path: Path) -> Config:
         return Config(
             pack=base / raw["pack"],
             runs_dir=base / raw["runs_dir"],
-            sources_dir=base / raw["sources_dir"],
-            index_dir=base / raw["index_dir"],
+            sources_dir=base / raw.get("sources_dir", "data/sources"),
+            index_dir=base / raw.get("index_dir", "data/index"),
             agent_model=raw["models"]["agent"],
             judge_model=raw["models"]["judge"],
             embedding_model=raw["models"]["embedding"],
             agent=AgentSettings(**raw["agent"]),
             budget=BudgetSettings(**raw["budget"]),
+            open_questions=base / raw["open_questions"] if "open_questions" in raw else None,
         )
     except (KeyError, TypeError) as exc:
         raise ConfigError(f"{path}: missing or unexpected setting: {exc}") from exc

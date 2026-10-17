@@ -89,6 +89,33 @@ Not used by any calculation tool. Recorded so `cite` cases on penalties use the 
 
 **Decision:** _open_
 
+## OQ-008: Which basic wage does ER Art 30(1) pro-rate for part-time and job-sharing workers?
+
+- **ER Art 30(1) (EN):** "The annual number of working hours stipulated in the employment contract divided by the annual number of working hours under a full-time contract, multiplied by 100 equals the percentage multiplied by the value of the end of service pay under a full-time employment contract."
+- **Art 51(5):** the gratuity is calculated "according to the last basic wage received by the foreign Worker".
+- **ER Art 5(1)(b) (EN), job sharing:** tasks are shared between workers "and it shall reflect on the wage due to each of them in order to be proportionate. Workers shall be treated in accordance with the controls of parttime jobs."
+- The Arabic ER Art 30 is not quoted yet: its text layer still has unmapped glyphs (ADR-0004).
+
+"The value of the end of service pay under a full-time employment contract" doesn't say whose wage that value is computed on. A part-time worker's own basic wage is usually already reduced for the hours worked, so applying the percentage to a gratuity computed on that wage would reduce it twice.
+
+Options:
+- **A.** full-time gratuity computed on the worker's own (part-time) last basic wage, then × the percentage
+- **B.** full-time gratuity computed on the full-time equivalent basic wage for the same job, then × the percentage
+
+Until this is decided, the gratuity tool applies the percentage to a full-time gratuity computed on the basic wage it is given (A when given the worker's own wage), and returns OQ-008 with every part-time or job-sharing result.
+
+**Decision:** _open_
+
+## OQ-009: Gratuity for flexible work
+
+- **Art 52:** the Executive Regulations set the gratuity "for foreign workers in work patterns other than full-time".
+- **ER Art 30** covers only "a part-time or employment sharing model" (30(1)) and temporary work (30(2)). ER Art 10(4)(d) lists a "Flexible employment contract" as a contract type.
+- Remote work is not a gap: ER Art 5(1)(a) says it applies "whether the work was parttime or fulltime", so the full-time or part-time rule follows.
+
+Is a flexible worker's gratuity computed like part-time under ER Art 30(1), like full-time under Art 51, or not at all? The gratuity tool rejects the flexible work pattern until this is decided.
+
+**Decision:** _open_
+
 ---
 
 ## Facts still to verify (agent work, not owner decisions)

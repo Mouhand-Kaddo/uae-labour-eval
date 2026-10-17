@@ -1,8 +1,10 @@
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
+from corpus_fixture import write_corpus
 from fake_openrouter import (
     FAKE_KEY,
     FakeOpenRouter,
@@ -11,8 +13,8 @@ from fake_openrouter import (
     tool_call_response,
 )
 
+from eval_harness.cases import case_set_hash
 from eval_harness.cli import main
-from eval_harness.ingest import Chunk, write_chunks
 
 HAIKU = "anthropic/claude-haiku-5.5"
 
@@ -54,41 +56,6 @@ CITE_CASES = """
   rationale: Art 9 caps probation at six months.
 """
 
-MANIFEST = """
-[instruments.statute]
-title = "The Statute"
-
-[[sources]]
-id = "statute-en"
-instrument = "statute"
-language = "en"
-official_url = "https://official.example/en"
-wayback_url = "https://web.archive.org/web/20260101000000id_/https://official.example/en"
-retrieved = 2026-10-17
-sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
-indexed = true
-heading_pattern = 'Article \\((\\d+)\\)'
-"""
-
-
-def index_chunk(article, text):
-    return Chunk(
-        id=f"statute:en:{article}:1",
-        instrument="statute",
-        article=article,
-        part=1,
-        language="en",
-        text=text,
-        text_sha256=hashlib.sha256(text.encode()).hexdigest(),
-        source="statute-en",
-    )
-
-
-INDEX = [
-    index_chunk("9", "Article (9) Probation. Probation shall not exceed six months."),
-    index_chunk("29", "Article (29) Annual leave of thirty days."),
-]
-
 
 @pytest.fixture
 def project(tmp_path, monkeypatch):
@@ -97,9 +64,7 @@ def project(tmp_path, monkeypatch):
     (pack / "system_prompt.md").write_text("You answer questions about the corpus.")
     (pack / "evals" / "cases" / "refuse.yaml").write_text(REFUSE_CASES)
     (pack / "evals" / "cases" / "cite.yaml").write_text(CITE_CASES)
-    (pack / "corpus").mkdir()
-    (pack / "corpus" / "manifest.toml").write_text(MANIFEST)
-    write_chunks(INDEX, tmp_path / "data" / "index")
+    write_corpus(tmp_path)
     (tmp_path / "config.toml").write_text(
         f"""
 pack = "pack"
@@ -444,11 +409,204 @@ def test_refuses_to_start_without_an_index(project, capsys):
     assert "ingest" in capsys.readouterr().err
 
 
-def test_summary_records_the_corpus_manifest_hash(project):
+CALC_CASE = """
+- id: calc-en-001
+  category: calc
+  language: en
+  input: "First day 2023-01-01, last day 2023-12-31, basic wage AED 36,500. My gratuity?"
+  expected:
+    status: answered
+    numbers: [25200]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments: {start_date: "2023-01-01", end_date: "2023-12-31", monthly_basic_wage: 36500}
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)"]
+  depends_on: [OQ-001]
+  rationale: 21 days × 36,500 × 12 / 365 = 21 × 1,200 = 25,200.
+"""
+
+GRATUITY_ARGS = {
+    "start_date": "2023-01-01",
+    "end_date": "2023-12-31",
+    "monthly_basic_wage": 36500,
+    "work_pattern": "full_time",
+    "nationality": "foreign",
+}
+
+
+def answer_response(text):
+    return tool_call_response(
+        "final_answer",
+        {
+            "answer": text,
+            "citations": [{"instrument": "Labour Law", "article": "51"}],
+            "status": "answered",
+            "refusal_reason": None,
+        },
+        call_id="c2",
+    )
+
+
+def test_pack_tools_are_offered_called_and_scored(project):
+    pack = project / "pack"
+    (pack / "__init__.py").write_text(
+        "from uae_labour.gratuity import GRATUITY_TOOL\n\nTOOLS = [GRATUITY_TOOL]\n"
+    )
+    (pack / "evals" / "cases" / "calc.yaml").write_text(CALC_CASE)
+    fake = FakeOpenRouter(
+        [
+            tool_call_response("calculate_gratuity", GRATUITY_ARGS, call_id="c1"),
+            answer_response("Your gratuity is AED 25,200. This is not legal advice."),
+        ]
+    )
+
+    exit_code = run(project, fake, "run", "--model", HAIKU, "--category", "calc")
+
+    assert exit_code == 0
+    first, second = fake.chat_requests
+    assert [t["function"]["name"] for t in first["tools"]] == [
+        "search_sources",
+        "get_section",
+        "calculate_gratuity",
+        "final_answer",
+    ]
+    [tool_message] = [m for m in second["messages"] if m["role"] == "tool"]
+    assert json.loads(tool_message["content"])["result"]["gratuity"] == 25200.0
+    steps = read_jsonl(only_run_dir(project) / "traces" / "calc-en-001.1.jsonl")
+    [call] = [s for s in steps if s["type"] == "tool_call"]
+    assert call["arguments"] == GRATUITY_ARGS
+    assert call["result"]["refs"][0] == {"instrument": "Labour Law", "article": "51", "clause": "2"}
+    verdict = steps[-1]
+    assert verdict["passed"] is True
+    assert set(verdict["details"]) == {"status", "numeric", "tool_call"}
+
+
+def git(project, *args):
+    return subprocess.run(
+        [
+            "git",
+            "-C",
+            str(project),
+            "-c",
+            "user.name=t",
+            "-c",
+            "user.email=t@example.com",
+            "-c",
+            "commit.gpgsign=false",
+            *args,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def test_the_summary_ties_the_run_to_its_cases_config_models_and_commit(project):
+    git(project, "init", "-q")
+    git(project, "add", ".")
+    git(project, "commit", "-q", "-m", "fixture")
     fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
 
     eval_run(project, fake, "--limit", "1")
 
     summary = json.loads((only_run_dir(project) / "summary.json").read_text())
-    manifest_bytes = (project / "pack" / "corpus" / "manifest.toml").read_bytes()
-    assert summary["corpus_manifest_sha256"] == hashlib.sha256(manifest_bytes).hexdigest()
+    assert summary["case_set_hash"] == case_set_hash(project / "pack" / "evals" / "cases")
+    manifest = (project / "pack" / "manifest.toml").read_bytes()
+    assert summary["manifest_hash"] == hashlib.sha256(manifest).hexdigest()
+    assert summary["git_commit"] == git(project, "rev-parse", "HEAD")
+    assert summary["models"] == {
+        "agent": HAIKU,
+        "judge": "openai/gpt-5.6-terra",
+        "embedding": "baai/bge-m3",
+    }
+    assert summary["config"]["agent"] == {
+        "max_turns": 6,
+        "max_tokens": 1024,
+        "reasoning_effort": "low",
+    }
+    assert summary["config"]["budget"]["ceiling_usd"] == 20.0
+
+
+def test_the_summary_has_no_git_commit_outside_a_repository(project):
+    fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
+
+    eval_run(project, fake, "--limit", "1")
+
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["git_commit"] is None
+
+
+def test_headline_numbers_count_reviewed_cases_only(project, capsys):
+    cases = REFUSE_CASES.replace("reviewed: false", "reviewed: true", 1)
+    (project / "pack" / "evals" / "cases" / "refuse.yaml").write_text(cases)
+    fake = FakeOpenRouter(
+        [
+            final_answer_response("refused", "legal_advice"),
+            final_answer_response("answered", None),
+        ]
+    )
+
+    eval_run(project, fake)
+
+    out = capsys.readouterr().out
+    assert "headline (reviewed cases only): 1/1 passed" in out
+    assert "unreviewed: 0/1 passed, not in the headline" in out
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["reviewed"] == {
+        "total": 1,
+        "passed": 1,
+        "by_category": {"refuse": {"total": 1, "passed": 1}},
+    }
+    assert summary["unreviewed"] == {
+        "total": 1,
+        "passed": 0,
+        "by_category": {"refuse": {"total": 1, "passed": 0}},
+    }
+
+
+def set_open_questions(project, path):
+    config = project / "config.toml"
+    config.write_text(f'open_questions = "{path}"\n' + config.read_text())
+
+
+def test_refuses_a_reviewed_case_that_depends_on_an_open_question(project, capsys):
+    (project / "open-questions.md").write_text(
+        "## OQ-005: Leave boundaries\n\n**Decision:** _open_\n"
+    )
+    set_open_questions(project, "open-questions.md")
+    cases = REFUSE_CASES.replace(
+        "reviewed: false\n  refs: []\n  depends_on: []",
+        "reviewed: true\n  refs: []\n  depends_on: [OQ-005]",
+        1,
+    )
+    (project / "pack" / "evals" / "cases" / "refuse.yaml").write_text(cases)
+    fake = FakeOpenRouter([])
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 2
+    assert fake.chat_requests == []
+    assert "reviewed but depends on open questions ['OQ-005']" in capsys.readouterr().err
+
+
+def test_refuses_to_start_when_the_configured_questions_doc_is_missing(project, capsys):
+    set_open_questions(project, "missing.md")
+    fake = FakeOpenRouter([])
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 2
+    assert "cannot read open questions" in capsys.readouterr().err
+
+
+def test_refuses_to_start_when_the_pack_offers_no_tool_list(project, capsys):
+    (project / "pack" / "__init__.py").write_text("TOOLS = None\n")
+    fake = FakeOpenRouter([])
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 2
+    assert "TOOLS" in capsys.readouterr().err

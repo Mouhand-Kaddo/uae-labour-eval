@@ -14,6 +14,7 @@ from eval_harness.ingest import IngestError, ingest
 from eval_harness.ledger import Ledger
 from eval_harness.manifest import ManifestError, load_manifest
 from eval_harness.openrouter import OpenRouterClient, OpenRouterError
+from eval_harness.report import ReportError, write_report
 from eval_harness.runner import RunRefused, run_eval
 
 EXIT_REFUSED = 2
@@ -32,6 +33,8 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
     if args.command == "ingest":
         return _ingest(config)
 
+    if args.command == "report":
+        return _report(config, args.run)
     api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if not api_key:
         print("error: OPENROUTER_API_KEY is not set", file=sys.stderr)
@@ -96,6 +99,20 @@ def _budget(config: Config, client: OpenRouterClient) -> int:
     return 0
 
 
+def _report(config, run: str) -> int:
+    run_dir = Path(run) if Path(run).is_dir() else config.runs_dir / run
+    if not run_dir.is_dir():
+        print(f"error: no run directory {run!r} (looked in {config.runs_dir})", file=sys.stderr)
+        return EXIT_REFUSED
+    try:
+        index = write_report(run_dir)
+    except ReportError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    print(f"report written to {index}")
+    return 0
+
+
 def _positive_int(value: str) -> int:
     number = int(value)
     if number < 1:
@@ -117,4 +134,7 @@ def _parser() -> argparse.ArgumentParser:
     commands.add_parser("fetch", help="download the manifest's sources and verify their SHA-256")
     commands.add_parser("ingest", help="chunk the fetched sources into the search index")
     commands.add_parser("budget", help="show ledger total, key usage and remaining budget")
+
+    report = commands.add_parser("report", help="write the HTML report for a run")
+    report.add_argument("run", help="run ID under runs_dir, or a path to a run directory")
     return parser

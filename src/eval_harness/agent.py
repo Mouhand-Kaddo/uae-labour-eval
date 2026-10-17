@@ -76,8 +76,9 @@ def run_agent(
 
         for call in tool_calls:
             name = call["function"]["name"]
+            arguments: Any = call["function"]["arguments"]
             try:
-                arguments = json.loads(call["function"]["arguments"] or "{}")
+                arguments = json.loads(arguments or "{}")
                 if name == "final_answer":
                     final = parse_final_answer(arguments)
                     trace.add("final_answer", turn=turn, **asdict(final))
@@ -87,7 +88,9 @@ def run_agent(
                 result = {"result": tools_by_name[name].run(arguments)}
             except (ValueError, TypeError, KeyError) as exc:
                 result = {"error": str(exc)}
-            trace.add("tool_call", turn=turn, id=call["id"], name=name, **result)
+            trace.add(
+                "tool_call", turn=turn, id=call["id"], name=name, arguments=arguments, **result
+            )
             messages.append(
                 {
                     "role": "tool",

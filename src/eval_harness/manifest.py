@@ -52,11 +52,11 @@ SHA256 = re.compile(r"[0-9a-f]{64}")
 
 
 def manifest_path(pack: Path) -> Path:
-    return pack / "corpus" / "manifest.toml"
+    return pack / "manifest.toml"
 
 
 def load_manifest(pack: Path) -> Manifest:
-    """Read and validate `<pack>/corpus/manifest.toml`; raises ManifestError naming the problem."""
+    """Read and validate `<pack>/manifest.toml`; raises ManifestError naming the problem."""
     path = manifest_path(pack)
     try:
         data = path.read_bytes()
