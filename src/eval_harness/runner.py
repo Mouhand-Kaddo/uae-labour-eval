@@ -91,7 +91,7 @@ def run_eval(
     *,
     model_id: str,
     category: str | None = None,
-    case_id: str | None = None,
+    case_ids: list[str] | None = None,
     limit: int | None = None,
     repeats: int = 1,
     echo: Callable[[str], None] = print,
@@ -114,7 +114,7 @@ def run_eval(
     pair_rubric = rubrics.pop(PAIR_RUBRIC, None)
     open_questions = _load_open_questions(config)
     cases = _select_cases(
-        config, open_questions, category, case_id, limit, [*SCORERS, *rubrics, CONSISTENCY]
+        config, open_questions, category, case_ids, limit, [*SCORERS, *rubrics, CONSISTENCY]
     )
     pairs = sum(case.language == "both" for case in cases)
     if pairs and pair_rubric is None:
@@ -351,7 +351,7 @@ def run_eval(
             "pricing": asdict(model) | {"supported_parameters": sorted(model.supported_parameters)},
             "selection": {
                 "category": category,
-                "case": case_id,
+                "case": case_ids,
                 "limit": limit,
                 "repeats": repeats,
             },
@@ -419,7 +419,7 @@ def _select_cases(
     config: Config,
     open_questions: dict[str, bool] | None,
     category: str | None,
-    case_id: str | None,
+    case_ids: list[str] | None,
     limit: int | None,
     scorer_names: list[str],
 ) -> list[Case]:
@@ -427,7 +427,15 @@ def _select_cases(
         cases = load_cases(config.pack / "evals" / "cases", scorer_names, open_questions)
     except CaseError as exc:
         raise RunRefused(f"invalid cases: {exc}") from exc
-    selected = [c for c in cases if category in (None, c.category) and case_id in (None, c.id)]
+    if case_ids is not None:
+        unknown = sorted(set(case_ids) - {c.id for c in cases})
+        if unknown:
+            raise RunRefused(f"no cases match the selection: unknown case IDs {unknown}")
+    selected = [
+        c
+        for c in cases
+        if category in (None, c.category) and (case_ids is None or c.id in case_ids)
+    ]
     if limit is not None:
         selected = selected[:limit]
     if not selected:
