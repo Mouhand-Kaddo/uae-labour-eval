@@ -67,7 +67,7 @@ def embed_corpus(
     if model not in models:
         raise EmbedRefused(f"embedding model {model!r} is not in the OpenRouter embeddings list")
     estimate = (
-        models[model].prompt_price_usd
+        models[model].peak_prompt_price_usd
         * sum(len(text.encode("utf-8")) for text in pending.values())
         * config.budget.safety_margin
     )

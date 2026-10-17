@@ -160,6 +160,26 @@ def test_grounding_case_passes_when_the_judge_passes_every_criterion(project, ca
     }
 
 
+def test_the_judge_request_carries_the_routing_configured_for_the_judge_model(project):
+    config = project / "config.toml"
+    config.write_text(
+        f'{config.read_text()}\n[provider_routing."{JUDGE}"]\nonly = ["openai"]\n'
+        f'[provider_routing."{HAIKU}"]\norder = ["anthropic"]\n'
+    )
+    fake = FakeOpenRouter(
+        [
+            search("probation"),
+            grounded_answer("9"),
+            judge_says(claims_supported=True, cites_relevant=True),
+        ]
+    )
+
+    assert grounding_run(project, fake) == 0
+
+    assert fake.chat_requests[0]["provider"] == {"require_parameters": True, "order": ["anthropic"]}
+    assert fake.chat_requests[-1]["provider"] == {"require_parameters": True, "only": ["openai"]}
+
+
 def test_a_failed_criterion_fails_the_case_even_when_deterministic_scorers_pass(project, capsys):
     fake = FakeOpenRouter(
         [

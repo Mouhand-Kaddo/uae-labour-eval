@@ -367,8 +367,8 @@ def judge_pending(
     estimate = estimate_run_cost(
         case_count=len(pending),
         history_per_case_usd=None,
-        prompt_price_usd=judge.prompt_price_usd,
-        completion_price_usd=judge.completion_price_usd,
+        prompt_price_usd=judge.peak_prompt_price_usd,
+        completion_price_usd=judge.peak_completion_price_usd,
         assumed_prompt_tokens=config.budget.assumed_prompt_tokens_per_case,
         assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
         margin=config.budget.safety_margin,
@@ -399,11 +399,18 @@ def judge_pending(
                 usage=response.usage,
                 case_id=item_id,
                 category=item["category"],
+                provider=response.provider,
             )
             spend += response.cost
 
         verdict = ask_judge(
-            client, judge, rubrics[item["rubric"]], config.judge, record, item_material(item)
+            client,
+            judge,
+            rubrics[item["rubric"]],
+            config.judge,
+            config.provider_for(judge.id),
+            record,
+            item_material(item),
         )
         verdicts[item_id]["verdict"] = {"passed": verdict.passed, **verdict.details}
         write_json(directory / VERDICTS_FILE, verdicts)

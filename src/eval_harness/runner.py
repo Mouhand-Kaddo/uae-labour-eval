@@ -271,12 +271,14 @@ def _estimate(
     config: Config, plan: _Plan, ledger: Ledger, category: str | None, repeats: int
 ) -> float:
     """The run's cost estimate: agent runs, from ledger history if any, plus judge calls, plus
-    query embeddings, assuming at most one search per agent turn."""
+    query embeddings, assuming at most one search per agent turn. Every price is the model's
+    peak (and history is scaled up to it), since a surcharge window can double the price."""
+    history = ledger.per_case_average(model=plan.model.id, category=category)
     estimate = estimate_run_cost(
         case_count=plan.agent_runs * repeats,
-        history_per_case_usd=ledger.per_case_average(model=plan.model.id, category=category),
-        prompt_price_usd=plan.model.prompt_price_usd,
-        completion_price_usd=plan.model.completion_price_usd,
+        history_per_case_usd=None if history is None else history * plan.model.peak_factor,
+        prompt_price_usd=plan.model.peak_prompt_price_usd,
+        completion_price_usd=plan.model.peak_completion_price_usd,
         assumed_prompt_tokens=config.budget.assumed_prompt_tokens_per_case,
         assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
         margin=config.budget.safety_margin,
@@ -285,8 +287,8 @@ def _estimate(
         estimate += estimate_run_cost(
             case_count=plan.judged_per_repeat * repeats,
             history_per_case_usd=None,
-            prompt_price_usd=plan.judge.prompt_price_usd,
-            completion_price_usd=plan.judge.completion_price_usd,
+            prompt_price_usd=plan.judge.peak_prompt_price_usd,
+            completion_price_usd=plan.judge.peak_completion_price_usd,
             assumed_prompt_tokens=config.budget.assumed_prompt_tokens_per_case,
             assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
             margin=config.budget.safety_margin,
@@ -294,7 +296,7 @@ def _estimate(
     estimate += estimate_run_cost(
         case_count=plan.agent_runs * repeats * config.agent.max_turns,
         history_per_case_usd=None,
-        prompt_price_usd=plan.embedding.prompt_price_usd,
+        prompt_price_usd=plan.embedding.peak_prompt_price_usd,
         completion_price_usd=0.0,
         assumed_prompt_tokens=ASSUMED_TOKENS_PER_SEARCH_QUERY,
         assumed_completion_tokens=0,
@@ -349,6 +351,7 @@ class _Spend:
             case_id=self.case.id,
             category=self.case.category,
             repeat=self.repeat,
+            provider=response.provider if isinstance(response, ChatResponse) else None,
         )
         self.run_usd += response.cost
         self.case_usd += response.cost
@@ -378,9 +381,15 @@ class _Run:
             self.spend.record(response, "judge", judge.id)
 
         settings = self.config.judge
+        provider = self.config.provider_for(judge.id)
         self.scorers |= {
             name: judge_scorer(
-                self.client, model=judge, rubric=rubric, settings=settings, on_response=record_judge
+                self.client,
+                model=judge,
+                rubric=rubric,
+                settings=settings,
+                provider=provider,
+                on_response=record_judge,
             )
             for name, rubric in self.plan.rubrics.items()
         }
@@ -391,6 +400,7 @@ class _Run:
                     model=judge,
                     rubric=self.plan.pair_rubric,
                     settings=settings,
+                    provider=provider,
                     on_response=record_judge,
                 )
             )
@@ -485,6 +495,7 @@ class _Run:
                         *self.plan.tools,
                     ],
                     settings=self.config.agent,
+                    provider=self.config.provider_for(self.plan.model.id),
                     trace=trace,
                     on_response=record_agent,
                 )
