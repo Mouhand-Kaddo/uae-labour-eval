@@ -1,4 +1,6 @@
+import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -10,6 +12,7 @@ from fake_openrouter import (
     tool_call_response,
 )
 
+from eval_harness.cases import case_set_hash
 from eval_harness.cli import main
 
 HAIKU = "anthropic/claude-haiku-5.5"
@@ -303,3 +306,123 @@ def test_budget_command_prints_ledger_total_key_usage_and_remaining(project, cap
     assert "ledger total USD 0.250000" in out
     assert "key usage USD 1.500000" in out
     assert "remaining USD 18.500000" in out
+
+
+def git(project, *args):
+    return subprocess.run(
+        [
+            "git",
+            "-C",
+            str(project),
+            "-c",
+            "user.name=t",
+            "-c",
+            "user.email=t@example.com",
+            "-c",
+            "commit.gpgsign=false",
+            *args,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def test_the_summary_ties_the_run_to_its_cases_config_models_and_commit(project):
+    git(project, "init", "-q")
+    git(project, "add", ".")
+    git(project, "commit", "-q", "-m", "fixture")
+    fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
+
+    eval_run(project, fake, "--limit", "1")
+
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["case_set_hash"] == case_set_hash(project / "pack" / "evals" / "cases")
+    assert summary["manifest_hash"] is None
+    assert summary["git_commit"] == git(project, "rev-parse", "HEAD")
+    assert summary["models"] == {
+        "agent": HAIKU,
+        "judge": "openai/gpt-5.6-terra",
+        "embedding": "baai/bge-m3",
+    }
+    assert summary["config"]["agent"] == {
+        "max_turns": 6,
+        "max_tokens": 1024,
+        "reasoning_effort": "low",
+    }
+    assert summary["config"]["budget"]["ceiling_usd"] == 20.0
+
+
+def test_the_summary_records_the_corpus_manifest_hash_when_the_pack_has_one(project):
+    manifest = b"[[source]]\nid = 'labour-law-en'\n"
+    (project / "pack" / "manifest.toml").write_bytes(manifest)
+    fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
+
+    eval_run(project, fake, "--limit", "1")
+
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["manifest_hash"] == hashlib.sha256(manifest).hexdigest()
+    assert summary["git_commit"] is None
+
+
+def test_headline_numbers_count_reviewed_cases_only(project, capsys):
+    cases = REFUSE_CASES.replace("reviewed: false", "reviewed: true", 1)
+    (project / "pack" / "evals" / "cases" / "refuse.yaml").write_text(cases)
+    fake = FakeOpenRouter(
+        [
+            final_answer_response("refused", "legal_advice"),
+            final_answer_response("answered", None),
+        ]
+    )
+
+    eval_run(project, fake)
+
+    out = capsys.readouterr().out
+    assert "headline (reviewed cases only): 1/1 passed" in out
+    assert "unreviewed: 0/1 passed, not in the headline" in out
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["reviewed"] == {
+        "total": 1,
+        "passed": 1,
+        "by_category": {"refuse": {"total": 1, "passed": 1}},
+    }
+    assert summary["unreviewed"] == {
+        "total": 1,
+        "passed": 0,
+        "by_category": {"refuse": {"total": 1, "passed": 0}},
+    }
+
+
+def set_open_questions(project, path):
+    config = project / "config.toml"
+    config.write_text(f'open_questions = "{path}"\n' + config.read_text())
+
+
+def test_refuses_a_reviewed_case_that_depends_on_an_open_question(project, capsys):
+    (project / "open-questions.md").write_text(
+        "## OQ-005: Leave boundaries\n\n**Decision:** _open_\n"
+    )
+    set_open_questions(project, "open-questions.md")
+    cases = REFUSE_CASES.replace(
+        "reviewed: false\n  refs: []\n  depends_on: []",
+        "reviewed: true\n  refs: []\n  depends_on: [OQ-005]",
+        1,
+    )
+    (project / "pack" / "evals" / "cases" / "refuse.yaml").write_text(cases)
+    fake = FakeOpenRouter([])
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 2
+    assert fake.chat_requests == []
+    assert "reviewed but depends on open questions ['OQ-005']" in capsys.readouterr().err
+
+
+def test_refuses_to_start_when_the_configured_questions_doc_is_missing(project, capsys):
+    set_open_questions(project, "missing.md")
+    fake = FakeOpenRouter([])
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 2
+    assert "cannot read open questions" in capsys.readouterr().err

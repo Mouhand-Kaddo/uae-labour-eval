@@ -1,7 +1,9 @@
 """The runner: resolve prices, select cases, ask the budget guard, run, score, record."""
 
+import hashlib
 import json
 import secrets
+import subprocess
 import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
@@ -10,7 +12,7 @@ from typing import Any
 
 from eval_harness.agent import run_agent
 from eval_harness.budget import decide_start, estimate_run_cost, remaining_budget, should_abort
-from eval_harness.cases import Case, CaseError, load_cases
+from eval_harness.cases import Case, CaseError, case_set_hash, load_cases, load_open_questions
 from eval_harness.config import Config
 from eval_harness.final_answer import FinalAnswer
 from eval_harness.ledger import Ledger
@@ -66,6 +68,8 @@ def run_eval(
     model = models[model_id]
 
     cases = _select_cases(config, category, limit)
+    cases_hash = case_set_hash(config.pack / "evals" / "cases")
+    manifest_hash = _manifest_hash(config)
     system_prompt = (config.pack / "system_prompt.md").read_text(encoding="utf-8")
 
     ledger = Ledger(config.ledger_path)
@@ -173,11 +177,16 @@ def run_eval(
     remaining = remaining_budget(config.budget.ceiling_usd, ledger.total(), key_usage + run_spend)
 
     run = RunResult(run_id, status, results, run_spend, cumulative, remaining)
+    reviewed, unreviewed = _tally(results, reviewed=True), _tally(results, reviewed=False)
     _write_summary(
         run_dir,
         run,
         {
             "started_at": started_at.isoformat(),
+            "case_set_hash": cases_hash,
+            "manifest_hash": manifest_hash,
+            "git_commit": _git_commit(config),
+            "config": asdict(config),
             "model": model_id,
             "models": {
                 "agent": config.agent_model,
@@ -189,10 +198,14 @@ def run_eval(
             "estimate_usd": estimate,
             "ledger_total_at_start_usd": ledger_total,
             "key_usage_at_start_usd": key_usage,
+            "reviewed": reviewed,
+            "unreviewed": unreviewed,
         },
     )
     passed = sum(r.passed for r in results)
     echo(f"run {run_id} {status}: {len(results)} case(s), {passed} passed")
+    echo(f"headline (reviewed cases only): {reviewed['passed']}/{reviewed['total']} passed")
+    echo(f"unreviewed: {unreviewed['passed']}/{unreviewed['total']} passed, not in the headline")
     echo(
         f"run spend USD {run_spend:.6f}; cumulative USD {cumulative:.6f}; "
         f"remaining USD {remaining:.6f}"
@@ -202,7 +215,8 @@ def run_eval(
 
 def _select_cases(config: Config, category: str | None, limit: int | None) -> list[Case]:
     try:
-        cases = load_cases(config.pack / "evals" / "cases", SCORERS)
+        questions = load_open_questions(config.open_questions) if config.open_questions else None
+        cases = load_cases(config.pack / "evals" / "cases", SCORERS, questions)
     except CaseError as exc:
         raise RunRefused(f"invalid cases: {exc}") from exc
     selected = [c for c in cases if category is None or c.category == category]
@@ -214,6 +228,39 @@ def _select_cases(config: Config, category: str | None, limit: int | None) -> li
     if unsupported:
         raise RunRefused(f"bilingual inputs are not supported by the runner yet: {unsupported}")
     return selected
+
+
+def _manifest_hash(config: Config) -> str | None:
+    manifests = sorted(config.pack.glob("manifest.*"))
+    if not manifests:
+        return None
+    if len(manifests) > 1:
+        raise RunRefused(f"the pack has several corpus manifests: {[p.name for p in manifests]}")
+    return hashlib.sha256(manifests[0].read_bytes()).hexdigest()
+
+
+def _git_commit(config: Config) -> str | None:
+    try:
+        completed = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=config.pack,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return completed.stdout.strip()
+
+
+def _tally(results: list[CaseResult], *, reviewed: bool) -> dict[str, Any]:
+    group = [r for r in results if r.reviewed == reviewed]
+    by_category: dict[str, dict[str, int]] = {}
+    for result in group:
+        counts = by_category.setdefault(result.category, {"total": 0, "passed": 0})
+        counts["total"] += 1
+        counts["passed"] += result.passed
+    return {"total": len(group), "passed": sum(r.passed for r in group), "by_category": by_category}
 
 
 def _score(
@@ -256,4 +303,6 @@ def _write_summary(run_dir, run: RunResult, context: dict[str, Any]) -> None:
         "remaining_usd": run.remaining_usd,
         "cases": [asdict(c) for c in run.cases],
     }
-    (run_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    (run_dir / "summary.json").write_text(
+        json.dumps(summary, indent=2, default=str), encoding="utf-8"
+    )
