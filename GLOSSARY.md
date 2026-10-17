@@ -201,6 +201,10 @@ _Avoid_: prompt, guidelines
 How often the judge's verdicts match the project owner's hand labels, with Cohen's kappa.
 _Avoid_: judge accuracy, calibration
 
+**Judge-check set**:
+About 50 answers, real ones from a run plus deliberately broken ones, that the project owner labels without seeing the judge's verdicts; judge agreement is measured on it.
+_Avoid_: gold set, calibration set
+
 **Run**:
 One execution of a set of cases against one agent model, with a fixed case-set hash.
 _Avoid_: eval, job, experiment

@@ -26,18 +26,19 @@ from eval_harness.final_answer import FinalAnswer
 from eval_harness.ingest import Chunk, IngestError
 from eval_harness.judge import (
     PAIR_RUBRIC,
-    STRUCTURED_OUTPUT_PARAMETERS,
+    JudgeUnavailable,
     RubricError,
     judge_scorer,
     load_rubrics,
     pair_judge,
+    resolve_judge,
 )
+from eval_harness.judge_check import recorded_agreement
 from eval_harness.ledger import Ledger
 from eval_harness.manifest import Manifest, ManifestError, load_manifest
 from eval_harness.openrouter import (
     ChatResponse,
     EmbeddingResponse,
-    ModelInfo,
     OpenRouterClient,
     OpenRouterError,
 )
@@ -125,7 +126,10 @@ def run_eval(
     judged_per_repeat = pairs + sum(
         len(_inputs(case)) for case in cases for name in case.scoring if name in rubrics
     )
-    judge = _judge_model(config, models) if judged_per_repeat else None
+    try:
+        judge = resolve_judge(config.judge_model, models) if judged_per_repeat else None
+    except JudgeUnavailable as exc:
+        raise RunRefused(str(exc)) from exc
     manifest, index = _load_corpus(config)
     _check_planted_chunks(cases, index)
     instruments = {
@@ -360,6 +364,7 @@ def run_eval(
             "key_usage_at_start_usd": key_usage,
             "reviewed": reviewed,
             "unreviewed": unreviewed,
+            "judge_agreement": recorded_agreement(config.pack),
         },
     )
     passed = sum(r.passed for r in results)
@@ -392,18 +397,6 @@ def _check_planted_chunks(cases: list[Case], index: SearchIndex) -> None:
                     f"case {case.id!r}: planted chunk {chunk.id} claims an article that is in "
                     "the corpus; give it an article number the corpus does not have"
                 )
-
-
-def _judge_model(config: Config, models: dict[str, ModelInfo]) -> ModelInfo:
-    judge = models.get(config.judge_model)
-    if judge is None:
-        raise RunRefused(f"judge model {config.judge_model!r} is not in the OpenRouter models list")
-    if not judge.supported_parameters >= STRUCTURED_OUTPUT_PARAMETERS:
-        raise RunRefused(
-            f"judge model {judge.id!r} does not support structured outputs "
-            f"({sorted(STRUCTURED_OUTPUT_PARAMETERS)})"
-        )
-    return judge
 
 
 def _load_open_questions(config: Config) -> dict[str, bool] | None:

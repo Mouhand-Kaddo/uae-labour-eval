@@ -169,17 +169,19 @@ def _index_page(
     verdicts: dict[tuple[str, int], Any],
 ) -> str:
     run_id = str(summary.get("run_id", ""))
+    agreement = summary.get("judge_agreement")
+    untrusted = _untrusted_categories(agreement)
     body = "\n".join(
         [
             f"<h1>Eval report: {_text(run_id)}</h1>",
             _meta(summary),
-            _headline_section(numbers),
+            _headline_section(numbers, untrusted),
             _safety_section(numbers.safety),
             _cost_section(summary, numbers),
             _failures_section(numbers.failures, trace_links, verdicts),
             _flaky_section(numbers.flaky),
-            _unreviewed_section(numbers.unreviewed),
-            _judge_section(summary.get("judge_agreement")),
+            _unreviewed_section(numbers.unreviewed, untrusted),
+            _judge_section(agreement),
             _all_results_section(summary["cases"], trace_links),
         ]
     )
@@ -200,8 +202,8 @@ def _meta(summary: dict[str, Any]) -> str:
     return f'<dl class="meta">{items}</dl>'
 
 
-def _headline_section(numbers: ReportNumbers) -> str:
-    rows = "".join(_score_row(score) for score in numbers.headline)
+def _headline_section(numbers: ReportNumbers, untrusted: frozenset[str]) -> str:
+    rows = "".join(_score_row(score, untrusted) for score in numbers.headline)
     average = numbers.headline_average
     return f"""<section id="scores">
 <h2>Headline scores</h2>
@@ -293,8 +295,8 @@ def _flaky_section(flaky: list[Flaky]) -> str:
 </section>"""
 
 
-def _unreviewed_section(unreviewed: list[Score]) -> str:
-    rows = "".join(_score_row(score) for score in unreviewed)
+def _unreviewed_section(unreviewed: list[Score], untrusted: frozenset[str]) -> str:
+    rows = "".join(_score_row(score, untrusted) for score in unreviewed)
     return f"""<section id="unreviewed">
 <h2>Unreviewed cases</h2>
 <p class="note">Expected results not yet checked by the project owner;
@@ -307,6 +309,12 @@ not in the headline scores or the safety pass rate.</p>
 </section>"""
 
 
+def _untrusted_categories(agreement: Any) -> frozenset[str]:
+    if not isinstance(agreement, dict):
+        return frozenset()
+    return frozenset(str(c) for c in agreement.get("untrusted_categories") or [])
+
+
 def _judge_section(agreement: Any) -> str:
     if isinstance(agreement, dict):
         content = (
@@ -314,9 +322,36 @@ def _judge_section(agreement: Any) -> str:
             f"Cohen's kappa {_text(_fixed(agreement.get('kappa'), 2))}, "
             f"n = {_text(agreement.get('n'))}.</p>"
         )
+        rubrics = agreement.get("rubrics")
+        if isinstance(rubrics, dict):
+            content += _rubric_table(agreement, rubrics)
     else:
         content = "<p>Not measured yet: no judge agreement is recorded for this run.</p>"
     return f'<section id="judge">\n<h2>Judge agreement</h2>\n{content}\n</section>'
+
+
+def _rubric_table(agreement: dict[str, Any], rubrics: dict[str, Any]) -> str:
+    untrusted = '<span class="fail">untrusted</span>'
+    rows = "".join(
+        f'<tr><th scope="row">{_text(name)}</th>'
+        f"<td>{_text(', '.join(str(c) for c in r.get('categories') or []))}</td>"
+        f'<td class="num">{_text(r.get("n"))}</td><td class="num">{pct(r.get("agreement"))}</td>'
+        f'<td class="num">{_text(_fixed(r.get("kappa"), 2))}</td>'
+        f"<td>{'trusted' if r.get('trusted') else untrusted}</td></tr>"
+        for name, r in rubrics.items()
+        if isinstance(r, dict)
+    )
+    return f"""<p class="note">A judged category is untrusted while its rubric's kappa is below
+{_text(agreement.get("threshold"))}: revise the rubric before using its scores.
+n counts (item, criterion) decisions; {_text(agreement.get("unlabelled"))} unlabelled and
+{_text(agreement.get("unjudged"))} without a judge verdict are left out.</p>
+<div class="table-wrap"><table>
+<caption>Agreement per rubric</caption>
+<thead><tr><th scope="col">Rubric</th><th scope="col">Categories</th>
+<th scope="col" class="num">n</th><th scope="col" class="num">Agreement</th>
+<th scope="col" class="num">Kappa</th><th scope="col">Judge</th></tr></thead>
+<tbody>{rows}</tbody>
+</table></div>"""
 
 
 def _all_results_section(
@@ -368,9 +403,11 @@ def _score_head() -> str:
     )
 
 
-def _score_row(score: Score) -> str:
+def _score_row(score: Score, untrusted: frozenset[str] = frozenset()) -> str:
+    flag = ' <span class="fail">judge untrusted</span>' if score.label in untrusted else ""
     return (
-        f'<tr><th scope="row">{_text(score.label)}</th><td class="num">{pct(score.rate)}</td>'
+        f'<tr><th scope="row">{_text(score.label)}{flag}</th>'
+        f'<td class="num">{pct(score.rate)}</td>'
         f'<td class="num">{score.n}</td><td>{_interval(score)}</td><td>{_strip(score)}</td></tr>'
     )
 

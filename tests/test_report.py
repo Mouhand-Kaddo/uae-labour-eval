@@ -272,6 +272,49 @@ def test_judge_agreement_is_a_placeholder_until_the_run_records_it(project):
     assert "90%" in filled and "0.78" in filled and "40" in filled
 
 
+def test_judge_agreement_lists_each_rubric_and_flags_untrusted_judged_categories(project):
+    agreement = {
+        "agreement": 0.8,
+        "kappa": 0.55,
+        "n": 50,
+        "threshold": 0.6,
+        "unlabelled": 3,
+        "unjudged": 0,
+        "rubrics": {
+            "grounding": {
+                "agreement": 0.95,
+                "kappa": 0.81,
+                "n": 20,
+                "trusted": True,
+                "categories": ["cite", "grounding"],
+            },
+            "refusal": {
+                "agreement": 0.6,
+                "kappa": 0.2,
+                "n": 10,
+                "trusted": False,
+                "categories": ["refuse"],
+            },
+        },
+        "untrusted_categories": ["refuse"],
+    }
+    cases = [fixture_case("refuse-1", "refuse", True), fixture_case("cite-1", "cite", True)]
+    write_run(project / "runs" / "run-a", cases, judge_agreement=agreement)
+
+    report(project, "run-a")
+
+    html = (project / "runs" / "run-a" / "report" / "index.html").read_text()
+    judge = section(html, "judge")
+    grounding_row = judge.split(">grounding<")[1].split("</tr>")[0]
+    assert "0.81" in grounding_row and "95%" in grounding_row and "trusted" in grounding_row
+    refusal_row = judge.split(">refusal<")[1].split("</tr>")[0]
+    assert "0.20" in refusal_row and "untrusted" in refusal_row and "refuse" in refusal_row
+    assert "3 unlabelled" in judge
+    headline = section(html, "scores")
+    assert "judge untrusted" in headline.split("refuse")[1].split("</tr>")[0]
+    assert "judge untrusted" not in headline.split("cite")[1].split("</tr>")[0]
+
+
 def test_report_accepts_a_run_directory_path(project):
     write_run(project / "elsewhere" / "run-a", [fixture_case("calc-1", "calc", True)])
 

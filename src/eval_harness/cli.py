@@ -13,6 +13,12 @@ from eval_harness.config import Config, ConfigError, load_config
 from eval_harness.embeddings import EmbedRefused, embed_corpus
 from eval_harness.fetch import FetchError, fetch_sources
 from eval_harness.ingest import IngestError, ingest
+from eval_harness.judge_check import (
+    JudgeCheckError,
+    judge_agreement,
+    judge_pending,
+    sample_check_set,
+)
 from eval_harness.ledger import Ledger
 from eval_harness.manifest import ManifestError, load_manifest
 from eval_harness.openrouter import OpenRouterClient, OpenRouterError
@@ -39,6 +45,10 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
         return _report(config, args.run)
     if args.command == "compare":
         return _compare(config, args.run_a, args.run_b)
+    if args.command == "judge-agreement":
+        return _judge_agreement(config)
+    if args.command == "judge-check" and args.action == "sample":
+        return _judge_check_sample(config, args.runs, args.size, args.seed)
     api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if not api_key:
         print("error: OPENROUTER_API_KEY is not set", file=sys.stderr)
@@ -49,6 +59,8 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
         return _budget(config, client)
     if args.command == "embed":
         return _embed(config, client)
+    if args.command == "judge-check":
+        return _judge_check_judge(config, client, args.limit)
 
     try:
         run = run_eval(
@@ -143,6 +155,66 @@ def _compare(config: Config, run_a: str, run_b: str) -> int:
     return 0
 
 
+def _judge_check_sample(config: Config, runs: list[str], size: int, seed: int) -> int:
+    try:
+        items = sample_check_set(
+            config, [_run_dir(config, run) for run in runs], size=size, seed=seed
+        )
+    except (ReportError, JudgeCheckError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    counts: dict[tuple[str, str], int] = {}
+    for item in items:
+        key = (item.case.category, "broken" if item.breakage else "real")
+        counts[key] = counts.get(key, 0) + 1
+    for (category, kind), count in sorted(counts.items()):
+        print(f"{category} {kind}: {count}")
+    pending = sum(item.verdict is None for item in items)
+    print(f"wrote {len(items)} items; {pending} still need a judge verdict (judge-check judge)")
+    return 0
+
+
+def _judge_check_judge(config: Config, client: OpenRouterClient, limit: int | None) -> int:
+    try:
+        judged, spend = judge_pending(config, client, limit=limit)
+    except (JudgeCheckError, OpenRouterError) as exc:
+        print(f"judge-check refused: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    print(f"judged {judged} item(s); spend USD {spend:.6f}")
+    return 0
+
+
+def _judge_agreement(config: Config) -> int:
+    try:
+        result = judge_agreement(config.pack)
+    except JudgeCheckError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    print(
+        f"{result['n']} labelled decisions with a judge verdict across {result['items']} items; "
+        f"{result['unlabelled']} unlabelled, {result['unjudged']} without a judge verdict"
+    )
+    print("| Rubric | Criterion | n | Agreement | Kappa | Trust |")
+    print("|---|---|---|---|---|---|")
+    for name, rubric in result["rubrics"].items():
+        for criterion, measured in rubric["criteria"].items():
+            print(f"| {name} | {criterion} | {_measured(measured)} | |")
+        trust = "trusted" if rubric["trusted"] else "UNTRUSTED"
+        print(f"| **{name}** | all | {_measured(rubric)} | {trust} |")
+    print(f"| **overall** | | {_measured(result)} | |")
+    untrusted = ", ".join(result["untrusted_categories"]) or "none"
+    print(f"judged categories untrusted (kappa below {result['threshold']}): {untrusted}")
+    return 0
+
+
+def _measured(measured: dict) -> str:
+    agreement, kappa = measured["agreement"], measured["kappa"]
+    return (
+        f"{measured['n']} | {'n/a' if agreement is None else f'{agreement:.0%}'} | "
+        f"{'n/a' if kappa is None else f'{kappa:.2f}'}"
+    )
+
+
 def _positive_int(value: str) -> int:
     number = int(value)
     if number < 1:
@@ -175,4 +247,18 @@ def _parser() -> argparse.ArgumentParser:
     compare = commands.add_parser("compare", help="show two runs side by side")
     compare.add_argument("run_a", help="run ID under runs_dir, or a path to a run directory")
     compare.add_argument("run_b", help="run ID under runs_dir, or a path to a run directory")
+
+    judge_check = commands.add_parser("judge-check", help="build and judge the judge-check set")
+    actions = judge_check.add_subparsers(dest="action", required=True)
+    sample = actions.add_parser(
+        "sample", help="sample judged answers from runs into the pack's blind labelling file"
+    )
+    sample.add_argument("runs", nargs="+", help="run IDs under runs_dir, or run directories")
+    sample.add_argument("--size", type=_positive_int, default=40, help="real answers to draw")
+    sample.add_argument("--seed", type=int, default=18, help="random seed for the draw")
+    judge = actions.add_parser("judge", help="ask the judge about items with no verdict (paid)")
+    judge.add_argument("--limit", type=_positive_int, help="judge at most N items")
+    commands.add_parser(
+        "judge-agreement", help="compare the owner's labels with the judge (raw and kappa)"
+    )
     return parser
