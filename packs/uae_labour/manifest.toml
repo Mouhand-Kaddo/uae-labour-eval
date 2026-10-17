@@ -24,7 +24,17 @@ official_url = "https://uaelegislation.gov.ae/ar/legislations/1541/download"
 wayback_url = "https://web.archive.org/web/20260916100132id_/https://uaelegislation.gov.ae/ar/legislations/1541/download"
 retrieved = 2026-10-17
 sha256 = "4c5a721869c4782345db719d2772fd8eb017585f8bba194edb1e67e59a6f6294"
-indexed = false
+indexed = true
+heading_pattern = 'المادة\s*[()]\s*(\d+)\s*[()]'
+drop_line_pattern = 'مرسوم بقانون اتحادي لسنة 2021 بشأن تنظيم علاقات العمل \d+|\d+'
+
+[sources.glyphs."BCDHEE+SakkalMajalla"]
+1361 = ""
+1363 = ""
+1756 = ""
+
+[sources.glyphs."BCDGEE+SakkalMajalla-Bold"]
+1756 = ""
 
 [[sources]]
 id = "executive-regulations-en"

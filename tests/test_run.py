@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from corpus_fixture import index_chunk, write_corpus
+from corpus_fixture import INDEX, index_chunk, write_corpus
 from fake_openrouter import (
     FAKE_KEY,
     FakeOpenRouter,
@@ -398,6 +398,55 @@ def test_get_section_reads_an_article_and_records_the_retrieval(project):
     [retrieval] = [s for s in steps if s["type"] == "retrieval"]
     assert retrieval["tool"] == "get_section"
     assert steps[-1]["passed"] is True
+
+
+ARABIC_CITE_CASE = """
+- id: cite-ar-001
+  category: cite
+  language: ar
+  input: "ما أقصى مدة لفترة التجربة في القانون؟"
+  expected:
+    status: answered
+    citations: [{instrument: statute, article: "9"}]
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: Art 9 caps probation at six months.
+"""
+ARABIC_ARTICLE_9 = index_chunk(
+    "9", "المادة (9) فترة التجربة. لا تزيد فترة التجربة على ستة أشهر.", language="ar"
+)
+
+
+def test_arabic_cite_case_finds_the_arabic_article_by_a_spelling_variant_and_answers_in_arabic(
+    project, capsys
+):
+    write_corpus(project, [*INDEX, ARABIC_ARTICLE_9])
+    (project / "pack" / "evals" / "cases" / "cite.yaml").write_text(ARABIC_CITE_CASE)
+    fake = FakeOpenRouter(
+        [
+            tool_call_response("search_sources", {"query": "أقصى مدة فتره التجربه"}),
+            tool_call_response(
+                "final_answer",
+                {
+                    "answer": "لا تزيد فترة التجربة على ستة أشهر (المادة 9).",
+                    "citations": [{"instrument": "statute", "article": "9"}],
+                    "status": "answered",
+                    "refusal_reason": None,
+                },
+                call_id="c2",
+            ),
+        ]
+    )
+
+    assert cite_run(project, fake) == 0
+
+    assert "PASS cite-ar-001" in capsys.readouterr().out
+    steps = read_jsonl(only_run_dir(project) / "traces" / "cite-ar-001.1.jsonl")
+    [retrieval] = [s for s in steps if s["type"] == "retrieval"]
+    assert [c["id"] for c in retrieval["chunks"]] == ["statute:ar:9:1"]
+    assert steps[-1]["details"]["answer_language"]["detected"] == "ar"
 
 
 def test_refuses_to_start_without_an_index(project, capsys):

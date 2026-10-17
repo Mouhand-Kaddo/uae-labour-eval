@@ -18,3 +18,24 @@
     Worker's service during this period after notifying the Worker in writing at least fourteen
     (14) days prior to the date specified for termination of service." Both facts come from Art 9, so the answer must cite Labour Law Art 9 and
     every cited article must appear in a chunk retrieved during the case.
+- id: cite-ar-001
+  category: cite
+  language: ar
+  input: >-
+    وفق قانون العمل الإماراتي، كم يومًا من الأجر يستحقها العامل الأجنبي بدوام كامل عن كل سنة من
+    سنوات الخدمة الخمس الأولى في مكافأة نهاية الخدمة، وعلى أي أجر تُحسب المكافأة؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "51"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)"]
+  depends_on: []
+  rationale: >-
+    Art 51(2) (Arabic text): "يستحق العامل الأجنبي الذي يعمل وفق نمط العمل بالدوام الكامل، والذي
+    أكمل سنة أو أكثر في الخدمة المستمرة مكافأة نهاية الخدمة عند انتهاء خدمته، تحسب وفق الأجر
+    الأساسي، وذلك على النحو الآتي: أ. أجر (21) واحد وعشرين يوم عن كل سنة من سنوات الخدمة الخمس
+    الأولى." Both facts (21 days, basic wage) come from Art 51, so the answer must cite Labour Law
+    Art 51, every cited article must have been retrieved during the case, and the answer must be
+    in Arabic like the question.

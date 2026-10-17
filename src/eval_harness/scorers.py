@@ -115,11 +115,23 @@ def _is_number(value: Any) -> bool:
     return isinstance(value, int | float) and not isinstance(value, bool)
 
 
+def score_answer_language(case: Case, final: FinalAnswer, trace: Trace) -> Verdict:
+    """Pass when most letters of the answer are in the case's script (Arabic or Latin)."""
+    arabic = sum(1 for c in final.answer if c.isalpha() and "؀" <= c <= "ۿ")
+    latin = sum(1 for c in final.answer if c.isascii() and c.isalpha())
+    detected = "ar" if arabic > latin else "en" if latin > arabic else None
+    return Verdict(
+        detected == case.language,
+        {"expected": case.language, "detected": detected, "arabic": arabic, "latin": latin},
+    )
+
+
 SCORERS: dict[str, Callable[[Case, FinalAnswer, Trace], Verdict]] = {
     "status": score_status,
     "citations": score_citations,
     "numeric": score_numeric,
     "tool_call": score_tool_call,
+    "answer_language": score_answer_language,
 }
 
 

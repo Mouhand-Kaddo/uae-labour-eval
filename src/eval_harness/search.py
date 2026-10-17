@@ -16,10 +16,18 @@ from eval_harness.ingest import Chunk, IngestError, read_chunks
 TOP_K = 8
 RRF_K = 60
 TOKEN = re.compile(r"\w+")
+ARABIC_DIACRITICS_AND_TATWEEL = re.compile("[ـً-ٰٟ]")
+ARABIC_LETTER_VARIANTS = str.maketrans("أإآٱىة", "اااايه")
 
 
 def tokenize(text: str) -> list[str]:
-    return TOKEN.findall(text.casefold())
+    """Search terms, the same for chunks and queries: casefolded, with Arabic normalised."""
+    return TOKEN.findall(normalize_arabic(text.casefold()))
+
+
+def normalize_arabic(text: str) -> str:
+    """Strip diacritics and tatweel, unify alef forms, ى→ي and ة→ه (ADR-0003)."""
+    return ARABIC_DIACRITICS_AND_TATWEEL.sub("", text).translate(ARABIC_LETTER_VARIANTS)
 
 
 class SearchIndex:

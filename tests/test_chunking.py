@@ -4,7 +4,7 @@ import re
 
 import pytest
 
-from eval_harness.ingest import IngestError, chunk_text
+from eval_harness.ingest import IngestError, check_article_sets, chunk_text
 from eval_harness.manifest import Source
 
 HEADING = re.compile(r"Article\s*[()]\s*(\d+)\s*[()]")
@@ -117,3 +117,25 @@ def test_a_skipped_article_number_stops_ingest():
 def test_text_without_any_heading_stops_ingest():
     with pytest.raises(IngestError, match="no article headings"):
         chunk_text("Just a preamble.\n", source())
+
+
+def test_text_with_an_unmapped_glyph_stops_ingest():
+    with pytest.raises(IngestError, match="2 unmapped glyph"):
+        chunk_text("Article (1)\nA�B�\n", source())
+
+
+def test_languages_of_one_instrument_with_different_articles_stop_ingest():
+    english = chunk_text("Article (1)\nOne\nArticle (2)\nTwo\n", source())
+    arabic = chunk_text("Article (1)\nواحد\n", source(id="statute-ar", language="ar"))
+
+    with pytest.raises(
+        IngestError, match=r"statute: article sets differ; missing \{'ar': \['2'\]\}"
+    ):
+        check_article_sets(english + arabic)
+
+
+def test_languages_with_the_same_articles_pass_the_check():
+    english = chunk_text("Article (1)\nOne\n", source())
+    arabic = chunk_text("Article (1)\nواحد\n", source(id="statute-ar", language="ar"))
+
+    check_article_sets(english + arabic)

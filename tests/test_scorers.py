@@ -233,3 +233,34 @@ def test_tool_call_scorer_passes_when_a_retry_got_it_right():
     verdict = score_case(calc_case(EXPECTED_CALL, ["tool_call"]), answered("..."), trace)
 
     assert verdict.passed
+
+
+def language_case(language):
+    return Case(
+        id=f"cite-{language}-001",
+        category="cite",
+        language=language,
+        input="...",
+        expected={"status": "answered"},
+        scoring=["answer_language"],
+        reviewed=False,
+        refs=[],
+        depends_on=[],
+        rationale="Answers must come in the language of the question.",
+    )
+
+
+@pytest.mark.parametrize(
+    ("language", "text", "passes"),
+    [
+        ("ar", "لا تزيد فترة التجربة على (6) ستة أشهر وفق المادة 9 من Labour Law.", True),
+        ("ar", "Probation may not exceed six months (المادة 9).", False),
+        ("en", "Probation may not exceed six months (المادة 9).", True),
+        ("en", "لا تزيد فترة التجربة على ستة أشهر.", False),
+        ("ar", "", False),
+    ],
+)
+def test_answer_language_scorer_checks_the_answer_is_in_the_case_language(language, text, passes):
+    verdict = score_case(language_case(language), answered(text), [])
+
+    assert verdict.passed is passes

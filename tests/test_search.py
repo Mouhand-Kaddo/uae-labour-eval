@@ -5,7 +5,7 @@ from fake_openrouter import fake_embedding
 
 from eval_harness.embeddings import append_vectors
 from eval_harness.ingest import Chunk, IngestError, write_chunks
-from eval_harness.search import SearchIndex, search_tools
+from eval_harness.search import SearchIndex, search_tools, tokenize
 
 
 def chunk(article, part, text, instrument="statute", language="en"):
@@ -175,3 +175,13 @@ def test_bad_tool_arguments_raise_value_error_for_the_model(index, tool, argumen
 def test_tool_descriptions_name_the_instruments_to_cite(index):
     for tool in search_tools(index, INSTRUMENTS, lambda *_: None, fake_embedding):
         assert '"statute" (The Statute)' in tool.description
+
+
+def test_tokenize_normalises_arabic_spelling_variants():
+    text = "الأَجْرُ الأساسيّ إلى الإجـــازة آخر ٱلعمل"
+
+    assert tokenize(text) == ["الاجر", "الاساسي", "الي", "الاجازه", "اخر", "العمل"]
+
+
+def test_tokenize_casefolds_english():
+    assert tokenize("Basic WAGE, Art 51") == ["basic", "wage", "art", "51"]
