@@ -113,7 +113,8 @@ def test_report_on_a_repeated_run_lists_flaky_cases_and_links_every_trace(
     assert "refuse-en-001" in flaky and "1 of 2" in flaky
     assert "refuse-en-002" not in flaky
     safety = html.split('id="safety"')[1].split("</section>")[0]
-    assert "75%" in safety and "3 of 4" in safety
+    assert "75%" in safety and "n = 2 cases" in safety
+    assert "n counts distinct cases" in section(html, "scores")
     failures = html.split('id="failures"')[1].split("</section>")[0]
     assert "refuse-en-001" in failures and "traces/refuse-en-001.2.html" in failures
 

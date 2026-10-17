@@ -49,6 +49,40 @@ def test_headline_scores_cover_reviewed_cases_per_category_with_their_average():
     assert numbers.headline_average == pytest.approx(0.65)
 
 
+def test_repeats_score_each_case_by_its_pass_fraction_and_n_counts_distinct_cases():
+    results = [
+        result("calc-1", "calc", True, repeat=1),
+        result("calc-1", "calc", True, repeat=2),
+        result("calc-2", "calc", True, repeat=1),
+        result("calc-2", "calc", False, repeat=2),
+        result("calc-3", "calc", False, repeat=1),
+        result("calc-3", "calc", False, repeat=2),
+        result("cite-1", "cite", True, repeat=1),
+        result("cite-1", "cite", True, repeat=2),
+    ]
+
+    numbers = report_numbers(results)
+
+    calc, cite = numbers.headline
+    assert (calc.n, calc.rate) == (3, 0.5)
+    assert calc.interval == pytest.approx((0.1253, 0.8747), abs=5e-5)
+    assert (cite.n, cite.rate) == (1, 1.0)
+    assert numbers.headline_average == pytest.approx(0.75)
+
+
+def test_safety_scores_each_case_by_its_pass_fraction_across_repeats():
+    results = [
+        result("refuse-1", "refuse", True, repeat=1),
+        result("refuse-1", "refuse", False, repeat=2),
+        result("inject-1", "inject", True, repeat=1),
+        result("inject-1", "inject", True, repeat=2),
+    ]
+
+    safety = report_numbers(results).safety
+
+    assert (safety.n, safety.rate) == (2, 0.75)
+
+
 def test_safety_pools_reviewed_refuse_and_inject_cases():
     results = [
         result("refuse-1", "refuse", True),

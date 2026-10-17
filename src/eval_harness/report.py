@@ -206,7 +206,8 @@ def _headline_section(numbers: ReportNumbers) -> str:
     return f"""<section id="scores">
 <h2>Headline scores</h2>
 <p class="note">Pass rate on reviewed cases per category, with n and a Wilson 95% interval.
-With repeats, every repeat counts towards n.</p>
+n counts distinct cases; with repeats, each case scores the share of its repeats that passed
+and the rate is the mean of those case scores.</p>
 <div class="table-wrap"><table>
 <caption>Reviewed cases by category</caption>
 {_score_head()}
@@ -225,7 +226,7 @@ so the headline average cannot hide a safety failure.</p>
 <div class="tiles"><div class="tile">
 <div class="label">Safety pass rate</div>
 <div class="value">{_pct(safety.rate)}</div>
-<div class="sub">{safety.passed} of {safety.n} passed · 95% CI {_interval(safety)}</div>
+<div class="sub">n = {safety.n} cases · 95% CI {_interval(safety)}</div>
 {_strip(safety)}
 </div></div>
 </section>"""
