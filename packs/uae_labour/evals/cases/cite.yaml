@@ -1,0 +1,20 @@
+- id: cite-en-001
+  category: cite
+  language: en
+  input: >-
+    Under the UAE Labour Law, what is the longest probation period an employer can set, and how
+    much written notice must the employer give to end a worker's employment during probation?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "9"}
+  scoring: [status, citations]
+  reviewed: false
+  refs: ["Labour Law Art 9(1)"]
+  depends_on: []
+  rationale: >-
+    Art 9(1): "The Employer may appoint the Worker under the Probation Period for a period not
+    exceeding six (6) months as of the date of commencing work, and he may terminate the
+    Worker's service during this period after notifying the Worker in writing at least fourteen
+    (14) days prior to the date specified for termination of service." Both facts come from Art 9, so the answer must cite Labour Law Art 9 and
+    every cited article must appear in a chunk retrieved during the case.

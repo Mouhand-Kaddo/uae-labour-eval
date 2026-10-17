@@ -8,7 +8,7 @@ import httpx
 
 from eval_harness.manifest import Manifest, Source
 
-USER_AGENT = "uae-labour-eval-fetch/0.1"
+USER_AGENT = "eval-harness-fetch/0.1"
 
 
 class FetchError(Exception):
