@@ -15,9 +15,9 @@ DAYS_IN_MONTH = 30
 DAILY_RATE_QUESTION = "OQ-001"
 
 
-def daily_basic_wage(monthly_basic_wage: Fraction) -> Fraction:
-    """A day's basic wage: monthly × 12 ÷ 365 (Art 67 year, decided in OQ-001)."""
-    return monthly_basic_wage * 12 / DAYS_IN_YEAR
+def daily_rate(monthly_amount: Fraction) -> Fraction:
+    """A day's wage or basic wage: monthly × 12 ÷ 365 (Art 67 year, decided in OQ-001)."""
+    return monthly_amount * 12 / DAYS_IN_YEAR
 
 
 def money(amount: Fraction) -> float:

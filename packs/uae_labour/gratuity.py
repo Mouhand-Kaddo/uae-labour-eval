@@ -1,6 +1,5 @@
 """Gratuity calculation: Labour Law Art 51 and Art 67, Executive Regulations Art 30."""
 
-import math
 from dataclasses import asdict, dataclass, field
 from datetime import date
 from fractions import Fraction
@@ -9,13 +8,14 @@ from typing import Any
 from eval_harness.agent import Tool
 from eval_harness.refs import Ref
 
+from .arguments import check_names, date_arg, number_arg, wages_args, whole_days_arg
 from .rules import (
     DAILY_RATE_QUESTION,
     DAYS_IN_YEAR,
     EXECUTIVE_REGULATIONS,
     LABOUR_LAW,
     PERIODS,
-    daily_basic_wage,
+    daily_rate,
     money,
 )
 
@@ -92,7 +92,7 @@ def calculate_gratuity(
     open_questions = [DAILY_RATE_QUESTION, CAP_QUESTION]
 
     basic = Fraction(str(monthly_basic_wage))
-    daily = daily_basic_wage(basic)
+    daily = daily_rate(basic)
     days_at_21 = min(counted_days, FIRST_YEARS_DAYS)
     days_at_30 = counted_days - days_at_21
     gratuity_days = Fraction(
@@ -167,26 +167,14 @@ PARAMETERS: dict[str, Any] = {
 
 
 def _run(args: dict[str, Any]) -> dict[str, Any]:
-    unknown = args.keys() - PARAMETERS["properties"].keys()
-    if unknown:
-        raise ValueError(f"unknown arguments {sorted(unknown)}")
-    missing = set(PARAMETERS["required"]) - args.keys()
-    if missing:
-        raise ValueError(f"missing arguments {sorted(missing)}")
-
-    start = _date(args, "start_date")
-    end = _date(args, "end_date")
+    check_names(args, PARAMETERS)
+    start = date_arg(args, "start_date")
+    end = date_arg(args, "end_date")
     if end < start:
         raise ValueError("end_date must not be before start_date")
-    basic = _number(args, "monthly_basic_wage")
-    if basic <= 0:
-        raise ValueError("monthly_basic_wage must be positive")
-    if args.get("monthly_wage") is not None and _number(args, "monthly_wage") < basic:
-        raise ValueError("monthly_wage is the basic wage plus allowances (Art 1), so >= basic")
+    basic = wages_args(args)
 
-    absence = args.get("unpaid_absence_days") or 0
-    if not isinstance(absence, int) or isinstance(absence, bool) or absence < 0:
-        raise ValueError("unpaid_absence_days must be a whole number of days, 0 or more")
+    absence = whole_days_arg(args, "unpaid_absence_days")
     if absence > (end - start).days + 1:
         raise ValueError("unpaid_absence_days cannot exceed the days of service")
 
@@ -197,7 +185,7 @@ def _run(args: dict[str, Any]) -> dict[str, Any]:
         raise ValueError(f"work_pattern must be one of {list(WORK_PATTERNS)}")
     ratio = args.get("part_time_hours_ratio")
     if pattern in PRO_RATA_PATTERNS:
-        if ratio is None or not 0 < _number(args, "part_time_hours_ratio") <= 1:
+        if ratio is None or not 0 < number_arg(args, "part_time_hours_ratio") <= 1:
             raise ValueError(f"part_time_hours_ratio between 0 and 1 is needed for {pattern}")
     elif ratio is not None:
         raise ValueError("part_time_hours_ratio applies only to part_time or job_sharing")
@@ -215,20 +203,6 @@ def _run(args: dict[str, Any]) -> dict[str, Any]:
             part_time_hours_ratio=ratio,
         )
     )
-
-
-def _date(args: dict[str, Any], name: str) -> date:
-    try:
-        return date.fromisoformat(args[name])
-    except (TypeError, ValueError):
-        raise ValueError(f"{name} must be a date in YYYY-MM-DD form") from None
-
-
-def _number(args: dict[str, Any], name: str) -> float:
-    value = args[name]
-    if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(value):
-        raise ValueError(f"{name} must be a number")
-    return value
 
 
 GRATUITY_TOOL = Tool(
