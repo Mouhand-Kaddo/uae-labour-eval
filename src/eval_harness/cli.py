@@ -12,6 +12,7 @@ from eval_harness.compare import compare_runs
 from eval_harness.config import Config, ConfigError, load_config
 from eval_harness.embeddings import EmbedAborted, EmbedRefused, embed_corpus
 from eval_harness.fetch import FetchError, fetch_sources
+from eval_harness.gate import CI, ThresholdsError, gate, gate_table, load_thresholds
 from eval_harness.ingest import IngestError, ingest
 from eval_harness.judge_check import (
     JudgeCheckError,
@@ -23,8 +24,10 @@ from eval_harness.ledger import Ledger
 from eval_harness.manifest import ManifestError, load_manifest
 from eval_harness.openrouter import OpenRouterClient, OpenRouterError
 from eval_harness.report import ReportError, read_run, write_report
+from eval_harness.report_stats import report_numbers
 from eval_harness.runner import RunRefused, run_eval
 
+EXIT_GATE_FAILED = 1
 EXIT_REFUSED = 2
 EXIT_ABORTED = 3
 
@@ -43,6 +46,8 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
 
     if args.command == "report":
         return _report(config, args.run, args.out)
+    if args.command == "gate":
+        return _gate(config, args.run, args.section)
     if args.command == "compare":
         return _compare(config, args.run_a, args.run_b)
     if args.command == "judge-agreement":
@@ -63,12 +68,17 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
         return _judge_check_judge(config, client, args.limit)
 
     try:
+        case_ids = load_thresholds(config.pack, CI).cases if args.ci else args.case
+    except ThresholdsError as exc:
+        print(f"run refused: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    try:
         run = run_eval(
             config,
             client,
             model_id=args.model or config.agent_model,
             category=args.category,
-            case_ids=args.case,
+            case_ids=case_ids,
             limit=args.limit,
             repeats=args.repeats,
         )
@@ -145,6 +155,23 @@ def _report(config: Config, run: str, out: str | None) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_REFUSED
     print(f"report written to {index}")
+    return 0
+
+
+def _gate(config: Config, run: str, section: str | None) -> int:
+    try:
+        thresholds = load_thresholds(config.pack, section)
+        summary = read_run(_run_dir(config, run))
+    except (ThresholdsError, ReportError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    rows = gate(report_numbers(summary["cases"]), thresholds)
+    print(gate_table(rows))
+    failed = [row.score.label for row in rows if row.problem is not None]
+    if failed:
+        print(f"gate failed: {', '.join(failed)}")
+        return EXIT_GATE_FAILED
+    print("gate passed")
     return 0
 
 
@@ -233,8 +260,12 @@ def _parser() -> argparse.ArgumentParser:
     run = commands.add_parser("run", help="run cases against a model")
     run.add_argument("--model", help="OpenRouter model ID (default: agent model from config)")
     run.add_argument("--category", help="only run cases in this category")
-    run.add_argument(
+    selection = run.add_mutually_exclusive_group()
+    selection.add_argument(
         "--case", action="append", help="only run the case with this ID (repeat for several)"
+    )
+    selection.add_argument(
+        "--ci", action="store_true", help="run the [ci] case list from the pack's thresholds"
     )
     run.add_argument("--limit", type=_positive_int, help="run at most N cases")
     run.add_argument("--repeats", type=_positive_int, default=1, help="run each case K times")
@@ -249,6 +280,14 @@ def _parser() -> argparse.ArgumentParser:
     report.add_argument(
         "--out",
         help="folder to write the report into (default: <run>/report), e.g. reports/<run-id>",
+    )
+
+    gate_command = commands.add_parser(
+        "gate", help="check a run against the pack's thresholds; exit 1 if any is missed"
+    )
+    gate_command.add_argument("run", help="run ID under runs_dir, or a path to a run directory")
+    gate_command.add_argument(
+        "--section", choices=[CI], help="use the [ci] thresholds instead of the full-run ones"
     )
 
     compare = commands.add_parser("compare", help="show two runs side by side")

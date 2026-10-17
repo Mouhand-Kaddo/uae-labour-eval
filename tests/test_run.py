@@ -179,6 +179,27 @@ def test_case_option_runs_only_that_case(project):
     assert summary["selection"]["case"] == ["refuse-en-002"]
 
 
+def test_ci_option_runs_the_ci_case_list_from_the_thresholds_file(project):
+    thresholds = Path(__file__).parent / "fixtures" / "thresholds.toml"
+    (project / "pack" / "evals" / "thresholds.toml").write_text(thresholds.read_text())
+    fake = FakeOpenRouter([final_answer_response("refused", "out_of_scope")])
+
+    assert run(project, fake, "run", "--model", HAIKU, "--ci") == 0
+
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert [c["case_id"] for c in summary["cases"]] == ["refuse-en-002"]
+    assert summary["selection"]["case"] == ["refuse-en-002"]
+
+
+def test_ci_option_is_refused_without_a_thresholds_file(project, capsys):
+    fake = FakeOpenRouter([])
+
+    assert run(project, fake, "run", "--model", HAIKU, "--ci") == 2
+
+    assert "thresholds.toml" in capsys.readouterr().err
+    assert fake.chat_requests == []
+
+
 def test_an_unknown_case_id_is_refused_before_any_spend(project, capsys):
     fake = FakeOpenRouter([])
 
