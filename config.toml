@@ -14,6 +14,10 @@ max_turns = 6
 max_tokens = 1024
 reasoning_effort = "low"
 
+[judge]
+max_tokens = 2048
+reasoning_effort = "low"
+
 [budget]
 ceiling_usd = 20.0
 safety_margin = 1.5

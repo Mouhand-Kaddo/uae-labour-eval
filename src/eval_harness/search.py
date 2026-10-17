@@ -16,7 +16,7 @@ from eval_harness.ingest import Chunk, IngestError, read_chunks
 TOP_K = 8
 RRF_K = 60
 TOKEN = re.compile(r"\w+")
-ARABIC_DIACRITICS_AND_TATWEEL = re.compile("[ـً-ٰٟ]")
+ARABIC_DIACRITICS_AND_TATWEEL = re.compile("[\u0640\u064b-\u065f\u0670]")
 ARABIC_LETTER_VARIANTS = str.maketrans("أإآٱىة", "اااايه")
 
 

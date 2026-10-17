@@ -1,7 +1,7 @@
 """Scorers: (case, final answer, trace) -> verdict. A case passes only if all its scorers pass."""
 
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -30,10 +30,10 @@ def score_status(case: Case, final: FinalAnswer, trace: Trace) -> Verdict:
 def score_citations(case: Case, final: FinalAnswer, trace: Trace) -> Verdict:
     """Pass when every required article is cited and every cited article was retrieved
     during this case (ADR-0007). Articles are compared at article level, not clause level."""
-    required = {_article_key(c["instrument"], c["article"]) for c in case.expected["citations"]}
-    cited = {_article_key(c.instrument, c.article) for c in final.citations}
+    required = {article_key(c["instrument"], c["article"]) for c in case.expected["citations"]}
+    cited = {article_key(c.instrument, c.article) for c in final.citations}
     retrieved = {
-        _article_key(chunk["instrument"], chunk["article"])
+        article_key(chunk["instrument"], chunk["article"])
         for step in trace
         if step["type"] == "retrieval"
         for chunk in step["chunks"]
@@ -53,7 +53,7 @@ def score_citations(case: Case, final: FinalAnswer, trace: Trace) -> Verdict:
 ARTICLE_NUMBER = re.compile(r"\d+")
 
 
-def _article_key(instrument: str, article: str) -> str:
+def article_key(instrument: str, article: str) -> str:
     number = ARTICLE_NUMBER.search(str(article))
     return f"{instrument.strip().casefold()} {number.group() if number else str(article).strip()}"
 
@@ -117,7 +117,7 @@ def _is_number(value: Any) -> bool:
 
 def score_answer_language(case: Case, final: FinalAnswer, trace: Trace) -> Verdict:
     """Pass when most letters of the answer are in the case's script (Arabic or Latin)."""
-    arabic = sum(1 for c in final.answer if c.isalpha() and "؀" <= c <= "ۿ")
+    arabic = sum(1 for c in final.answer if c.isalpha() and "\u0600" <= c <= "\u06ff")
     latin = sum(1 for c in final.answer if c.isascii() and c.isalpha())
     detected = "ar" if arabic > latin else "en" if latin > arabic else None
     return Verdict(
@@ -126,7 +126,9 @@ def score_answer_language(case: Case, final: FinalAnswer, trace: Trace) -> Verdi
     )
 
 
-SCORERS: dict[str, Callable[[Case, FinalAnswer, Trace], Verdict]] = {
+Scorer = Callable[[Case, FinalAnswer, Trace], Verdict]
+
+SCORERS: dict[str, Scorer] = {
     "status": score_status,
     "citations": score_citations,
     "numeric": score_numeric,
@@ -135,9 +137,11 @@ SCORERS: dict[str, Callable[[Case, FinalAnswer, Trace], Verdict]] = {
 }
 
 
-def score_case(case: Case, final: FinalAnswer, trace: Trace) -> Verdict:
+def score_case(
+    case: Case, final: FinalAnswer, trace: Trace, scorers: Mapping[str, Scorer] = SCORERS
+) -> Verdict:
     """Run every scorer the case names; the case passes only if all of them pass."""
-    verdicts = {name: SCORERS[name](case, final, trace) for name in case.scoring}
+    verdicts = {name: scorers[name](case, final, trace) for name in case.scoring}
     return Verdict(
         all(v.passed for v in verdicts.values()),
         {name: {"passed": v.passed, **v.details} for name, v in verdicts.items()},

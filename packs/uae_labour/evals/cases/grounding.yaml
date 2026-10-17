@@ -1,0 +1,21 @@
+- id: grounding-en-001
+  category: grounding
+  language: en
+  input: >-
+    Under the UAE Labour Law, how much maternity leave is a female worker entitled to, how much
+    of it is paid, and can she take more time off afterwards if she or her baby is ill?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "30"}
+  scoring: [status, citations, "judge:grounding"]
+  reviewed: false
+  refs: ["Labour Law Art 30(1)", "Labour Law Art 30(2)"]
+  depends_on: []
+  rationale: >-
+    Art 30(1): sixty days of maternity leave, "the first forty-five (45) days with full pay" and
+    "the following fifteen (15) days with half pay". Art 30(2): after it she may be absent
+    without pay for up to forty-five consecutive or intermittent days for an illness of hers or
+    her child's resulting from pregnancy or childbirth, proven by a medical certificate. Every
+    claim in the answer must be supported by the retrieved text of the cited article, so the
+    judge sees the Art 30 chunks the agent actually retrieved.

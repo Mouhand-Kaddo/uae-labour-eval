@@ -11,7 +11,7 @@ from pdfminer.pdffont import PDFUnicodeNotDefined
 from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
 from pdfminer.pdfpage import PDFPage
 
-REPLACEMENT = "�"
+REPLACEMENT = "\ufffd"
 GlyphTable = dict[tuple[str, int], str]
 
 LEFT_TO_RIGHT = {"L", "EN", "AN"}

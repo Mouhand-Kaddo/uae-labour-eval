@@ -13,19 +13,27 @@ from typing import Any
 from eval_harness.agent import run_agent
 from eval_harness.budget import decide_start, estimate_run_cost, remaining_budget, should_abort
 from eval_harness.cases import Case, CaseError, case_set_hash, load_cases, load_open_questions
-from eval_harness.config import Config
+from eval_harness.config import Config, same_family
 from eval_harness.final_answer import FinalAnswer
 from eval_harness.ingest import Chunk, IngestError
+from eval_harness.judge import (
+    STRUCTURED_OUTPUT_PARAMETERS,
+    Rubric,
+    RubricError,
+    judge_scorer,
+    load_rubrics,
+)
 from eval_harness.ledger import Ledger
 from eval_harness.manifest import Manifest, ManifestError, load_manifest
 from eval_harness.openrouter import (
     ChatResponse,
     EmbeddingResponse,
+    ModelInfo,
     OpenRouterClient,
     OpenRouterError,
 )
 from eval_harness.pack import PackError, load_pack_tools
-from eval_harness.scorers import SCORERS, score_case
+from eval_harness.scorers import SCORERS, Scorer, score_case
 from eval_harness.search import SearchIndex, search_tools
 from eval_harness.trace import Trace
 
@@ -75,8 +83,19 @@ def run_eval(
     if model_id not in models:
         raise RunRefused(f"model {model_id!r} is not in the OpenRouter models list")
     model = models[model_id]
+    if same_family(model_id, config.judge_model):
+        raise RunRefused(
+            f"the agent {model_id!r} is from the same model family as the judge "
+            f"{config.judge_model!r}"
+        )
 
-    cases = _select_cases(config, category, limit)
+    try:
+        rubrics = load_rubrics(config.pack)
+    except RubricError as exc:
+        raise RunRefused(str(exc)) from exc
+    cases = _select_cases(config, category, limit, rubrics)
+    judged_per_repeat = sum(name in rubrics for case in cases for name in case.scoring)
+    judge = _judge_model(config, models) if judged_per_repeat else None
     manifest, index = _load_corpus(config)
     instruments = {
         s.instrument: manifest.instruments[s.instrument] for s in manifest.indexed_sources
@@ -100,6 +119,16 @@ def run_eval(
         assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
         margin=config.budget.safety_margin,
     )
+    if judge is not None:
+        estimate += estimate_run_cost(
+            case_count=judged_per_repeat * repeats,
+            history_per_case_usd=None,
+            prompt_price_usd=judge.prompt_price_usd,
+            completion_price_usd=judge.completion_price_usd,
+            assumed_prompt_tokens=config.budget.assumed_prompt_tokens_per_case,
+            assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
+            margin=config.budget.safety_margin,
+        )
     try:
         key_usage: float | None = client.key_usage()
     except OpenRouterError:
@@ -160,7 +189,12 @@ def run_eval(
                         "retrieval",
                         tool=tool,
                         chunks=[
-                            {"id": c.id, "instrument": c.instrument, "article": c.article}
+                            {
+                                "id": c.id,
+                                "instrument": c.instrument,
+                                "article": c.article,
+                                "text": c.text,
+                            }
                             for c in chunks
                         ],
                     )
@@ -193,23 +227,30 @@ def run_eval(
                     trace.add("error", message=str(exc))
                     final = None
                 except _BudgetCrossed:
-                    trace.add("aborted", reason="run spend crossed the remaining budget")
                     results.append(
-                        CaseResult(
-                            case.id,
-                            repeat,
-                            case.category,
-                            case.reviewed,
-                            "aborted",
-                            False,
-                            case_spend,
-                            round(time.monotonic() - started, 3),
-                        )
+                        _aborted(case, repeat, trace, case_spend, time.monotonic() - started)
                     )
                     raise
                 latency = round(time.monotonic() - started, 3)
 
-                result = _score(case, repeat, final, trace, case_spend, latency)
+                scorers = SCORERS
+                if judge is not None:
+                    scorers = SCORERS | {
+                        name: judge_scorer(
+                            client,
+                            model=judge,
+                            rubric=rubric,
+                            settings=config.judge,
+                            on_response=lambda response: record(response, "judge", judge.id),
+                        )
+                        for name, rubric in rubrics.items()
+                    }
+                agent_spend = case_spend
+                try:
+                    result = _score(case, repeat, final, trace, agent_spend, latency, scorers)
+                except _BudgetCrossed:
+                    results.append(_aborted(case, repeat, trace, agent_spend, latency))
+                    raise
                 results.append(result)
                 echo(_case_line(result))
     except _BudgetCrossed:
@@ -264,10 +305,24 @@ def _load_corpus(config: Config) -> tuple[Manifest, SearchIndex]:
         raise RunRefused(str(exc)) from exc
 
 
-def _select_cases(config: Config, category: str | None, limit: int | None) -> list[Case]:
+def _judge_model(config: Config, models: dict[str, ModelInfo]) -> ModelInfo:
+    judge = models.get(config.judge_model)
+    if judge is None:
+        raise RunRefused(f"judge model {config.judge_model!r} is not in the OpenRouter models list")
+    if not judge.supported_parameters >= STRUCTURED_OUTPUT_PARAMETERS:
+        raise RunRefused(
+            f"judge model {judge.id!r} does not support structured outputs "
+            f"({sorted(STRUCTURED_OUTPUT_PARAMETERS)})"
+        )
+    return judge
+
+
+def _select_cases(
+    config: Config, category: str | None, limit: int | None, rubrics: dict[str, Rubric]
+) -> list[Case]:
     try:
         questions = load_open_questions(config.open_questions) if config.open_questions else None
-        cases = load_cases(config.pack / "evals" / "cases", SCORERS, questions)
+        cases = load_cases(config.pack / "evals" / "cases", [*SCORERS, *rubrics], questions)
     except CaseError as exc:
         raise RunRefused(f"invalid cases: {exc}") from exc
     selected = [c for c in cases if category is None or c.category == category]
@@ -321,16 +376,24 @@ def _score(
     trace: Trace,
     cost: float,
     latency: float,
+    scorers: dict[str, Scorer],
 ) -> CaseResult:
     if final is None:
         trace.add("verdict", passed=False, details={"error": "the case did not finish"})
         return CaseResult(
             case.id, repeat, case.category, case.reviewed, "error", False, cost, latency
         )
-    verdict = score_case(case, final, trace.steps)
+    verdict = score_case(case, final, trace.steps, scorers)
     trace.add("verdict", passed=verdict.passed, details=verdict.details)
     return CaseResult(
         case.id, repeat, case.category, case.reviewed, final.status, verdict.passed, cost, latency
+    )
+
+
+def _aborted(case: Case, repeat: int, trace: Trace, cost: float, latency: float) -> CaseResult:
+    trace.add("aborted", reason="run spend crossed the remaining budget")
+    return CaseResult(
+        case.id, repeat, case.category, case.reviewed, "aborted", False, cost, round(latency, 3)
     )
 
 

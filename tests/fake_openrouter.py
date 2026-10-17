@@ -21,7 +21,13 @@ MODELS = [
     {
         "id": "openai/gpt-5.6-terra",
         "pricing": {"prompt": "0.000002", "completion": "0.000012"},
-        "supported_parameters": ["max_tokens", "reasoning", "tools"],
+        "supported_parameters": [
+            "max_tokens",
+            "reasoning",
+            "response_format",
+            "structured_outputs",
+            "tools",
+        ],
     },
 ]
 

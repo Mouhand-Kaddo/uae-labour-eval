@@ -56,12 +56,12 @@ def test_glyphs_are_grouped_into_lines_by_baseline_from_top_to_bottom():
 
 def test_a_page_without_letters_has_no_lines():
     assert page_lines([]) == []
-    assert page_lines([Glyph("ً", 99, 99, 708.8, 16), Glyph("", 100, 104, 700, 16)]) == []
+    assert page_lines([Glyph("\u064b", 99, 99, 708.8, 16), Glyph("", 100, 104, 700, 16)]) == []
 
 
 def test_a_raised_diacritic_follows_the_letter_it_sits_on():
-    tanween_left_of_alef = Glyph("ً", 99, 99, 708.8, 16)
-    damma_over_teh = Glyph("ُ", 121, 121, 706, 16)
+    tanween_left_of_alef = Glyph("\u064b", 99, 99, 708.8, 16)
+    damma_over_teh = Glyph("\u064f", 121, 121, 706, 16)
 
-    assert page_lines([*line([*"ادقن"]), tanween_left_of_alef]) == ["نقداً"]
-    assert page_lines([*line([*"بسحت"]), damma_over_teh]) == ["تُحسب"]
+    assert page_lines([*line([*"ادقن"]), tanween_left_of_alef]) == ["نقدا\u064b"]
+    assert page_lines([*line([*"بسحت"]), damma_over_teh]) == ["ت\u064fحسب"]
