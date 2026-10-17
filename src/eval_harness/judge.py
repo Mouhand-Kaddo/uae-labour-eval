@@ -11,7 +11,7 @@ from eval_harness.cases import Case
 from eval_harness.config import JudgeSettings
 from eval_harness.final_answer import FinalAnswer
 from eval_harness.openrouter import ChatResponse, ModelInfo, OpenRouterClient, OpenRouterError
-from eval_harness.scorers import PairScorer, Scorer, Trace, Verdict, article_key
+from eval_harness.scorers import PairScorer, Scorer, Steps, Verdict, article_key
 
 SCORER_PREFIX = "judge:"
 PAIR_RUBRIC = SCORER_PREFIX + "bilingual"
@@ -118,7 +118,7 @@ def judge_scorer(
     A failed call or a malformed verdict is a failed verdict with an `error`, never a pass.
     """
 
-    def score(case: Case, final: FinalAnswer, trace: Trace) -> Verdict:
+    def score(case: Case, final: FinalAnswer, trace: Steps) -> Verdict:
         return ask_judge(
             client, model, rubric, settings, on_response, _material(case, final, trace)
         )
@@ -138,7 +138,7 @@ def pair_judge(
     the retrieved text of every article either answer cites."""
 
     def score(
-        case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Trace]
+        case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Steps]
     ) -> Verdict:
         return ask_judge(
             client, model, rubric, settings, on_response, _pair_material(case, finals, traces)
@@ -194,7 +194,7 @@ def _payload(
     return payload
 
 
-def _material(case: Case, final: FinalAnswer, trace: Trace) -> str:
+def _material(case: Case, final: FinalAnswer, trace: Steps) -> str:
     planted = [
         {"id": c.id, "instrument": c.instrument, "article": c.article, "text": c.text}
         for c in case.planted_chunks or []
@@ -224,7 +224,7 @@ def single_material(
 
 
 def _pair_material(
-    case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Trace]
+    case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Steps]
 ) -> str:
     chunks = {
         chunk["id"]: chunk
@@ -271,7 +271,7 @@ def _sources(chunks: list[dict[str, Any]]) -> str:
     )
 
 
-def cited_chunks(final: FinalAnswer, trace: Trace) -> list[dict[str, Any]]:
+def cited_chunks(final: FinalAnswer, trace: Steps) -> list[dict[str, Any]]:
     """The retrieved chunks, in retrieval order, whose article the final answer cites."""
     cited = {article_key(c.instrument, c.article) for c in final.citations}
     chunks: dict[str, dict[str, Any]] = {}
