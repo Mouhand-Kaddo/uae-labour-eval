@@ -43,11 +43,11 @@ from eval_harness.openrouter import (
     OpenRouterError,
 )
 from eval_harness.pack import PackError, load_pack_tools, mark_open_questions
+from eval_harness.refs import article_key
 from eval_harness.scorers import (
     SCORERS,
     PairScorer,
     Scorer,
-    article_key,
     consistency_scorer,
     score_case,
     score_pair,

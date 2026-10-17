@@ -38,14 +38,16 @@ from eval_harness.judge import (
     Rubric,
     RubricError,
     ask_judge,
-    cited_chunks,
+    cited_sources,
     load_rubrics,
     pair_material,
+    planted_material,
     resolve_judge,
     single_material,
 )
 from eval_harness.ledger import Ledger
 from eval_harness.openrouter import ChatResponse, OpenRouterClient, OpenRouterError
+from eval_harness.refs import article_label
 from eval_harness.scorers import SCORERS
 
 STRATA = ("grounding", "refuse", "inject", "bilingual", "cite")
@@ -113,18 +115,10 @@ class Candidate:
         return {self.case.language: self.case.input}
 
     def sources(self) -> list[dict[str, Any]]:
-        chunks = {
-            chunk["id"]: {k: chunk[k] for k in ("id", "instrument", "article", "text")}
-            for language, final in self.finals.items()
-            for chunk in cited_chunks(final, self.halves[language])
-        }
-        return list(chunks.values())
+        return cited_sources(self.finals, self.halves)
 
     def planted(self) -> list[dict[str, Any]]:
-        return [
-            {"id": c.id, "instrument": c.instrument, "article": c.article, "text": c.text}
-            for c in self.case.planted_chunks or []
-        ]
+        return planted_material(self.case)
 
 
 def sample_check_set(
@@ -628,14 +622,14 @@ def _label_answer(answer: dict[str, Any]) -> dict[str, Any]:
         "status": answer["status"],
         **reason,
         "text": answer["answer"],
-        "citations": [f"{c['instrument']} Art {c['article']}" for c in answer["citations"]],
+        "citations": [article_label(c["instrument"], c["article"]) for c in answer["citations"]],
     }
 
 
 def _label_chunk(chunk: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": chunk["id"],
-        "article": f"{chunk['instrument']} Art {chunk['article']}",
+        "article": article_label(chunk["instrument"], chunk["article"]),
         "text": chunk["text"],
     }
 

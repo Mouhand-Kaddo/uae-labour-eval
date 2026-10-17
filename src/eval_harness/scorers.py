@@ -7,6 +7,7 @@ from typing import Any
 
 from eval_harness.cases import Case
 from eval_harness.final_answer import LIMIT, FinalAnswer
+from eval_harness.refs import article_key
 
 Steps = list[dict[str, Any]]
 """The steps of one trace (or one half of a pair), as scorers read them."""
@@ -49,14 +50,6 @@ def score_citations(case: Case, final: FinalAnswer, trace: Steps) -> Verdict:
             "not_retrieved": not_retrieved,
         },
     )
-
-
-ARTICLE_NUMBER = re.compile(r"\d+")
-
-
-def article_key(instrument: str, article: str) -> str:
-    number = ARTICLE_NUMBER.search(str(article))
-    return f"{instrument.strip().casefold()} {number.group() if number else str(article).strip()}"
 
 
 NUMBER = re.compile(r"\d+(?:[,٬]\d{3})*(?:[.٫]\d+)?")

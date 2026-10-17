@@ -2,7 +2,7 @@
 
 import json
 import re
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -11,7 +11,8 @@ from eval_harness.cases import Case
 from eval_harness.config import JudgeSettings
 from eval_harness.final_answer import FinalAnswer
 from eval_harness.openrouter import ChatResponse, ModelInfo, OpenRouterClient, OpenRouterError
-from eval_harness.scorers import PairScorer, Scorer, Steps, Verdict, article_key
+from eval_harness.refs import article_key, article_label
+from eval_harness.scorers import PairScorer, Scorer, Steps, Verdict
 
 SCORER_PREFIX = "judge:"
 PAIR_RUBRIC = SCORER_PREFIX + "bilingual"
@@ -195,11 +196,9 @@ def _payload(
 
 
 def _material(case: Case, final: FinalAnswer, trace: Steps) -> str:
-    planted = [
-        {"id": c.id, "instrument": c.instrument, "article": c.article, "text": c.text}
-        for c in case.planted_chunks or []
-    ]
-    return single_material(case.input, final, cited_chunks(final, trace), planted)
+    return single_material(
+        case.input, final, material_chunks(cited_chunks(final, trace)), planted_material(case)
+    )
 
 
 def single_material(
@@ -226,12 +225,7 @@ def single_material(
 def _pair_material(
     case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Steps]
 ) -> str:
-    chunks = {
-        chunk["id"]: chunk
-        for language, final in finals.items()
-        for chunk in cited_chunks(final, traces[language])
-    }
-    return pair_material(case.input, finals, list(chunks.values()))
+    return pair_material(case.input, finals, cited_sources(finals, traces))
 
 
 def pair_material(
@@ -260,7 +254,7 @@ def _answer(final: FinalAnswer) -> str:
 
 def _chunks(chunks: list[dict[str, Any]]) -> str:
     return "\n\n".join(
-        f"[{c['id']}] {c['instrument']} Art {c['article']}\n{c['text']}" for c in chunks
+        f"[{c['id']}] {article_label(c['instrument'], c['article'])}\n{c['text']}" for c in chunks
     )
 
 
@@ -268,6 +262,33 @@ def _sources(chunks: list[dict[str, Any]]) -> str:
     return (
         "Text of the cited articles, as retrieved by the agent:\n"
         f"{_chunks(chunks) or '(no retrieved text for any cited article)'}"
+    )
+
+
+MATERIAL_FIELDS = ("id", "instrument", "article", "text")
+
+
+def material_chunks(chunks: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Chunks as the judge sees them: id, instrument, article and text, once per chunk ID."""
+    unique: dict[str, dict[str, Any]] = {}
+    for chunk in chunks:
+        unique.setdefault(chunk["id"], {name: chunk[name] for name in MATERIAL_FIELDS})
+    return list(unique.values())
+
+
+def planted_material(case: Case) -> list[dict[str, Any]]:
+    """The case's planted chunks as the judge sees them."""
+    return material_chunks(asdict(chunk) for chunk in case.planted_chunks or [])
+
+
+def cited_sources(
+    finals: Mapping[str, FinalAnswer], traces: Mapping[str, Steps]
+) -> list[dict[str, Any]]:
+    """The retrieved text of every article any of the answers cites, as the judge sees it."""
+    return material_chunks(
+        chunk
+        for language, final in finals.items()
+        for chunk in cited_chunks(final, traces[language])
     )
 
 
