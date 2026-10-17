@@ -109,7 +109,8 @@ NOTICE_PERIOD_TOOL = Tool(
     description=(
         "Check whether an employment contract's notice period is within the UAE Labour Law's "
         "limits and, given the last wage, compute the pay in lieu of notice owed for the days "
-        "not worked. Returns the articles applied and any open questions the result rests on."
+        "not worked. Returns the articles applied and the interpretation questions "
+        "the result rests on, each marked decided or open."
     ),
     parameters=PARAMETERS,
     run=_run,

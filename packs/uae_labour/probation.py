@@ -151,7 +151,7 @@ PROBATION_TOOL = Tool(
         "Check a probation period against the UAE Labour Law: its six-month maximum, the "
         "written notice owed by the employer or the worker ending it, and, given the notice "
         "dates and wage, the compensation for short notice. Returns the articles applied and "
-        "any open questions the result rests on."
+        "the interpretation questions the result rests on, each marked decided or open."
     ),
     parameters=PARAMETERS,
     run=_run,

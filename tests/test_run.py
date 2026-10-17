@@ -782,3 +782,30 @@ def test_refuses_to_start_when_the_pack_offers_no_tool_list(project, capsys):
 
     assert exit_code == 2
     assert "TOOLS" in capsys.readouterr().err
+
+
+def test_tool_results_mark_each_open_question_decided_or_open_from_the_questions_doc(project):
+    (project / "open-questions.md").write_text(
+        "## OQ-001: Daily rate\n\n**Decision:** B. Monthly × 12 ÷ 365.\n\n"
+        "## OQ-002: Cap\n\n**Decision:** _open_\n"
+    )
+    set_open_questions(project, "open-questions.md")
+    pack = project / "pack"
+    (pack / "__init__.py").write_text(
+        "from uae_labour.gratuity import GRATUITY_TOOL\n\nTOOLS = [GRATUITY_TOOL]\n"
+    )
+    (pack / "evals" / "cases" / "calc.yaml").write_text(CALC_CASE)
+    fake = FakeOpenRouter(
+        [
+            tool_call_response("calculate_gratuity", GRATUITY_ARGS, call_id="c1"),
+            answer_response("Your gratuity is AED 25,200. This is not legal advice."),
+        ]
+    )
+
+    run(project, fake, "run", "--model", HAIKU, "--category", "calc")
+
+    [tool_message] = [m for m in fake.chat_requests[1]["messages"] if m["role"] == "tool"]
+    assert json.loads(tool_message["content"])["result"]["open_questions"] == [
+        {"id": "OQ-001", "status": "decided"},
+        {"id": "OQ-002", "status": "open"},
+    ]

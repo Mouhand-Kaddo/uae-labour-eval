@@ -211,7 +211,8 @@ GRATUITY_TOOL = Tool(
     description=(
         "Compute the end-of-service gratuity under the UAE Labour Law and its Executive "
         "Regulations from the worker's stated facts. Returns the amount in AED, the "
-        "intermediate values, the articles applied and any open questions the result rests on."
+        "intermediate values, the articles applied and the interpretation questions "
+        "the result rests on, each marked decided or open."
     ),
     parameters=PARAMETERS,
     run=_run,

@@ -32,7 +32,7 @@ from eval_harness.openrouter import (
     OpenRouterClient,
     OpenRouterError,
 )
-from eval_harness.pack import PackError, load_pack_tools
+from eval_harness.pack import PackError, load_pack_tools, mark_open_questions
 from eval_harness.scorers import SCORERS, Scorer, article_key, score_case
 from eval_harness.search import SearchIndex, search_tools
 from eval_harness.trace import Trace
@@ -94,7 +94,8 @@ def run_eval(
         rubrics = load_rubrics(config.pack)
     except RubricError as exc:
         raise RunRefused(str(exc)) from exc
-    cases = _select_cases(config, category, case_id, limit, rubrics)
+    open_questions = _load_open_questions(config)
+    cases = _select_cases(config, open_questions, category, case_id, limit, rubrics)
     judged_per_repeat = sum(name in rubrics for case in cases for name in case.scoring)
     judge = _judge_model(config, models) if judged_per_repeat else None
     manifest, index = _load_corpus(config)
@@ -109,6 +110,8 @@ def run_eval(
         tools = load_pack_tools(config.pack)
     except PackError as exc:
         raise RunRefused(str(exc)) from exc
+    if open_questions is not None:
+        tools = mark_open_questions(tools, open_questions)
 
     ledger = Ledger(config.ledger_path)
     ledger_total = ledger.total()
@@ -342,16 +345,25 @@ def _judge_model(config: Config, models: dict[str, ModelInfo]) -> ModelInfo:
     return judge
 
 
+def _load_open_questions(config: Config) -> dict[str, bool] | None:
+    if config.open_questions is None:
+        return None
+    try:
+        return load_open_questions(config.open_questions)
+    except CaseError as exc:
+        raise RunRefused(f"invalid cases: {exc}") from exc
+
+
 def _select_cases(
     config: Config,
+    open_questions: dict[str, bool] | None,
     category: str | None,
     case_id: str | None,
     limit: int | None,
     rubrics: dict[str, Rubric],
 ) -> list[Case]:
     try:
-        questions = load_open_questions(config.open_questions) if config.open_questions else None
-        cases = load_cases(config.pack / "evals" / "cases", [*SCORERS, *rubrics], questions)
+        cases = load_cases(config.pack / "evals" / "cases", [*SCORERS, *rubrics], open_questions)
     except CaseError as exc:
         raise RunRefused(f"invalid cases: {exc}") from exc
     selected = [c for c in cases if category in (None, c.category) and case_id in (None, c.id)]

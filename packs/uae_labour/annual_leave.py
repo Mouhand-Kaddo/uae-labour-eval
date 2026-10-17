@@ -214,7 +214,8 @@ ANNUAL_LEAVE_TOOL = Tool(
         "Compute a worker's annual leave entitlement under the UAE Labour Law and its "
         "Executive Regulations from the service dates, the leave still due after leave taken, "
         "and, given the basic wage, its cash value on leaving. Returns the intermediate values, "
-        "the articles applied and any open questions the result rests on."
+        "the articles applied and the interpretation questions "
+        "the result rests on, each marked decided or open."
     ),
     parameters=PARAMETERS,
     run=_run,
