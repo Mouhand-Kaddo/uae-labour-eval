@@ -4,7 +4,7 @@ Ambiguities found in the sources. The project owner decides each one; the code a
 
 Quotes are from the consolidated texts on uaelegislation.gov.ae (Labour Law: legislation 1541; Executive Regulations: legislation 1547), read on 2026-10-17 from Wayback Machine copies of the official URLs. The portal states that the Arabic text prevails over the English. They will be re-quoted from the hashed sources once fetched.
 
-**Blocks calc:** OQ-001, OQ-002 and OQ-003 must be decided before the calculation-tools slice.
+**Blocks calc:** OQ-001, OQ-002 and OQ-003 are decided (#4); the calculation tools follow those decisions.
 
 ---
 
@@ -21,7 +21,7 @@ Options:
 
 Also affects leave cash-out (OQ-003) and pay in lieu of notice.
 
-**Decision:** _open_
+**Decision:** B. A day's basic wage is monthly basic wage × 12 ÷ 365. Decided by the project owner on 2026-10-17 (#4).
 
 ## OQ-002: Is the gratuity cap two years of basic wage or of wage? (blocks calc)
 
@@ -36,7 +36,7 @@ Options:
 - **B.** cap = 24 × monthly wage (basic plus allowances)
 - **C.** cap = 730 days × the daily rate from OQ-001 (A or B base)
 
-**Decision:** _open_
+**Decision:** two years of basic wage. Decided by the project owner on 2026-10-17 (#4). With the OQ-001 daily rate, options A and C on a basic-wage base give the same figure: 730 × (monthly × 12 ÷ 365) = 24 × monthly basic wage.
 
 ## OQ-003: Which wage pays for untaken annual leave? (blocks calc)
 
@@ -50,7 +50,7 @@ Options:
 - **A.** termination: basic wage; during employment: wage (follow each clause as written)
 - **B.** basic wage in both situations
 
-**Decision:** _open_
+**Decision:** B. Basic wage in both situations. Decided by the project owner on 2026-10-17 (#4).
 
 ## OQ-004: Arabic and English Art 29(9) differ
 
