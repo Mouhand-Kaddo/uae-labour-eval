@@ -256,14 +256,21 @@ def run_eval(
                         )
                         for name, rubric in rubrics.items()
                     }
-                agent_spend = case_spend
                 try:
-                    result = _score(
-                        case, repeat, final, trace, agent_spend, latency, scorers, rubrics
-                    )
+                    status, passed = _score(case, final, trace, scorers, rubrics)
                 except _BudgetCrossed:
-                    results.append(_aborted(case, repeat, trace, agent_spend, latency))
+                    results.append(_aborted(case, repeat, trace, case_spend, latency))
                     raise
+                result = CaseResult(
+                    case.id,
+                    repeat,
+                    case.category,
+                    case.reviewed,
+                    status,
+                    passed,
+                    case_spend,
+                    latency,
+                )
                 results.append(result)
                 echo(_case_line(result))
     except _BudgetCrossed:
@@ -414,24 +421,18 @@ def _tally(results: list[CaseResult], *, reviewed: bool) -> dict[str, Any]:
 
 def _score(
     case: Case,
-    repeat: int,
     final: FinalAnswer | None,
     trace: Trace,
-    cost: float,
-    latency: float,
     scorers: dict[str, Scorer],
     deferred: Collection[str],
-) -> CaseResult:
+) -> tuple[str, bool]:
+    """The case's status and whether it passed, with its verdict added to the trace."""
     if final is None:
         trace.add("verdict", passed=False, details={"error": "the case did not finish"})
-        return CaseResult(
-            case.id, repeat, case.category, case.reviewed, "error", False, cost, latency
-        )
+        return "error", False
     verdict = score_case(case, final, trace.steps, scorers, deferred)
     trace.add("verdict", passed=verdict.passed, details=verdict.details)
-    return CaseResult(
-        case.id, repeat, case.category, case.reviewed, final.status, verdict.passed, cost, latency
-    )
+    return final.status, verdict.passed
 
 
 def _aborted(case: Case, repeat: int, trace: Trace, cost: float, latency: float) -> CaseResult:

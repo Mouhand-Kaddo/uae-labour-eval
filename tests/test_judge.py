@@ -239,6 +239,23 @@ def test_judge_calls_are_recorded_in_the_ledger_and_the_run_spend(project, capsy
     assert f"run spend USD {total:.6f}" in capsys.readouterr().out
 
 
+def test_a_cases_cost_includes_its_judge_spend(project, capsys):
+    fake = FakeOpenRouter(
+        [
+            search("probation"),
+            grounded_answer("9"),
+            judge_says(cost=0.003, claims_supported=True, cites_relevant=True),
+        ]
+    )
+
+    grounding_run(project, fake)
+
+    [case] = json.loads((only_run_dir(project) / "summary.json").read_text())["cases"]
+    case_spend = sum(r["cost"] for r in read_jsonl(project / "runs" / "ledger.jsonl"))
+    assert case["cost_usd"] == pytest.approx(case_spend)
+    assert case["cost_usd"] > 0.003
+
+
 def test_judge_spend_that_crosses_the_remaining_budget_aborts_the_run(project, capsys):
     fake = FakeOpenRouter(
         [
