@@ -33,7 +33,7 @@ from eval_harness.openrouter import (
     OpenRouterError,
 )
 from eval_harness.pack import PackError, load_pack_tools
-from eval_harness.scorers import SCORERS, Scorer, score_case
+from eval_harness.scorers import SCORERS, Scorer, article_key, score_case
 from eval_harness.search import SearchIndex, search_tools
 from eval_harness.trace import Trace
 
@@ -98,6 +98,7 @@ def run_eval(
     judged_per_repeat = sum(name in rubrics for case in cases for name in case.scoring)
     judge = _judge_model(config, models) if judged_per_repeat else None
     manifest, index = _load_corpus(config)
+    _check_planted_chunks(cases, index)
     instruments = {
         s.instrument: manifest.instruments[s.instrument] for s in manifest.indexed_sources
     }
@@ -184,8 +185,11 @@ def run_eval(
                     return response.vectors[0]
 
                 trace = Trace(run_dir / "traces" / f"{case.id}.{repeat}.jsonl")
+                planted = case.planted_chunks or []
 
-                def record_retrieval(tool: str, chunks: list[Chunk], trace: Trace = trace) -> None:
+                def record_retrieval(
+                    tool: str, chunks: list[Chunk], trace: Trace = trace, planted=planted
+                ) -> None:
                     trace.add(
                         "retrieval",
                         tool=tool,
@@ -195,6 +199,7 @@ def run_eval(
                                 "instrument": c.instrument,
                                 "article": c.article,
                                 "text": c.text,
+                                **({"planted": True} if c in planted else {}),
                             }
                             for c in chunks
                         ],
@@ -217,7 +222,9 @@ def run_eval(
                         system_prompt=system_prompt,
                         user_input=case.input,
                         tools=[
-                            *search_tools(index, instruments, record_retrieval, embed_query),
+                            *search_tools(
+                                index, instruments, record_retrieval, embed_query, planted
+                            ),
                             *tools,
                         ],
                         settings=config.agent,
@@ -309,6 +316,18 @@ def _load_corpus(config: Config) -> tuple[Manifest, SearchIndex]:
         )
     except (ManifestError, IngestError) as exc:
         raise RunRefused(str(exc)) from exc
+
+
+def _check_planted_chunks(cases: list[Case], index: SearchIndex) -> None:
+    """A planted chunk must claim an article the corpus lacks, so citing it is detectable."""
+    corpus_articles = {article_key(c.instrument, c.article) for c in index.chunks}
+    for case in cases:
+        for chunk in case.planted_chunks or []:
+            if article_key(chunk.instrument, chunk.article) in corpus_articles:
+                raise RunRefused(
+                    f"case {case.id!r}: planted chunk {chunk.id} claims an article that is in "
+                    "the corpus; give it an article number the corpus does not have"
+                )
 
 
 def _judge_model(config: Config, models: dict[str, ModelInfo]) -> ModelInfo:
