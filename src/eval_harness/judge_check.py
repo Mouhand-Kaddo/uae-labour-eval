@@ -23,7 +23,6 @@ import yaml
 from eval_harness.budget import decide_start, estimate_run_cost, should_abort
 from eval_harness.cases import (
     CONSISTENCY,
-    PAIR_LANGUAGES,
     Case,
     CaseError,
     load_cases,
@@ -110,9 +109,7 @@ class Candidate:
 
     @property
     def questions(self) -> dict[str, str]:
-        if isinstance(self.case.input, dict):
-            return {language: self.case.input[language] for language in self.finals}
-        return {self.case.language: self.case.input}
+        return self.case.inputs()
 
     def sources(self) -> list[dict[str, Any]]:
         return cited_sources(self.finals, self.halves)
@@ -191,15 +188,14 @@ def _candidate(
         raise JudgeCheckError(f"{path}: case {start['case_id']!r} is not in the pack's cases")
     halves = _halves(steps, case)
     final_steps = {language: _final_step(half) for language, half in halves.items()}
-    expected_answers = len(PAIR_LANGUAGES) if case.language == "both" else 1
-    if len(final_steps) != expected_answers or None in final_steps.values():
+    if final_steps.keys() != case.inputs().keys() or None in final_steps.values():
         return None
     try:
         finals = {language: parse_final_answer(step) for language, step in final_steps.items()}
     except ValueError as exc:
         raise JudgeCheckError(f"{path}: malformed final answer: {exc}") from exc
     details = (steps[-1].get("details") if steps[-1].get("type") == "verdict" else None) or {}
-    if case.language == "both":
+    if case.is_pair:
         rubric = PAIR_RUBRIC_NAME
         stored = (details.get("consistency") or {}).get("judge")
     else:
@@ -213,7 +209,7 @@ def _candidate(
 
 
 def _halves(steps: list[dict[str, Any]], case: Case) -> dict[str, list[dict[str, Any]]]:
-    if case.language != "both":
+    if not case.is_pair:
         return {case.language: steps}
     halves: dict[str, list[dict[str, Any]]] = {}
     current: list[dict[str, Any]] | None = None

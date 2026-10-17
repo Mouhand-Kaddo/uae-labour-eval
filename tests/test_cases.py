@@ -60,6 +60,17 @@ def test_a_bilingual_case_has_an_english_and_an_arabic_input(tmp_path):
     assert case.planted_chunks is None
 
 
+def test_a_pair_puts_both_questions_to_the_agent_english_first(tmp_path):
+    pair, single = load(tmp_path, a_pair(), a_case(id="cite-ar-001", language="ar"))
+
+    assert pair.is_pair and not single.is_pair
+    assert list(pair.inputs().items()) == [
+        ("en", "What is the notice period?"),
+        ("ar", "ما مدة الإنذار؟"),
+    ]
+    assert single.inputs() == {"ar": single.input}
+
+
 @pytest.mark.parametrize(
     ("overrides", "message"),
     [

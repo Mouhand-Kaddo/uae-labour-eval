@@ -14,7 +14,6 @@ from eval_harness.agent import run_agent
 from eval_harness.budget import decide_start, estimate_run_cost, remaining_budget, should_abort
 from eval_harness.cases import (
     CONSISTENCY,
-    PAIR_LANGUAGES,
     Case,
     CaseError,
     case_set_hash,
@@ -117,14 +116,14 @@ def run_eval(
     cases = _select_cases(
         config, open_questions, category, case_ids, limit, [*SCORERS, *rubrics, CONSISTENCY]
     )
-    pairs = sum(case.language == "both" for case in cases)
+    pairs = sum(case.is_pair for case in cases)
     if pairs and pair_rubric is None:
         raise RunRefused(
             f"bilingual cases need the rubric {config.pack / 'evals' / 'rubrics' / 'bilingual.md'}"
         )
-    agent_runs = sum(len(_inputs(case)) for case in cases)
+    agent_runs = sum(len(case.inputs()) for case in cases)
     judged_per_repeat = pairs + sum(
-        len(_inputs(case)) for case in cases for name in case.scoring if name in rubrics
+        len(case.inputs()) for case in cases for name in case.scoring if name in rubrics
     )
     try:
         judge = resolve_judge(config.judge_model, models) if judged_per_repeat else None
@@ -253,8 +252,8 @@ def run_eval(
                 finals: dict[str, FinalAnswer] | None = {}
                 halves: dict[str, list[dict[str, Any]]] = {}
                 try:
-                    for language, user_input in _inputs(case).items():
-                        if case.language == "both":
+                    for language, user_input in case.inputs().items():
+                        if case.is_pair:
                             trace.add("half", language=language, input=user_input)
                         first_step = len(trace.steps)
                         finals[language] = run_agent(
@@ -436,13 +435,6 @@ def _select_cases(
     return selected
 
 
-def _inputs(case: Case) -> dict[str, str]:
-    """The questions to put to the agent: one, or both halves of a bilingual pair."""
-    if isinstance(case.input, dict):
-        return {language: case.input[language] for language in PAIR_LANGUAGES}
-    return {case.language: case.input}
-
-
 def _manifest_hash(config: Config) -> str | None:
     manifests = sorted(config.pack.glob("manifest.*"))
     if not manifests:
@@ -489,7 +481,7 @@ def _score(
     if finals is None:
         trace.add("verdict", passed=False, details={"error": "the case did not finish"})
         return "error", False
-    if case.language == "both":
+    if case.is_pair:
         verdict = score_pair(case, finals, halves, scorers, pair_scorers, deferred)
     else:
         verdict = score_case(case, finals[case.language], trace.steps, scorers, deferred)

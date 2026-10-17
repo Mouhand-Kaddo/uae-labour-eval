@@ -30,6 +30,17 @@ class Case:
     rationale: str
     planted_chunks: list[Chunk] | None = None
 
+    @property
+    def is_pair(self) -> bool:
+        """A bilingual pair: the same question asked in each of PAIR_LANGUAGES."""
+        return self.language == PAIR
+
+    def inputs(self) -> dict[str, str]:
+        """The questions to put to the agent, by language: one, or both halves of a pair."""
+        if self.is_pair:
+            return {language: self.input[language] for language in PAIR_LANGUAGES}
+        return {self.language: self.input}
+
     def half(self, language: str) -> "Case":
         """One language of a bilingual pair, as a single-language case with that language's
         input and expectations."""
@@ -38,7 +49,8 @@ class Case:
         )
 
 
-LANGUAGES = ("ar", "both", "en")
+PAIR = "both"
+LANGUAGES = ("ar", PAIR, "en")
 PAIR_LANGUAGES = ("en", "ar")
 CONSISTENCY = "consistency"
 CASE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
@@ -226,7 +238,7 @@ def _check_scoring(label: str, scoring: list[Any], scorer_names: Collection[str]
 
 
 def _check_pair(label: str, entry: dict[str, Any]) -> None:
-    if entry["language"] != "both":
+    if entry["language"] != PAIR:
         if CONSISTENCY in entry["scoring"]:
             raise CaseError(f"{label}: {CONSISTENCY!r} compares the halves of a bilingual pair")
         return
@@ -241,10 +253,10 @@ def _check_pair(label: str, entry: dict[str, Any]) -> None:
 
 
 def _check_input(label: str, language: str, value: Any) -> None:
-    if language == "both":
+    if language == PAIR:
         if not (
             isinstance(value, dict)
-            and value.keys() == {"en", "ar"}
+            and value.keys() == set(PAIR_LANGUAGES)
             and all(isinstance(text, str) and text.strip() for text in value.values())
         ):
             raise CaseError(f"{label}: input must be a mapping with 'en' and 'ar' texts")
