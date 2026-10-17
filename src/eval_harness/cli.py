@@ -10,7 +10,7 @@ import httpx
 from eval_harness.budget import remaining_budget
 from eval_harness.compare import compare_runs
 from eval_harness.config import Config, ConfigError, load_config
-from eval_harness.embeddings import EmbedRefused, embed_corpus
+from eval_harness.embeddings import EmbedAborted, EmbedRefused, embed_corpus
 from eval_harness.fetch import FetchError, fetch_sources
 from eval_harness.ingest import IngestError, ingest
 from eval_harness.judge_check import (
@@ -107,6 +107,9 @@ def _ingest(config: Config) -> int:
 def _embed(config: Config, client: OpenRouterClient) -> int:
     try:
         count = embed_corpus(config, client)
+    except EmbedAborted as exc:
+        print(f"embed aborted: {exc}", file=sys.stderr)
+        return EXIT_ABORTED
     except (EmbedRefused, IngestError, OpenRouterError) as exc:
         print(f"embed failed: {exc}", file=sys.stderr)
         return EXIT_REFUSED

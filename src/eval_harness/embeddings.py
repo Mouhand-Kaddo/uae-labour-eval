@@ -6,7 +6,7 @@ from collections.abc import Callable, Iterable
 from datetime import UTC, datetime
 from pathlib import Path
 
-from eval_harness.budget import decide_start
+from eval_harness.budget import decide_start, should_abort
 from eval_harness.config import Config
 from eval_harness.ingest import IngestError, read_chunks
 from eval_harness.ledger import Ledger
@@ -18,6 +18,11 @@ BATCH_SIZE = 32
 
 class EmbedRefused(Exception):
     """Embedding did not start; nothing was spent."""
+
+
+class EmbedAborted(Exception):
+    """Embedding stopped once its spend crossed the remaining budget; batches already embedded
+    stay cached."""
 
 
 def cached_vectors(index_dir: Path, model: str) -> dict[str, list[float]]:
@@ -47,7 +52,8 @@ def embed_corpus(
     """Embed every chunk with no cached vector; returns how many were embedded.
 
     Raises EmbedRefused if the budget guard says no. The estimate takes one token per UTF-8
-    byte, an upper bound, at the model's live prompt price.
+    byte, an upper bound, at the model's live prompt price. Raises EmbedAborted after the batch
+    whose spend crosses the budget that remained at the start.
     """
     model = config.embedding_model
     cached = cached_vectors(config.index_dir, model)
@@ -76,12 +82,13 @@ def embed_corpus(
         key_usage_usd=key_usage,
         ceiling_usd=config.budget.ceiling_usd,
     )
-    if not decision.allowed:
+    if not decision.allowed or decision.remaining_usd is None:
         raise EmbedRefused(decision.reason)
     echo(f"budget ok: {decision.reason}")
 
     run_id = f"embed-{datetime.now(UTC):%Y%m%dT%H%M%SZ}-{secrets.token_hex(3)}"
     items = list(pending.items())
+    spend = 0.0
     for start in range(0, len(items), BATCH_SIZE):
         batch = items[start : start + BATCH_SIZE]
         response = client.embed(model, [text for _, text in batch])
@@ -89,4 +96,11 @@ def embed_corpus(
         append_vectors(
             config.index_dir, model, zip([h for h, _ in batch], response.vectors, strict=True)
         )
+        spend += response.cost
+        if should_abort(run_spend_usd=spend, remaining_usd=decision.remaining_usd):
+            raise EmbedAborted(
+                f"spend USD {spend:.6f} crossed the remaining budget USD "
+                f"{decision.remaining_usd:.6f} after {start + len(batch)} of {len(items)} "
+                "chunk(s); those stay cached"
+            )
     return len(items)

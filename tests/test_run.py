@@ -357,6 +357,16 @@ def test_run_aborts_when_its_spend_crosses_the_remaining_budget(project, capsys)
     assert len(read_jsonl(project / "runs" / "ledger.jsonl")) == 1
 
 
+def test_estimate_counts_the_query_embeddings_a_run_may_make(project, capsys):
+    fake = FakeOpenRouter([], embedding_price="1")
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 2
+    assert fake.chat_requests == []
+    assert "over budget" in capsys.readouterr().err
+
+
 def test_budget_command_prints_ledger_total_key_usage_and_remaining(project, capsys):
     fake = FakeOpenRouter([final_answer_response("refused", "legal_advice", cost=0.25)])
     eval_run(project, fake, "--limit", "1")
@@ -555,6 +565,20 @@ def test_embed_refuses_to_run_when_the_budget_guard_says_no(project, capsys, fak
 
     assert fake.embedding_requests == []
     assert message in capsys.readouterr().err
+
+
+def test_embed_stops_once_its_spend_crosses_the_remaining_budget(project, capsys):
+    write_index(project, *(f"Article {n} of the statute." for n in range(70)))
+    fake = FakeOpenRouter(key_usage=19.9, embedding_cost=0.06)
+
+    assert embed(project, fake) == 3
+
+    assert len(fake.embedding_requests) == 2
+    assert [e["cost"] for e in ledger(project)] == [0.06, 0.06]
+    assert "embed aborted" in capsys.readouterr().err
+    fake = FakeOpenRouter()
+    assert embed(project, fake) == 0
+    assert [len(r["input"]) for r in fake.embedding_requests] == [6]
 
 
 def test_embed_refuses_an_embedding_model_openrouter_does_not_list(project, capsys):

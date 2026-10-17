@@ -31,9 +31,7 @@ MODELS = [
     },
 ]
 
-EMBEDDING_MODELS = [
-    {"id": "baai/bge-m3", "pricing": {"prompt": "0.00000001", "completion": "0"}},
-]
+EMBEDDING_PRICE = "0.00000001"
 
 CONCEPTS = {
     "probation": {"probation", "التجربة"},
@@ -120,8 +118,16 @@ def embeddings_response(texts, cost):
 
 
 class FakeOpenRouter:
-    def __init__(self, chat_responses=(), key_usage=0.0, key_status=200, embedding_cost=0.00001):
+    def __init__(
+        self,
+        chat_responses=(),
+        key_usage=0.0,
+        key_status=200,
+        embedding_cost=0.00001,
+        embedding_price=EMBEDDING_PRICE,
+    ):
         self.chat_responses = list(chat_responses)
+        self.embedding_price = embedding_price
         self.key_usage = key_usage
         self.key_status = key_status
         self.embedding_cost = embedding_cost
@@ -142,7 +148,8 @@ class FakeOpenRouter:
             self.chat_requests.append(json.loads(request.content))
             return httpx.Response(200, json=self.chat_responses.pop(0))
         if path == "/api/v1/embeddings/models":
-            return httpx.Response(200, json={"data": EMBEDDING_MODELS})
+            pricing = {"prompt": self.embedding_price, "completion": "0"}
+            return httpx.Response(200, json={"data": [{"id": "baai/bge-m3", "pricing": pricing}]})
         if path == "/api/v1/embeddings":
             body = json.loads(request.content)
             self.embedding_requests.append(body)

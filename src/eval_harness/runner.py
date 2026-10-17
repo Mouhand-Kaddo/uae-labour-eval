@@ -56,6 +56,8 @@ from eval_harness.scorers import (
 from eval_harness.search import SearchIndex, search_tools
 from eval_harness.trace import Trace
 
+ASSUMED_TOKENS_PER_SEARCH_QUERY = 64
+
 
 class RunRefused(Exception):
     """The run did not start; nothing was spent."""
@@ -174,6 +176,7 @@ class _Plan:
     """Everything a run needs, checked before the budget guard is asked."""
 
     model: ModelInfo
+    embedding: ModelInfo
     cases: list[Case]
     rubrics: dict[str, Rubric]
     pair_rubric: Rubric | None
@@ -209,6 +212,11 @@ def _plan(
     models = client.models()
     if model_id not in models:
         raise RunRefused(f"model {model_id!r} is not in the OpenRouter models list")
+    embedding_models = client.embedding_models()
+    if config.embedding_model not in embedding_models:
+        raise RunRefused(
+            f"embedding model {config.embedding_model!r} is not in the OpenRouter embeddings list"
+        )
     if same_family(model_id, config.judge_model):
         raise RunRefused(
             f"the agent {model_id!r} is from the same model family as the judge "
@@ -245,6 +253,7 @@ def _plan(
         tools = mark_open_questions(tools, pack_cases.open_questions)
     return _Plan(
         model=models[model_id],
+        embedding=embedding_models[config.embedding_model],
         cases=cases,
         rubrics=rubrics,
         pair_rubric=pair_rubric,
@@ -261,7 +270,8 @@ def _plan(
 def _estimate(
     config: Config, plan: _Plan, ledger: Ledger, category: str | None, repeats: int
 ) -> float:
-    """The run's cost estimate: agent runs, from ledger history if any, plus judge calls."""
+    """The run's cost estimate: agent runs, from ledger history if any, plus judge calls, plus
+    query embeddings, assuming at most one search per agent turn."""
     estimate = estimate_run_cost(
         case_count=plan.agent_runs * repeats,
         history_per_case_usd=ledger.per_case_average(model=plan.model.id, category=category),
@@ -281,6 +291,15 @@ def _estimate(
             assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
             margin=config.budget.safety_margin,
         )
+    estimate += estimate_run_cost(
+        case_count=plan.agent_runs * repeats * config.agent.max_turns,
+        history_per_case_usd=None,
+        prompt_price_usd=plan.embedding.prompt_price_usd,
+        completion_price_usd=0.0,
+        assumed_prompt_tokens=ASSUMED_TOKENS_PER_SEARCH_QUERY,
+        assumed_completion_tokens=0,
+        margin=config.budget.safety_margin,
+    )
     return estimate
 
 
