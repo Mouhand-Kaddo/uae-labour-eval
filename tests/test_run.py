@@ -303,3 +303,86 @@ def test_budget_command_prints_ledger_total_key_usage_and_remaining(project, cap
     assert "ledger total USD 0.250000" in out
     assert "key usage USD 1.500000" in out
     assert "remaining USD 18.500000" in out
+
+
+CALC_CASE = """
+- id: calc-en-001
+  category: calc
+  language: en
+  input: "First day 2023-01-01, last day 2023-12-31, basic wage AED 36,500. My gratuity?"
+  expected:
+    status: answered
+    numbers: [25200]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments: {start_date: "2023-01-01", end_date: "2023-12-31", monthly_basic_wage: 36500}
+  scoring: [status, numeric, tool_call]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)"]
+  depends_on: [OQ-001]
+  rationale: 21 days × 36,500 × 12 / 365 = 21 × 1,200 = 25,200.
+"""
+
+GRATUITY_ARGS = {
+    "start_date": "2023-01-01",
+    "end_date": "2023-12-31",
+    "monthly_basic_wage": 36500,
+    "work_pattern": "full_time",
+    "nationality": "foreign",
+}
+
+
+def answer_response(text):
+    return tool_call_response(
+        "final_answer",
+        {
+            "answer": text,
+            "citations": [{"instrument": "Labour Law", "article": "51"}],
+            "status": "answered",
+            "refusal_reason": None,
+        },
+        call_id="c2",
+    )
+
+
+def test_pack_tools_are_offered_called_and_scored(project):
+    pack = project / "pack"
+    (pack / "__init__.py").write_text(
+        "from uae_labour.gratuity import GRATUITY_TOOL\n\nTOOLS = [GRATUITY_TOOL]\n"
+    )
+    (pack / "evals" / "cases" / "calc.yaml").write_text(CALC_CASE)
+    fake = FakeOpenRouter(
+        [
+            tool_call_response("calculate_gratuity", GRATUITY_ARGS, call_id="c1"),
+            answer_response("Your gratuity is AED 25,200. This is not legal advice."),
+        ]
+    )
+
+    exit_code = run(project, fake, "run", "--model", HAIKU, "--category", "calc")
+
+    assert exit_code == 0
+    first, second = fake.chat_requests
+    assert [t["function"]["name"] for t in first["tools"]] == [
+        "calculate_gratuity",
+        "final_answer",
+    ]
+    [tool_message] = [m for m in second["messages"] if m["role"] == "tool"]
+    assert json.loads(tool_message["content"])["result"]["gratuity"] == 25200.0
+    steps = read_jsonl(only_run_dir(project) / "traces" / "calc-en-001.1.jsonl")
+    [call] = [s for s in steps if s["type"] == "tool_call"]
+    assert call["arguments"] == GRATUITY_ARGS
+    assert call["result"]["refs"][0] == {"instrument": "Labour Law", "article": "51", "clause": "2"}
+    verdict = steps[-1]
+    assert verdict["passed"] is True
+    assert set(verdict["details"]) == {"status", "numeric", "tool_call"}
+
+
+def test_refuses_to_start_when_the_pack_offers_no_tool_list(project, capsys):
+    (project / "pack" / "__init__.py").write_text("TOOLS = None\n")
+    fake = FakeOpenRouter([])
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 2
+    assert "TOOLS" in capsys.readouterr().err
