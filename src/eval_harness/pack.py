@@ -1,4 +1,5 @@
-"""A pack's calculation tools: the `TOOLS` list in the pack folder's `__init__.py` (ADR-0006)."""
+"""What a pack provides (ADR-0006): its cases, checked against the scorers it may use, and its
+calculation tools, the `TOOLS` list in the pack folder's `__init__.py`."""
 
 import dataclasses
 import importlib.util
@@ -8,10 +9,33 @@ from pathlib import Path
 from typing import Any
 
 from eval_harness.agent import Tool
+from eval_harness.cases import CONSISTENCY, Case, load_cases, load_open_questions
+from eval_harness.config import Config
+from eval_harness.judge import PAIR_RUBRIC, Rubric
+from eval_harness.scorers import SCORERS
 
 
 class PackError(Exception):
     pass
+
+
+@dataclasses.dataclass(frozen=True)
+class PackCases:
+    cases: list[Case]
+    open_questions: dict[str, bool] | None
+
+
+def load_pack_cases(config: Config, rubrics: Mapping[str, Rubric]) -> PackCases:
+    """Every case in the pack, checked against the scorers a case may name (the built-in ones,
+    `judge:<rubric>` for the pack's rubrics, and consistency) and against the open-questions doc
+    if the config names one. `rubrics` is keyed by scorer name, as `load_rubrics` returns it.
+    Raises CaseError."""
+    open_questions = (
+        None if config.open_questions is None else load_open_questions(config.open_questions)
+    )
+    scorer_names = [*SCORERS, *(name for name in rubrics if name != PAIR_RUBRIC), CONSISTENCY]
+    cases = load_cases(config.pack / "evals" / "cases", scorer_names, open_questions)
+    return PackCases(cases, open_questions)
 
 
 def load_pack_tools(pack: Path) -> list[Tool]:

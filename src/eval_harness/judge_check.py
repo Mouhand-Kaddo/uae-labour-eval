@@ -22,11 +22,8 @@ import yaml
 
 from eval_harness.budget import decide_start, estimate_run_cost, should_abort
 from eval_harness.cases import (
-    CONSISTENCY,
     Case,
     CaseError,
-    load_cases,
-    load_open_questions,
 )
 from eval_harness.config import Config
 from eval_harness.final_answer import FinalAnswer, parse_final_answer
@@ -46,8 +43,8 @@ from eval_harness.judge import (
 )
 from eval_harness.ledger import Ledger
 from eval_harness.openrouter import ChatResponse, OpenRouterClient, OpenRouterError
+from eval_harness.pack import load_pack_cases
 from eval_harness.refs import article_label
-from eval_harness.scorers import SCORERS
 
 STRATA = ("grounding", "refuse", "inject", "bilingual", "cite")
 TRUSTED_KAPPA = 0.6
@@ -142,12 +139,9 @@ def pack_rubrics(pack: Path) -> dict[str, Rubric]:
 
 
 def _pack_cases(config: Config, rubrics: Mapping[str, Rubric]) -> dict[str, Case]:
-    scorer_names = [*SCORERS, *(SCORER_PREFIX + name for name in rubrics), CONSISTENCY]
+    by_scorer = {SCORER_PREFIX + name: rubric for name, rubric in rubrics.items()}
     try:
-        open_questions = (
-            load_open_questions(config.open_questions) if config.open_questions else None
-        )
-        cases = load_cases(config.pack / "evals" / "cases", scorer_names, open_questions)
+        cases = load_pack_cases(config, by_scorer).cases
     except CaseError as exc:
         raise JudgeCheckError(f"invalid cases: {exc}") from exc
     return {case.id: case for case in cases}

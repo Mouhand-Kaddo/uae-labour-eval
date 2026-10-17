@@ -1,6 +1,5 @@
 """The runner: resolve prices, select cases, ask the budget guard, run, score, record."""
 
-import hashlib
 import json
 import secrets
 import subprocess
@@ -17,8 +16,6 @@ from eval_harness.cases import (
     Case,
     CaseError,
     case_set_hash,
-    load_cases,
-    load_open_questions,
 )
 from eval_harness.config import Config, same_family
 from eval_harness.final_answer import FinalAnswer
@@ -41,7 +38,7 @@ from eval_harness.openrouter import (
     OpenRouterClient,
     OpenRouterError,
 )
-from eval_harness.pack import PackError, load_pack_tools, mark_open_questions
+from eval_harness.pack import PackError, load_pack_cases, load_pack_tools, mark_open_questions
 from eval_harness.refs import article_key
 from eval_harness.scorers import (
     SCORERS,
@@ -111,11 +108,13 @@ def run_eval(
         rubrics = load_rubrics(config.pack)
     except RubricError as exc:
         raise RunRefused(str(exc)) from exc
+    try:
+        pack_cases = load_pack_cases(config, rubrics)
+    except CaseError as exc:
+        raise RunRefused(f"invalid cases: {exc}") from exc
     pair_rubric = rubrics.pop(PAIR_RUBRIC, None)
-    open_questions = _load_open_questions(config)
-    cases = _select_cases(
-        config, open_questions, category, case_ids, limit, [*SCORERS, *rubrics, CONSISTENCY]
-    )
+    open_questions = pack_cases.open_questions
+    cases = _select_cases(pack_cases.cases, category, case_ids, limit)
     pairs = sum(case.is_pair for case in cases)
     if pairs and pair_rubric is None:
         raise RunRefused(
@@ -135,7 +134,6 @@ def run_eval(
         s.instrument: manifest.instruments[s.instrument] for s in manifest.indexed_sources
     }
     cases_hash = case_set_hash(config.pack / "evals" / "cases")
-    manifest_hash = _manifest_hash(config)
     system_prompt = (config.pack / "system_prompt.md").read_text(encoding="utf-8")
     try:
         tools = load_pack_tools(config.pack)
@@ -342,7 +340,7 @@ def run_eval(
         {
             "started_at": started_at.isoformat(),
             "case_set_hash": cases_hash,
-            "manifest_hash": manifest_hash,
+            "manifest_hash": manifest.sha256,
             "git_commit": _git_commit(config),
             "config": asdict(config),
             "model": model_id,
@@ -398,27 +396,9 @@ def _check_planted_chunks(cases: list[Case], index: SearchIndex) -> None:
                 )
 
 
-def _load_open_questions(config: Config) -> dict[str, bool] | None:
-    if config.open_questions is None:
-        return None
-    try:
-        return load_open_questions(config.open_questions)
-    except CaseError as exc:
-        raise RunRefused(f"invalid cases: {exc}") from exc
-
-
 def _select_cases(
-    config: Config,
-    open_questions: dict[str, bool] | None,
-    category: str | None,
-    case_ids: list[str] | None,
-    limit: int | None,
-    scorer_names: list[str],
+    cases: list[Case], category: str | None, case_ids: list[str] | None, limit: int | None
 ) -> list[Case]:
-    try:
-        cases = load_cases(config.pack / "evals" / "cases", scorer_names, open_questions)
-    except CaseError as exc:
-        raise RunRefused(f"invalid cases: {exc}") from exc
     if case_ids is not None:
         unknown = sorted(set(case_ids) - {c.id for c in cases})
         if unknown:
@@ -433,15 +413,6 @@ def _select_cases(
     if not selected:
         raise RunRefused("no cases match the selection")
     return selected
-
-
-def _manifest_hash(config: Config) -> str | None:
-    manifests = sorted(config.pack.glob("manifest.*"))
-    if not manifests:
-        return None
-    if len(manifests) > 1:
-        raise RunRefused(f"the pack has several corpus manifests: {[p.name for p in manifests]}")
-    return hashlib.sha256(manifests[0].read_bytes()).hexdigest()
 
 
 def _git_commit(config: Config) -> str | None:
