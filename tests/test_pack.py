@@ -2,14 +2,16 @@ from pathlib import Path
 
 import pytest
 
-from eval_harness.cases import load_cases
+from eval_harness.cases import load_cases, load_open_questions
 from eval_harness.config import load_config
 from eval_harness.pack import load_pack_tools
 from eval_harness.scorers import SCORERS
 
 REPO = Path(__file__).resolve().parent.parent
 CONFIG = load_config(REPO / "config.toml")
-CASES = load_cases(CONFIG.pack / "evals" / "cases", SCORERS)
+CASES = load_cases(
+    CONFIG.pack / "evals" / "cases", SCORERS, load_open_questions(CONFIG.open_questions)
+)
 TOOLS = {tool.name: tool for tool in load_pack_tools(CONFIG.pack)}
 GRATUITY_CASES = [
     pytest.param(case, id=case.id)
