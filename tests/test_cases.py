@@ -7,7 +7,7 @@ from eval_harness.cases import CaseError, case_set_hash, load_cases, load_open_q
 
 REPO = Path(__file__).resolve().parent.parent
 
-SCORERS = {"status", "numeric"}
+SCORERS = {"status", "numeric", "consistency"}
 
 
 def a_case(**overrides):
@@ -37,17 +37,57 @@ def load(tmp_path, *cases, open_questions=None):
     return load_cases(write_cases(tmp_path / "cases", *cases), SCORERS, open_questions)
 
 
+def a_pair(**overrides):
+    pair = {
+        "id": "bilingual-notice-001",
+        "category": "bilingual",
+        "language": "both",
+        "input": {"en": "What is the notice period?", "ar": "ما مدة الإنذار؟"},
+        "expected": {"en": {"status": "answered"}, "ar": {"status": "answered"}},
+        "scoring": ["status", "consistency"],
+    }
+    return a_case(**pair | overrides)
+
+
 def test_a_bilingual_case_has_an_english_and_an_arabic_input(tmp_path):
-    [case] = load(
-        tmp_path,
-        a_case(
-            language="both", input={"en": "What is the notice period?", "ar": "ما مدة الإنذار؟"}
-        ),
-    )
+    [case] = load(tmp_path, a_pair())
 
     assert case.language == "both"
     assert case.input == {"en": "What is the notice period?", "ar": "ما مدة الإنذار؟"}
+    assert case.half("ar").input == "ما مدة الإنذار؟"
+    assert case.half("ar").expected == {"status": "answered"}
+    assert case.half("ar").language == "ar"
     assert case.planted_chunks is None
+
+
+@pytest.mark.parametrize(
+    ("overrides", "message"),
+    [
+        (
+            {"expected": {"status": "answered"}},
+            "expected must be a mapping with 'en' and 'ar' expectations",
+        ),
+        (
+            {"expected": {"en": {"status": "answered"}, "ar": "answered"}},
+            "expected must be a mapping with 'en' and 'ar' expectations",
+        ),
+        ({"scoring": ["status"]}, "a bilingual pair must be scored on 'consistency'"),
+    ],
+)
+def test_a_bilingual_pair_needs_expectations_per_language_and_the_consistency_scorer(
+    tmp_path, overrides, message
+):
+    with pytest.raises(CaseError, match=r"case 'bilingual-notice-001': ") as error:
+        load(tmp_path, a_pair(**overrides))
+
+    assert message in str(error.value)
+
+
+def test_only_a_bilingual_pair_can_be_scored_on_consistency(tmp_path):
+    with pytest.raises(CaseError) as error:
+        load(tmp_path, a_case(scoring=["status", "consistency"]))
+
+    assert "'consistency' compares the halves of a bilingual pair" in str(error.value)
 
 
 @pytest.mark.parametrize(

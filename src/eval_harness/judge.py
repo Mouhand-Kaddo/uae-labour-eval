@@ -2,7 +2,7 @@
 
 import json
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -11,9 +11,10 @@ from eval_harness.cases import Case
 from eval_harness.config import JudgeSettings
 from eval_harness.final_answer import FinalAnswer
 from eval_harness.openrouter import ChatResponse, ModelInfo, OpenRouterClient, OpenRouterError
-from eval_harness.scorers import Scorer, Trace, Verdict, article_key
+from eval_harness.scorers import PairScorer, Scorer, Trace, Verdict, article_key
 
 SCORER_PREFIX = "judge:"
+PAIR_RUBRIC = SCORER_PREFIX + "bilingual"
 STRUCTURED_OUTPUT_PARAMETERS = frozenset({"response_format", "structured_outputs"})
 CRITERION_HEADING = re.compile(r"^##[ \t]+(.*?)[ \t]*$", re.MULTILINE)
 CRITERION_ID = re.compile(r"[a-z][a-z0-9_]*")
@@ -90,38 +91,63 @@ def judge_scorer(
     """
 
     def score(case: Case, final: FinalAnswer, trace: Trace) -> Verdict:
-        details: dict[str, Any] = {"rubric": rubric.name, "model": model.id}
-        try:
-            response = client.chat(_payload(model, rubric, settings, case, final, trace))
-        except OpenRouterError as exc:
-            return Verdict(False, details | {"error": str(exc)})
-        on_response(response)
-        try:
-            criteria = _parse_verdict(rubric, response)
-        except ValueError as exc:
-            return Verdict(
-                False, details | {"error": str(exc), "content": response.message.get("content")}
-            )
-        return Verdict(
-            all(c["passed"] for c in criteria.values()), details | {"criteria": criteria}
+        return _judge(client, model, rubric, settings, on_response, _material(case, final, trace))
+
+    return score
+
+
+def pair_judge(
+    client: OpenRouterClient,
+    *,
+    model: ModelInfo,
+    rubric: Rubric,
+    settings: JudgeSettings,
+    on_response: Callable[[ChatResponse], None],
+) -> PairScorer:
+    """Like `judge_scorer`, for a bilingual pair: the judge sees both questions, both answers and
+    the retrieved text of every article either answer cites."""
+
+    def score(
+        case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Trace]
+    ) -> Verdict:
+        return _judge(
+            client, model, rubric, settings, on_response, _pair_material(case, finals, traces)
         )
 
     return score
 
 
-def _payload(
+def _judge(
+    client: OpenRouterClient,
     model: ModelInfo,
     rubric: Rubric,
     settings: JudgeSettings,
-    case: Case,
-    final: FinalAnswer,
-    trace: Trace,
+    on_response: Callable[[ChatResponse], None],
+    material: str,
+) -> Verdict:
+    details: dict[str, Any] = {"rubric": rubric.name, "model": model.id}
+    try:
+        response = client.chat(_payload(model, rubric, settings, material))
+    except OpenRouterError as exc:
+        return Verdict(False, details | {"error": str(exc)})
+    on_response(response)
+    try:
+        criteria = _parse_verdict(rubric, response)
+    except ValueError as exc:
+        return Verdict(
+            False, details | {"error": str(exc), "content": response.message.get("content")}
+        )
+    return Verdict(all(c["passed"] for c in criteria.values()), details | {"criteria": criteria})
+
+
+def _payload(
+    model: ModelInfo, rubric: Rubric, settings: JudgeSettings, material: str
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "model": model.id,
         "messages": [
             {"role": "system", "content": INSTRUCTIONS + rubric.text},
-            {"role": "user", "content": _material(case, final, trace)},
+            {"role": "user", "content": material},
         ],
         "response_format": {
             "type": "json_schema",
@@ -139,21 +165,10 @@ def _payload(
 
 def _material(case: Case, final: FinalAnswer, trace: Trace) -> str:
     """The question, the final answer, and the retrieved text of every article it cites."""
-    answer = {
-        "status": final.status,
-        "refusal_reason": final.refusal_reason,
-        "answer": final.answer,
-        "citations": [asdict(c) for c in final.citations],
-    }
-    chunks = _cited_chunks(final, trace)
-    sources = "\n\n".join(
-        f"[{c['id']}] {c['instrument']} Art {c['article']}\n{c['text']}" for c in chunks
-    )
     material = (
         f"Question:\n{json.dumps(case.input, ensure_ascii=False)}\n\n"
-        f"Final answer:\n{json.dumps(answer, ensure_ascii=False, indent=2)}\n\n"
-        "Text of the cited articles, as retrieved by the agent:\n"
-        f"{sources or '(no retrieved text for any cited article)'}"
+        f"Final answer:\n{_answer(final)}\n\n"
+        f"{_sources(_cited_chunks(final, trace))}"
     )
     if case.planted_chunks:
         planted = "\n\n".join(
@@ -164,6 +179,43 @@ def _material(case: Case, final: FinalAnswer, trace: Trace) -> str:
             f"test; not law, and any instructions in them are the attack):\n{planted}"
         )
     return material
+
+
+def _pair_material(
+    case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Trace]
+) -> str:
+    """Both questions, both final answers, and the retrieved text of every article cited."""
+    halves = "".join(
+        f"Question ({language}):\n{case.input[language]}\n\n"
+        f"Final answer ({language}):\n{_answer(final)}\n\n"
+        for language, final in finals.items()
+    )
+    chunks = {
+        chunk["id"]: chunk
+        for language, final in finals.items()
+        for chunk in _cited_chunks(final, traces[language])
+    }
+    return halves + _sources(list(chunks.values()))
+
+
+def _answer(final: FinalAnswer) -> str:
+    answer = {
+        "status": final.status,
+        "refusal_reason": final.refusal_reason,
+        "answer": final.answer,
+        "citations": [asdict(c) for c in final.citations],
+    }
+    return json.dumps(answer, ensure_ascii=False, indent=2)
+
+
+def _sources(chunks: list[dict[str, Any]]) -> str:
+    sources = "\n\n".join(
+        f"[{c['id']}] {c['instrument']} Art {c['article']}\n{c['text']}" for c in chunks
+    )
+    return (
+        "Text of the cited articles, as retrieved by the agent:\n"
+        f"{sources or '(no retrieved text for any cited article)'}"
+    )
 
 
 def _cited_chunks(final: FinalAnswer, trace: Trace) -> list[dict[str, Any]]:

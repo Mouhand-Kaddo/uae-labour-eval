@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from eval_harness.cases import load_cases, load_open_questions
+from eval_harness.cases import CONSISTENCY, PAIR_LANGUAGES, load_cases, load_open_questions
 from eval_harness.config import load_config
 from eval_harness.ingest import CHUNKS_FILE, read_chunks
 from eval_harness.judge import load_rubrics
@@ -17,7 +17,7 @@ CONFIG = load_config(REPO / "config.toml")
 RUBRICS = load_rubrics(CONFIG.pack)
 CASES = load_cases(
     CONFIG.pack / "evals" / "cases",
-    [*SCORERS, *RUBRICS],
+    [*SCORERS, *RUBRICS, CONSISTENCY],
     load_open_questions(CONFIG.open_questions),
 )
 TOOLS = {tool.name: tool for tool in load_pack_tools(CONFIG.pack)}
@@ -139,6 +139,49 @@ def test_inject_case_is_scored_deterministically_and_by_the_judge(case):
     assert {"status", "inject", "judge:inject"} <= set(case.scoring)
     assert case.expected["canary"].strip()
     assert set(case.expected.get("forbidden_tools", [])) <= set(TOOLS)
+
+
+PAIRS = [pytest.param(case, id=case.id) for case in CASES if case.language == "both"]
+
+
+def pair_topic(case):
+    expected = case.expected["en"]
+    if "tool_call" in expected:
+        return "calc"
+    return "cite" if "citations" in expected else expected["status"]
+
+
+def test_bilingual_pairs_are_ten_spread_over_calc_cite_and_refusals():
+    cases = [p.values[0] for p in PAIRS]
+    topics = [pair_topic(case) for case in cases]
+
+    assert len(cases) == 10
+    assert all(case.category == "bilingual" and not case.reviewed for case in cases)
+    assert topics.count("calc") >= 3 and topics.count("cite") >= 3
+    assert topics.count("refused") >= 2
+    assert "judge:bilingual" in RUBRICS
+
+
+@pytest.mark.parametrize("case", PAIRS)
+def test_bilingual_pair_halves_share_their_expectations_and_are_checked_for_language(case):
+    assert case.expected["en"] == case.expected["ar"]
+    assert {"status", "answer_language", CONSISTENCY} <= set(case.scoring)
+    assert case.rationale.strip()
+
+
+@pytest.mark.parametrize("case", [p for p in PAIRS if pair_topic(p.values[0]) == "calc"])
+def test_bilingual_calc_pair_figures_agree_with_the_tool(case):
+    for language in PAIR_LANGUAGES:
+        expected = case.half(language).expected
+        name = expected["tool_call"]["name"]
+        result = TOOLS[name].run(expected["tool_call"]["arguments"])
+        fields = FIGURES.get(name, ("gratuity",))
+        figures = [result[field] for field in fields if result[field] is not None]
+
+        assert {"numeric", "tool_call"} <= set(case.scoring)
+        assert set(result["open_questions"]) <= set(case.depends_on)
+        for number in expected["numbers"]:
+            assert any(abs(f - number) <= expected["tolerance"] for f in figures), number
 
 
 def test_cite_grounding_and_refuse_cases_hit_their_targets_split_between_languages():
