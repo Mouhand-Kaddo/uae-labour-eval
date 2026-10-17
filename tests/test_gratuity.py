@@ -238,7 +238,7 @@ REFS_AND_QUESTIONS = [
     pytest.param(
         service(*THREE_YEARS, work_pattern="temporary"),
         {"Executive Regulations Art 30(2)"},
-        [],
+        ["OQ-006"],
         id="ER30(2)-temporary-work",
     ),
 ]

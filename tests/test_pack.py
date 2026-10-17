@@ -1,9 +1,12 @@
+import re
+from collections import Counter
 from pathlib import Path
 
 import pytest
 
 from eval_harness.cases import CONSISTENCY, PAIR_LANGUAGES, load_cases, load_open_questions
 from eval_harness.config import load_config
+from eval_harness.ingest import CHUNKS_FILE, read_chunks
 from eval_harness.judge import load_rubrics
 from eval_harness.manifest import load_manifest
 from eval_harness.pack import load_pack_tools
@@ -179,3 +182,49 @@ def test_bilingual_calc_pair_figures_agree_with_the_tool(case):
         assert set(result["open_questions"]) <= set(case.depends_on)
         for number in expected["numbers"]:
             assert any(abs(f - number) <= expected["tolerance"] for f in figures), number
+
+
+def test_cite_grounding_and_refuse_cases_hit_their_targets_split_between_languages():
+    counts = Counter((case.category, case.language) for case in CASES)
+    refusals = Counter(
+        case.expected.get("refusal_reason", case.expected["status"])
+        for case in CASES
+        if case.category == "refuse"
+    )
+
+    assert (counts["cite", "en"], counts["cite", "ar"]) == (12, 13)
+    assert (counts["grounding", "en"], counts["grounding", "ar"]) == (7, 8)
+    assert (counts["refuse", "en"], counts["refuse", "ar"]) == (10, 10)
+    assert refusals == {"legal_advice": 7, "out_of_scope": 7, "not_found": 6}
+
+
+REF = re.compile(r"(Labour Law|Executive Regulations) Art (\d+)(?:\((\d+)\))?")
+REF_INSTRUMENTS = {"Labour Law": "labour-law", "Executive Regulations": "executive-regulations"}
+CASES_WITH_REFS = [pytest.param(case, id=case.id) for case in CASES if case.refs]
+
+
+@pytest.fixture(scope="module")
+def article_texts():
+    if not (CONFIG.index_dir / CHUNKS_FILE).is_file():
+        pytest.skip("corpus not ingested; run `eval fetch` and `eval ingest`")
+    texts: dict[tuple[str, str, str], str] = {}
+    for chunk in read_chunks(CONFIG.index_dir):
+        key = (chunk.instrument, chunk.language, chunk.article)
+        texts[key] = texts.get(key, "") + chunk.text + "\n"
+    return texts
+
+
+@pytest.mark.parametrize("case", CASES_WITH_REFS)
+def test_every_ref_names_an_ingested_article_in_both_languages_and_an_existing_clause(
+    case, article_texts
+):
+    for ref in case.refs:
+        match = REF.fullmatch(ref)
+        assert match, f"{ref!r} is not '<instrument> Art N' or '<instrument> Art N(M)'"
+        title, article, clause = match.groups()
+        instrument = REF_INSTRUMENTS[title]
+        texts = [article_texts.get((instrument, lang, article)) for lang in ("en", "ar")]
+        assert all(texts), f"{ref} is not in the ingested index in both languages"
+        if clause:
+            clause_line = re.compile(rf"^{clause}\.\s", re.MULTILINE)
+            assert any(clause_line.search(text) for text in texts), f"{ref}: no clause {clause}"

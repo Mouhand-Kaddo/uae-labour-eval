@@ -19,3 +19,287 @@
     her child's resulting from pregnancy or childbirth, proven by a medical certificate. Every
     claim in the answer must be supported by the retrieved text of the cited article, so the
     judge sees the Art 30 chunks the agent actually retrieved.
+- id: grounding-en-002
+  category: grounding
+  language: en
+  input: >-
+    I'm three months into my probation period. What does the UAE Labour Law require of me if I
+    want to leave to join another employer in the UAE, and what changes if I want to leave the
+    country instead?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "9"}
+  scoring: [status, citations, "judge:grounding"]
+  reviewed: false
+  refs: ["Labour Law Art 9(3)", "Labour Law Art 9(4)"]
+  depends_on: []
+  rationale: >-
+    Art 9(3): to move to another employer in the State during probation the worker "must notify
+    the original Employer in writing within a period not less than one month", and the new
+    employer compensates the original employer for recruitment or contracting costs unless agreed
+    otherwise. Art 9(4): to leave the State the foreign worker must notify in writing "at least
+    (14) fourteen days prior"; if he returns for a new work permit within three months the new
+    employer pays the clause (3) compensation. Every claim must be supported by the retrieved
+    Art 9 text.
+- id: grounding-en-003
+  category: grounding
+  language: en
+  input: >-
+    If a worker is injured at work and cannot work while being treated, what does the employer
+    have to pay for under the UAE Labour Law, and how long is the worker's wage paid?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "37"}
+  scoring: [status, citations, "judge:grounding"]
+  reviewed: false
+  refs: ["Labour Law Art 37(2)"]
+  depends_on: []
+  rationale: >-
+    Art 37(2)(a): the employer bears "the expenses of the Worker's treatment until he is cured
+    and is able to return to work or proven to be disabled". 37(2)(b): the full wage "for the
+    duration of the treatment or for a period of six (6) months, whichever is less", then half
+    the wage "for another six (6) months, or until the Worker is cured, proven to be disabled,
+    or dies, whichever is comes first."
+- id: grounding-en-004
+  category: grounding
+  language: en
+  input: >-
+    In which situations can a worker in the UAE private sector leave their job without serving
+    notice and still keep their end-of-service rights?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "45"}
+  scoring: [status, citations, "judge:grounding"]
+  reviewed: false
+  refs: ["Labour Law Art 45"]
+  depends_on: []
+  rationale: >-
+    Art 45 lists four cases in which "The Worker may leave work without warning while retaining
+    his rights upon termination of service": employer breach, with the worker notifying the
+    Ministry "fourteen (14) business days prior" and the breach unremedied; assault, violence or
+    harassment by the employer, reported within five business days; a grave danger in the
+    workplace the employer knew of and did not remove; and assignment to fundamentally different
+    work without written consent (outside Art 12 necessity).
+- id: grounding-en-005
+  category: grounding
+  language: en
+  input: >-
+    What disciplinary penalties can an employer impose on a worker under UAE labour law, and are
+    there time limits on accusing a worker of a violation and on imposing the penalty?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "39"}
+      - {instrument: executive-regulations, article: "24"}
+  scoring: [status, citations, "judge:grounding"]
+  reviewed: false
+  refs: ["Labour Law Art 39(1)", "Executive Regulations Art 24(4)"]
+  depends_on: []
+  rationale: >-
+    Art 39(1) lists written caution, written warning, deduction "not exceeding the wages of five
+    (5) days per month", suspension "not exceeding fourteen (14) days" without pay, deprivation
+    of the periodic raise up to one year, deprivation of promotion up to two years, and
+    "Dismissal from service while preserving the Worker's right to end-of-service gratuity." ER
+    Art 24(4): no accusation for a violation "discovered for more than (30) thirty days", and no
+    penalty "if more than (60) days lapsed from the date of completing the investigation".
+- id: grounding-en-006
+  category: grounding
+  language: en
+  input: >-
+    I started my job eight months ago. How much annual leave does the UAE Labour Law give me for
+    my service so far, and how much will I get once I have completed a full year?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "29"}
+  scoring: [status, citations, "judge:grounding"]
+  reviewed: false
+  refs: ["Labour Law Art 29(1)"]
+  depends_on: [OQ-005]
+  rationale: >-
+    Art 29(1)(b): "Two days for each month if his service period is more than six months and less
+    than one year" (eight full months gives 16 days); 29(1)(a): "Thirty days for each year of his
+    extended service." Eight months sits clear of the six-month boundary, but the meaning of
+    "extended service" and of part months is OQ-005, so the case carries it.
+- id: grounding-en-007
+  category: grounding
+  language: en
+  input: >-
+    My employer has given me written notice that my contract will end. Under the UAE Labour Law,
+    what am I paid during the notice period, can I take time off to look for a new job, and what
+    happens if one side does not honour the notice period?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "43"}
+  scoring: [status, citations, "judge:grounding"]
+  reviewed: false
+  refs: ["Labour Law Art 43(2)", "Labour Law Art 43(3)", "Labour Law Art 43(5)"]
+  depends_on: []
+  rationale: >-
+    Art 43(2): the worker is "entitled to his full wage for that period according to the last
+    wage received". Art 43(5): when the employer terminates, the worker may be absent "for one
+    unpaid working day per week, in order to search for another job", telling the employer at
+    least three days before. Art 43(3): the party that does not observe the notice period pays a
+    "warning allowance ... equal to the Worker's wage for the entire warning period or the
+    remaining part of it." Asks for the general rules, not whether the termination was lawful.
+- id: grounding-ar-001
+  category: grounding
+  language: ar
+  input: >-
+    أنجبت طفلًا من أصحاب الهمم يحتاج إلى مرافق دائم بحسب التقرير الطبي. ما الإجازة الإضافية التي
+    يمنحها قانون العمل بعد إجازة الوضع، وهل يحق لي وقت للرضاعة بعد عودتي إلى العمل؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "30"}
+  scoring: [status, citations, "judge:grounding", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 30(4)", "Labour Law Art 30(9)"]
+  depends_on: []
+  rationale: >-
+    Art 30(4): "الحق في إجازة مدتها (30) ثلاثين يومًا بأجر كامل تبدأ بعد انتهاء مدة إجازة الوضع، ولها
+    الحق في تمديد الإجازة لمدة (30) ثلاثين يومًا دون أجر." Art 30(9): لمدة لا تزيد على ستة أشهر من
+    تاريخ الوضع "فترة أو فت رتين راحة يوميًا لإرضاع طفلها، على ألا تزيد مدة الفترتين على ساعة"
+    (the ingested text splits "فترتين").
+- id: grounding-ar-002
+  category: grounding
+  language: ar
+  input: >-
+    قدمت استقالتي بعد سبع سنوات من العمل بدوام كامل، وأنا عامل أجنبي. يقول زملائي إن المستقيل لا
+    يحصل على مكافأة نهاية الخدمة كاملة. كيف يحسب قانون العمل المكافأة، وهل تختلف بين الاستقالة
+    وإنهاء الخدمة من صاحب العمل؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "51"}
+  scoring: [status, citations, "judge:grounding", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(6)"]
+  depends_on: []
+  rationale: >-
+    Trap on resignation vs termination: the correct answer is "no difference". Art 51(2): the
+    foreign full-time worker with a year or more of continuous service gets the gratuity "عند
+    انتهاء خدمته، تحسب وفق الأجر الأساسي": "أجر (21) واحد وعشرين يوم عن كل سنة من سنوات الخدمة
+    الخمس الأولى" و"أجر (30) ثلاثين يوم عن كل سنة مما زاد على ذلك". Art 51(6): the total may not
+    exceed "أجر سنتين". Nothing reduces it for resignation; the judge fails any such claim.
+- id: grounding-ar-003
+  category: grounding
+  language: ar
+  input: >-
+    لدي خلاف مع صاحب العمل بشأن رواتب متأخرة. ما الإجراء الذي ينص عليه قانون العمل لتقديم المطالبة،
+    ومتى تفصل الوزارة في النزاع بقرار منها؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "54"}
+  scoring: [status, citations, "judge:grounding", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 54(1)", "Labour Law Art 54(2)", "Labour Law Art 54(3)"]
+  depends_on: []
+  rationale: >-
+    Art 54(1): the claim goes to the Ministry, which seeks an amicable settlement. Art 54(2): the
+    Ministry decides the dispute itself "متى كانت قيمة المطالبة موضوع النزاع لا تجاوز مبلغ (50,000)
+    خمسين ألف درهم" or when a party failed to comply with an earlier settlement decision. Art
+    54(3): either party may sue before the court of first instance "خلال (15) خمسة عشر يوم عمل".
+    Asks for the procedure, not whether this worker should claim, so it is answered.
+- id: grounding-ar-004
+  category: grounding
+  language: ar
+  input: >-
+    توفي أخي الذي كان يعمل لدى شركة خاصة في دبي. ما الذي يلزم قانون العمل صاحب العمل بتسليمه
+    لأسرته وخلال كم يومًا، ومن يتحمل تكاليف نقل الجثمان إلى بلده؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "15"}
+  scoring: [status, citations, "judge:grounding", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 15(1)", "Labour Law Art 15(3)"]
+  depends_on: []
+  rationale: >-
+    Art 15(1): the employer hands the family "أي أجور أو مستحقات مالية للعامل مضافًا إليها مكافأة
+    نهاية الخدمة" "خلال مدة لا تزيد على (10) عشرة أيام من تاريخ الوفاة أو من تاريخ علم صاحب العمل
+    بوفاة العامل". Art 15(3): "يتحمل صاحب العمل كافة التكاليف المترتبة على تجهيز ونقل جثمان العامل
+    المتوفى إلى موطنه الأصلي أو محل إقامته إذا طلب ذووه ذلك."
+- id: grounding-ar-005
+  category: grounding
+  language: ar
+  input: >-
+    طلب مني مديري القيام بعمل يختلف تمامًا عن الوظيفة المذكورة في عقدي. متى يجيز قانون العمل
+    ولائحته التنفيذية ذلك، وما المدة القصوى لهذا التكليف؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "12"}
+      - {instrument: executive-regulations, article: "13"}
+  scoring: [status, citations, "judge:grounding", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 12(1)", "Labour Law Art 12(2)", "Executive Regulations Art 13(1)"]
+  depends_on: []
+  rationale: >-
+    Art 12(1): not allowed "إلا إذا استدعت الضرورة ذلك أو بهدف منع وقوع حادث أو لإصلاح ما نشأ عنه،
+    على أن يكون التكليف مؤقتًا". Art 12(2): otherwise only "شريطة موافقة العامل الخطية". ER Art
+    13(1): "ويكون الحد الأقصى لتكليف العامل بتلك الأعمال (90) تسعين يومًا في السنة"; 13(2) defines
+    a fundamental difference. Both instruments are required.
+- id: grounding-ar-006
+  category: grounding
+  language: ar
+  input: >-
+    ابني عمره ستة عشر عامًا ويريد العمل في الصيف لدى شركة خاصة. ما الشروط التي يضعها قانون العمل
+    لتشغيله، وكم ساعة يجوز أن يعمل في اليوم؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "5"}
+  scoring: [status, citations, "judge:grounding", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 5(2)"]
+  depends_on: []
+  rationale: >-
+    Art 5(2): written consent of the guardian, a medical fitness certificate, "ألا تزيد ساعات العمل
+    الفعلية على ست ساعات يوميًّا" with at least an hour of breaks and no more than four
+    consecutive hours, no work "من الساعة السابعة مساءً حتى السابعة صباحًا", no dangerous or arduous
+    work, and no overtime or work on rest days or official holidays.
+- id: grounding-ar-007
+  category: grounding
+  language: ar
+  input: >-
+    عقد عملي غير محدد المدة منذ عام 2015 وفق القانون القديم. هل ما زال هذا العقد خاضعًا لقانون العمل
+    الحالي، وما الذي كان على صاحب العمل أن يفعله بشأنه؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "68"}
+  scoring: [status, citations, "judge:grounding", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 68(1)", "Labour Law Art 68(2)"]
+  depends_on: []
+  rationale: >-
+    Trap on unlimited contracts. Art 68(1): "تسري أحكام هذا المرسوم بقانون على عقود العمل غير محددة
+    المدة والمبرمة وفق القانون الاتحادي رقم (8) لسنة 1980". Art 68(2): employers must convert them
+    "إلى عقود عمل محددة المدة ... خلال سنة من تاريخ نفاذه، ويجوز للوزير تمديد هذه المدة". The judge
+    fails an answer that states the 1980 law's own rules, which are not in the corpus.
+- id: grounding-ar-008
+  category: grounding
+  language: ar
+  input: >-
+    أعمل بنمط الدوام الجزئي لدى شركة خاصة منذ ثلاث سنوات. كيف تُحسب مكافأة نهاية الخدمة للعامل بدوام
+    جزئي وفق اللائحة التنفيذية لقانون العمل؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: executive-regulations, article: "30"}
+  scoring: [status, citations, "judge:grounding", answer_language]
+  reviewed: false
+  refs: ["Executive Regulations Art 30(1)", "Labour Law Art 52"]
+  depends_on: [OQ-008]
+  rationale: >-
+    ER Art 30(1): "عدد ساعات العمل الواردة بعقد العمل في السنة مقسومًا على عدد ساعات العمل في عقد
+    الدوام الكامل بالسنة مضروبًا في 100 يساوي النسبة مضروبة في قيمة مكافأة نهاية الخدمة لعقد العمل
+    بالدوام الكامل." Art 52 delegates non-full-time gratuity to the Executive Regulations. Which
+    basic wage the full-time gratuity uses is OQ-008; three years keeps clear of the "less than
+    a year" question (OQ-006).

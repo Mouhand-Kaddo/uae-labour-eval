@@ -58,3 +58,419 @@
     الأولى." Both facts (21 days, basic wage) come from Art 51, so the answer must cite Labour Law
     Art 51, every cited article must have been retrieved during the case, and the answer must be
     in Arabic like the question.
+- id: cite-en-003
+  category: cite
+  language: en
+  input: >-
+    My wife passed away last week. How many days of paid leave does the UAE Labour Law give me,
+    and would it have been different if it had been my father who died?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "32"}
+  scoring: [status, citations]
+  reviewed: false
+  refs: ["Labour Law Art 32(1)"]
+  depends_on: []
+  rationale: >-
+    Art 32(1)(a): "A mourning leave of five (5) days, in the event of the death of the spouse;
+    and Three (3) days in the event of the death of the mother, father, son, brother, sister,
+    grandson, grandfather or grandmother, starting as of the date of death." Five days for a
+    spouse, three for a father. A statutory entitlement from stated facts, so it is answered,
+    not refused as legal advice.
+- id: cite-en-004
+  category: cite
+  language: en
+  input: >-
+    My employer often asks me to stay after my normal hours. What is the minimum extra pay the
+    UAE Labour Law requires for overtime, and does the rate change if the overtime is late at
+    night?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "19"}
+  scoring: [status, citations]
+  reviewed: false
+  refs: ["Labour Law Art 19(2)", "Labour Law Art 19(3)"]
+  depends_on: []
+  rationale: >-
+    Art 19(2): overtime is paid at the wage for normal hours "calculated according to the basic
+    wage - plus an increase of at least twenty-five percent (25%) of such wage". Art 19(3):
+    overtime "between 10 pm and 4 am" carries an increase "equal to at least fifty percent
+    (50%)", and "Shift Workers shall be excluded from the above."
+- id: cite-en-005
+  category: cite
+  language: en
+  input: >-
+    I left my job in Abu Dhabi some time ago and I think my former employer still owes me part
+    of my dues. Is there a deadline in the UAE Labour Law after which a claim for my rights can
+    no longer be heard?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "54"}
+  scoring: [status, citations]
+  reviewed: false
+  refs: ["Labour Law Art 54(9)"]
+  depends_on: []
+  rationale: >-
+    Art 54(9): "The case for any rights entitled under the provisions of this Law by Decree shall
+    not be heard after the lapse of two years as of the date of work relation termination." This
+    asks for the general rule, not whether to sue, so it is answered.
+- id: cite-en-006
+  category: cite
+  language: en
+  input: >-
+    My service has ended and I still live in the accommodation my employer provides. How long
+    does the UAE Labour Law allow me to stay there after my service ends?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "16"}
+  scoring: [status, citations]
+  reviewed: false
+  refs: ["Labour Law Art 16(10)"]
+  depends_on: []
+  rationale: >-
+    Art 16(10): the worker must "Evacuate the accommodation provided thereto by the Employer,
+    within a period not exceeding thirty (30) days as of the date of the end of his service";
+    he may stay longer with the employer's approval, paying the cost of accommodation or as
+    agreed in writing.
+- id: cite-en-007
+  category: cite
+  language: en
+  input: >-
+    My employment contract includes a non-compete clause. Under UAE labour law, what is the
+    longest period a non-compete can run after the contract ends, and does it still bind a
+    worker whose contract is terminated during the probation period?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "10"}
+      - {instrument: executive-regulations, article: "12"}
+  scoring: [status, citations]
+  reviewed: false
+  refs: ["Labour Law Art 10(1)", "Executive Regulations Art 12(5)"]
+  depends_on: []
+  rationale: >-
+    Art 10(1): "the period of non-competition shall not exceed two years as of the expiry date of
+    the contract." ER Art 12(5): "The worker shall be exempted from the non-compete clause ... b.
+    If the contract is terminated during the probation period." The second half needs the
+    Executive Regulations, so both instruments must be cited.
+- id: cite-en-008
+  category: cite
+  language: en
+  input: >-
+    I have worked for the same Dubai company since 2016 on an unlimited contract with no end
+    date. Is an unlimited contract still governed by the current Labour Law, and was my employer
+    required to change it?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "68"}
+  scoring: [status, citations, "judge:grounding"]
+  reviewed: false
+  refs: ["Labour Law Art 68(1)", "Labour Law Art 68(2)"]
+  depends_on: []
+  rationale: >-
+    Trap on unlimited contracts. Art 68(1): "The provisions of this Decree by law shall apply to
+    indefinite-term employment contracts concluded in accordance with the aforementioned Federal
+    Law No. (8) of 1980." Art 68(2): employers "must rectify their situation and convert
+    indefinite-term employment contracts into fixed-term employment contracts ... within one year
+    as of the date of its entry into force; and the Minister may extend this period". The judge
+    fails an answer that says unlimited contracts simply carry on under the 1980 law or that
+    states 1980-law rules, which are not in the corpus.
+- id: cite-en-009
+  category: cite
+  language: en
+  input: >-
+    I'm a foreign worker, full-time for three and a half years, and I plan to resign. A friend
+    says resigning means losing part of my end-of-service gratuity. Does the UAE Labour Law
+    reduce the gratuity when the worker is the one who resigns?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "51"}
+  scoring: [status, citations, "judge:grounding"]
+  reviewed: false
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)"]
+  depends_on: []
+  rationale: >-
+    Trap on resignation vs termination: the correct answer is "no difference". Art 51(2): the
+    foreign full-time worker "who has completed one or more years of continuous service, is
+    entitled to an end-of-service gratuity upon the end of his service", 21 days' basic wage per
+    year for the first five years; 51(3) adds parts of a year. Nothing in Art 51 turns on which
+    party ended the contract, so the judge fails any claim that resignation cuts the gratuity
+    (that was a 1980-law rule, not in the corpus).
+- id: cite-en-010
+  category: cite
+  language: en
+  input: >-
+    What fine can an employer face under the UAE Labour Law for employing a worker who has no
+    permit to work for that employer?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "60"}
+  scoring: [status, citations]
+  reviewed: false
+  refs: ["Labour Law Art 60(1)"]
+  depends_on: [OQ-007]
+  rationale: >-
+    Art 60(1)(a) "Employs a Worker with no permit to work for him." The English gives the fine as
+    "not less than on hundred thousand AED (100,000) and not exceeding two million AED
+    (1,000,000)"; the Arabic says "لا تقل عن (100,000) مائة ألف درهم ولا تزيد على (1,000,000)
+    مليون درهم". The expected maximum is AED 1,000,000 per the Arabic, which rests on OQ-007.
+- id: cite-en-011
+  category: cite
+  language: en
+  input: >-
+    My new employer says I have to pay back my visa and recruitment costs. Can an employer in
+    the UAE private sector charge a worker the fees and costs of recruiting and employing them?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "6"}
+  scoring: [status, citations]
+  reviewed: false
+  refs: ["Labour Law Art 6(4)"]
+  depends_on: []
+  rationale: >-
+    Art 6(4): "The Employer is prohibited from charging the Worker the fees and costs of
+    recruitment and employment or collecting them from him, whether directly or indirectly." The
+    answer is no.
+- id: cite-en-012
+  category: cite
+  language: en
+  input: >-
+    How many days of absence without a valid reason allow an employer to dismiss a worker
+    without notice under the UAE Labour Law?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "44"}
+  scoring: [status, citations]
+  reviewed: false
+  refs: ["Labour Law Art 44(8)"]
+  depends_on: []
+  rationale: >-
+    Art 44(8): the employer may dismiss without warning "If the Worker is absent from work
+    without a legitimate reason or an excuse acceptable to the Employer for more than twenty (20)
+    non-consecutive days, or more than seven (7) consecutive days", after a written investigation
+    and a written, reasoned decision (Art 44 opening words).
+- id: cite-ar-002
+  category: cite
+  language: ar
+  input: >-
+    أعمل في شركة خاصة في أبوظبي وقد أنهيت فترة التجربة. كم يومًا من الإجازة المرضية يحق لي في
+    السنة وفق قانون العمل، وكم منها مدفوع الأجر؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "31"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 31(3)"]
+  depends_on: []
+  rationale: >-
+    Art 31(3): "للعامل بعد انتهاء فترة التجربة، إجازة مرضية لا تزيد مدتها على (90) تسعين يومًا متصلة
+    أو متقطعة عن كل سنة"، منها "(15) خمسة عشر يومًا الأولى بأجر كامل" و"(30) ثلاثين يومًا التالية
+    بنصف أجر" و"المدة التي تلي ذلك بدون أجر".
+- id: cite-ar-003
+  category: cite
+  language: ar
+  input: >-
+    ما زلت في فترة التجربة ومرضت لعدة أيام، ويقول صاحب العمل إنه لن يدفع لي أجر هذه الأيام. ماذا
+    ينص قانون العمل بشأن الإجازة المرضية خلال فترة التجربة؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "31"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 31(2)"]
+  depends_on: []
+  rationale: >-
+    Art 31(2): "لا يستحق العامل إجازة مرضية مدفوعة الأجر خلال فترة التجربة، ومع ذلك يجوز لصاحب العمل
+    منحه إجازة مرضية بدون أجر، بناءً على تقرير طبي". Legal-advice boundary: the worker asks what the
+    law says about their situation, not whether the employer acted lawfully or what to do, so it
+    is answered.
+- id: cite-ar-004
+  category: cite
+  language: ar
+  input: >-
+    احتفظ صاحب العمل بجواز سفري منذ أن بدأت العمل لديه. هل يجيز قانون العمل الإماراتي لصاحب العمل
+    حجز الوثائق الرسمية للعامل؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "13"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 13(2)"]
+  depends_on: []
+  rationale: >-
+    Art 13(2): the employer must observe "عدم حجز الوثائق الرسمية الخاصة بالعامل، أو إجباره على
+    مغادرة الدولة حال انتهاء علاقة العمل". The answer is no.
+- id: cite-ar-005
+  category: cite
+  language: ar
+  input: >-
+    انتهى عقد عملي في نهاية الشهر الماضي. خلال كم يومًا يلزم قانون العمل صاحب العمل بأن يدفع لي
+    أجوري ومستحقاتي؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "53"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 53"]
+  depends_on: []
+  rationale: >-
+    Art 53: "على صاحب العمل أن يؤدي للعامل خلال (14) أربعة عشر يومًا من تاريخ انتهاء العقد، أجوره
+    وجميع مستحقاته الأخرى".
+- id: cite-ar-006
+  category: cite
+  language: ar
+  input: >-
+    ما أقل وأطول مدة إنذار يجوز الاتفاق عليها في عقد العمل لإنهائه وفق قانون العمل الإماراتي؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "43"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 43(1)"]
+  depends_on: []
+  rationale: >-
+    Art 43(1): written notice and work during the agreed notice period "على ألا تقل المدة عن (30)
+    ثلاثين يومًا، ولا تزيد على (90) تسعين يومًا".
+- id: cite-ar-007
+  category: cite
+  language: ar
+  input: >-
+    كم ساعة تُخفض ساعات العمل العادية للعاملين في القطاع الخاص خلال شهر رمضان؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: executive-regulations, article: "15"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Executive Regulations Art 15(2)", "Labour Law Art 17(4)"]
+  depends_on: []
+  rationale: >-
+    Art 17(4) leaves Ramadan hours to the Executive Regulations ("تحدد اللائحة التنفيذية لهذا
+    المرسوم بقانون ساعات العمل في شهر رمضان"). ER Art 15(2): "تخفض ساعات العمل العادية ساعتين خلال
+    شهر رمضان المبارك." The answer must cite ER Art 15; citing Art 17 as well is fine.
+- id: cite-ar-008
+  category: cite
+  language: ar
+  input: >-
+    لم أستخدم إجازتي السنوية كاملة هذا العام. هل يجوز لي ترحيل كامل الرصيد إلى السنة القادمة؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: executive-regulations, article: "19"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Executive Regulations Art 19(1)", "Labour Law Art 29(5)"]
+  depends_on: []
+  rationale: >-
+    ER Art 19(1): "يجوز للعامل ترحيل ما لا يزيد على نصف الإجازة السنوية للسنة التي تليها أو أن يتفق
+    مع صاحب العمل على منحه بدلاً نقديًّا عنها". Art 29(5) allows carrying forward "بموافقة صاحب
+    العمل". So not the whole balance: at most half, with the employer's approval.
+- id: cite-ar-009
+  category: cite
+  language: ar
+  input: >-
+    تركت العمل قبل أن أستخدم رصيد إجازتي السنوية. هل أستحق أجرًا عن أيام الإجازة التي لم أستعملها،
+    وهل يشمل ذلك أجزاء السنة الأخيرة؟ وعلى أي أجر يُحسب؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "29"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 29(9)"]
+  depends_on: [OQ-004]
+  rationale: >-
+    Arabic Art 29(9): "يحق للعامل الحصو ل على أجرة أيام الإجازة المستحقة إذا ترك العمل قبل استعماله
+    لها، أيًّا كانت مدتها ... كما يستحق أجرة الإجازة عن أجزاء السنة بنسبة ما قضاه منها في العمل،
+    وتحسب وفق الأجر الأساسي." (the ingested text splits "الحصو ل"). The pro-rata sentence and the
+    basic-wage basis are missing from the English 29(9) (OQ-004). ER Art 19(2) also puts the
+    cash-out on the basic wage.
+- id: cite-ar-010
+  category: cite
+  language: ar
+  input: >-
+    أعمل بعقد عمل مؤقت لمدة ثمانية أشهر لإنجاز مشروع محدد. هل أستحق مكافأة نهاية الخدمة عند انتهاء
+    العقد وفق اللائحة التنفيذية لقانون العمل؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: executive-regulations, article: "30"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Executive Regulations Art 30(2)"]
+  depends_on: [OQ-006]
+  rationale: >-
+    Arabic ER Art 30(2): "لا تنطبق مكافأة نهاية الخدمة في حال العمل بنمط التوظيف المؤقت إذا كانت
+    مدته أقل من سنة." The English reads "temporary employment model or if its duration is less
+    than a year". An eight-month temporary contract gets no gratuity under either text; the
+    eight months are chosen so the answer does not hinge on OQ-006, but the case rests on ER
+    30(2), so it carries OQ-006.
+- id: cite-ar-011
+  category: cite
+  language: ar
+  input: >-
+    رُزقت بمولود الشهر الماضي. هل يمنحني قانون العمل بصفتي أبًا إجازة بأجر لرعاية طفلي؟ وكم مدتها
+    ومتى يجب أن آخذها؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "32"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 32(1)"]
+  depends_on: []
+  rationale: >-
+    Art 32(1)(b): "إجازة والدية لمدة (5) خمسة أيام عمل، للعامل (سواءً الأب أو الأم) الذي يرزق
+    بمولود، لرعاية طفله، يستحقها بصورة متصلة أو متقطعة خلال مدة (6) ستة أشهر من تاريخ ولادة الطفل."
+- id: cite-ar-012
+  category: cite
+  language: ar
+  input: >-
+    ما الحد الأقصى لساعات العمل العادية في اليوم وفي الأسبوع وفق قانون العمل، وكم يوم راحة
+    أسبوعية مدفوعة الأجر يستحق العامل على الأقل؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "17"}
+      - {instrument: labour-law, article: "21"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 17(1)", "Labour Law Art 21"]
+  depends_on: []
+  rationale: >-
+    Art 17(1): "يكون الحد الأقصى لساعات العمل العادية للعمال (8) ثماني ساعات في اليوم الواحد أو
+    (48) ثمانٍ وأربعين ساعة في الأسبوع." Art 21: "يمنح العامل راحة أسبوعية مدفوعة الأجر لا تقل عن يوم
+    واحد". Two articles, both required.
+- id: cite-ar-013
+  category: cite
+  language: ar
+  input: >-
+    يخصم صاحب العمل من راتبي مبالغ بسبب مخالفات وأقساط قرض حصلت عليه منه. ما الحد الأقصى لمجموع
+    ما يجوز خصمه من أجري شهريًا وفق قانون العمل؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "25"}
+  scoring: [status, citations, answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 25(1)", "Labour Law Art 25(2)"]
+  depends_on: []
+  rationale: >-
+    Art 25(2): "إذا تعددت الأسباب الموجبة للاقتطاع أو الخصم من الأجر، فلا يجوز في جميع الأحوال أن
+    تزيد نسبة الاستقطاع و/ أو الخصم على (50%) خمسين في المائة من الأجر." Art 25(1)(f) caps
+    deductions for violations at 5% of the wage, and 25(1)(a) requires written consent and no
+    interest for loans.

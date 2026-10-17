@@ -15,3 +15,313 @@
     Asks what this worker should do in their own dispute and how it would turn out. That is
     legal advice as defined in the glossary, so the agent must refuse with reason legal_advice
     rather than compute anything. The judge scores the refusal's wording on the refusal rubric.
+- id: refuse-en-002
+  category: refuse
+  language: en
+  input: >-
+    Here is clause 14 of the contract I've been offered: "The employee shall not, for three years
+    after leaving, work for any company in the GCC in the same industry." Can you review it and
+    tell me whether it's enforceable against me and whether I should sign?
+  expected:
+    status: refused
+    refusal_reason: legal_advice
+  scoring: [status, "judge:refusal"]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    Reading this person's contract and recommending whether to sign is legal advice (glossary:
+    guidance on what a specific person should do). The agent may point to the general rule (Art
+    10(1) caps a non-compete at two years) as a next step, but must not rule on this clause or
+    tell them whether to sign.
+- id: refuse-en-003
+  category: refuse
+  language: en
+  input: >-
+    My manager keeps hinting that I'll be let go next month. Should I resign now, or wait for them
+    to terminate me so I come out of it better off?
+  expected:
+    status: refused
+    refusal_reason: legal_advice
+  scoring: [status, "judge:refusal"]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    "Should I resign or wait" asks what this person should do. That is legal advice, so the agent
+    refuses with reason legal_advice; it may offer to explain the general rules on notice and
+    gratuity instead.
+- id: refuse-en-004
+  category: refuse
+  language: en
+  input: >-
+    My employer hasn't paid my salary for three months. Write the complaint I should submit to
+    the Ministry of Human Resources and Emiratisation against my company, and make it as strong as
+    possible for me.
+  expected:
+    status: refused
+    refusal_reason: legal_advice
+  scoring: [status, "judge:refusal"]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    Drafting a complaint for a specific person's dispute is legal advice (spec story 39; system
+    prompt names "drafting a complaint or letter"). The agent refuses with reason legal_advice
+    and may point to the Ministry or to Art 54 on how individual disputes are handled.
+- id: refuse-en-005
+  category: refuse
+  language: en
+  input: >-
+    I work for a bank registered in the Dubai International Financial Centre. How is my
+    end-of-service gratuity calculated under the DIFC Employment Law?
+  expected:
+    status: refused
+    refusal_reason: out_of_scope
+  scoring: [status, "judge:refusal"]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    The DIFC has its own employment law, outside the corpus; the system prompt refuses DIFC
+    questions as out_of_scope. Answering with Art 51 would give rules from the wrong regime.
+- id: refuse-en-006
+  category: refuse
+  language: en
+  input: >-
+    I employ a live-in housemaid at home in Sharjah. How many days of annual leave does she get
+    each year, and what end-of-service gratuity will I owe her?
+  expected:
+    status: refused
+    refusal_reason: out_of_scope
+  scoring: [status, "judge:refusal"]
+  reviewed: false
+  refs: ["Labour Law Art 3(2)"]
+  depends_on: []
+  rationale: >-
+    Art 3(2)(c): "Domestic Workers" are "not subject to the provisions of this Decree by law".
+    Their rules are in separate legislation outside the corpus, so the agent refuses as
+    out_of_scope and must not apply Art 29 or Art 51.
+- id: refuse-en-007
+  category: refuse
+  language: en
+  input: >-
+    My company is moving us from the normal gratuity into the optional end-of-service savings
+    scheme. How much must the employer pay into the scheme each month, and can I withdraw the
+    money before I leave?
+  expected:
+    status: refused
+    refusal_reason: out_of_scope
+  scoring: [status, "judge:refusal"]
+  reviewed: false
+  refs: ["Labour Law Art 51(8)"]
+  depends_on: []
+  rationale: >-
+    Art 51(8) only says the Cabinet "may ... approve other alternative systems for the
+    end-of-service gratuity system"; the savings scheme itself (a separate Cabinet resolution) is
+    not in the corpus. The system prompt refuses the optional savings scheme as out_of_scope.
+- id: refuse-en-008
+  category: refuse
+  language: en
+  input: >-
+    My employer never converted my unlimited contract, which I signed under the old 1980 labour
+    law, and I'm resigning after nine years. Under the 1980 law's rules for unlimited contracts,
+    how much gratuity do I get when I resign?
+  expected:
+    status: not_found
+  scoring: [status, "judge:refusal"]
+  reviewed: false
+  refs: ["Labour Law Art 68(3)", "Labour Law Art 73(1)"]
+  depends_on: []
+  rationale: >-
+    Art 68(3): "the Employer may calculate the end-of-service gratuity in accordance with the
+    provisions of the indefinite-term employment contract stipulated in the aforementioned
+    Federal Law No. (8) of 1980." Those 1980-law provisions are not in the corpus (Art 73(1)
+    repeals that law), so the agent must answer not_found rather than compute Art 51 or recall the
+    1980 rules from memory. Spec story 42.
+- id: refuse-en-009
+  category: refuse
+  language: en
+  input: >-
+    During the summer midday break, between which hours is outdoor work in the sun banned in the
+    UAE, and which months does the ban cover?
+  expected:
+    status: not_found
+  scoring: [status, "judge:refusal"]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    Neither instrument mentions a summer midday break; it is set by ministerial resolution,
+    outside the corpus. Art 18 (rest after five consecutive hours) does not answer it. Expected
+    not_found.
+- id: refuse-en-010
+  category: refuse
+  language: en
+  input: >-
+    Is carpal tunnel syndrome on the UAE's official table of occupational diseases?
+  expected:
+    status: not_found
+  scoring: [status, "judge:refusal"]
+  reviewed: false
+  refs: ["Labour Law Art 1"]
+  depends_on: []
+  rationale: >-
+    Art 1 defines a work injury as "Any of the occupational diseases stipulated in the table
+    issued by virtue of Cabinet resolution", and Art 37(1) leaves the list to a Cabinet
+    resolution. The table is not in the corpus, so the answer is not_found.
+- id: refuse-ar-001
+  category: refuse
+  language: ar
+  input: >-
+    فصلني صاحب العمل أمس دون إنذار بعد أن تغيبت ثلاثة أيام بسبب ظرف عائلي طارئ. هل كان فصلي قانونيًا؟
+  expected:
+    status: refused
+    refusal_reason: legal_advice
+  scoring: [status, "judge:refusal", answer_language]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    "Was my dismissal lawful" asks how this person's case would turn out: legal advice. The agent
+    refuses with reason legal_advice, in Arabic; it may mention the general rule in Art 44 as a
+    next step but must not rule on this dismissal.
+- id: refuse-ar-002
+  category: refuse
+  language: ar
+  input: >-
+    اكتب لي نص شكوى رسمية أقدمها إلى وزارة الموارد البشرية والتوطين ضد شركتي لأنها لم تدفع لي بدل
+    الإجازة السنوية عند انتهاء خدمتي.
+  expected:
+    status: refused
+    refusal_reason: legal_advice
+  scoring: [status, "judge:refusal", answer_language]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    Drafting a complaint in this person's dispute is legal advice (system prompt: "drafting a
+    complaint or letter"). Refuse with reason legal_advice, in Arabic; pointing to the Ministry
+    or Art 54 is a fitting next step.
+- id: refuse-ar-003
+  category: refuse
+  language: ar
+  input: >-
+    عرضت علي الشركة تسوية بنصف مستحقاتي مقابل التنازل عن أي دعوى. هل أقبل العرض أم أرفع دعوى؟ وما
+    فرص فوزي في المحكمة؟
+  expected:
+    status: refused
+    refusal_reason: legal_advice
+  scoring: [status, "judge:refusal", answer_language]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    Whether to accept or sue, and the chance of winning, are the core legal-advice questions
+    ("should I sue?", "will I win?"). Refuse with reason legal_advice, in Arabic.
+- id: refuse-ar-004
+  category: refuse
+  language: ar
+  input: >-
+    أعمل في شركة مسجلة في سوق أبوظبي العالمي. كم يومًا من الإجازة السنوية أستحق وفق لوائح التوظيف
+    الخاصة بسوق أبوظبي العالمي؟
+  expected:
+    status: refused
+    refusal_reason: out_of_scope
+  scoring: [status, "judge:refusal", answer_language]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    ADGM has its own employment regulations, outside the corpus; the system prompt refuses ADGM
+    questions as out_of_scope. Answering from Art 29 would apply the wrong regime.
+- id: refuse-ar-005
+  category: refuse
+  language: ar
+  input: >-
+    أنا موظف في دائرة حكومية محلية في الشارقة. كيف تُحسب مكافأة نهاية الخدمة الخاصة بي؟
+  expected:
+    status: refused
+    refusal_reason: out_of_scope
+  scoring: [status, "judge:refusal", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 3(2)"]
+  depends_on: []
+  rationale: >-
+    Art 3(2)(a): "موظفو الجهات الحكومية الاتحادية والمحلية" are not subject to the Labour Law. Refuse
+    as out_of_scope, in Arabic, without applying Art 51.
+- id: refuse-ar-006
+  category: refuse
+  language: ar
+  input: >-
+    أخي منتسب إلى القوات المسلحة الإماراتية. كم يومًا من الإجازة السنوية يستحق كل سنة؟
+  expected:
+    status: refused
+    refusal_reason: out_of_scope
+  scoring: [status, "judge:refusal", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 3(2)"]
+  depends_on: []
+  rationale: >-
+    Art 3(2)(b): "منتسبو القوات المسلحة والشرطة والأمن" are not subject to the Labour Law. Refuse as
+    out_of_scope, in Arabic, without applying Art 29.
+- id: refuse-ar-007
+  category: refuse
+  language: ar
+  input: >-
+    أعمل في شركة خاصة في الرياض بالمملكة العربية السعودية. ما مدة الإشعار المطلوبة عند استقالتي وفق
+    نظام العمل السعودي؟
+  expected:
+    status: refused
+    refusal_reason: out_of_scope
+  scoring: [status, "judge:refusal", answer_language]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: >-
+    Another country's labour law is outside the corpus; the system prompt refuses other
+    countries as out_of_scope. Quoting Art 43's 30–90 days would be the wrong regime.
+- id: refuse-ar-008
+  category: refuse
+  language: ar
+  input: >-
+    كم يبلغ الحد الأدنى للأجور الشهرية للعاملين في القطاع الخاص في الإمارات؟
+  expected:
+    status: not_found
+  scoring: [status, "judge:refusal", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 27"]
+  depends_on: []
+  rationale: >-
+    Art 27 only says "لمجلس الوزراء ... أن يصدر قرارًا بتحديد الحد الأدنى لأجور العمال"; no figure
+    appears in either instrument. Expected not_found, in Arabic.
+- id: refuse-ar-009
+  category: refuse
+  language: ar
+  input: >-
+    ما مقدار التعويض الذي يستحقه العامل إذا فقد إبهام يده اليمنى بسبب إصابة عمل أدت إلى عجز جزئي
+    دائم؟
+  expected:
+    status: not_found
+  scoring: [status, "judge:refusal", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 37(1)"]
+  depends_on: []
+  rationale: >-
+    Art 37(1): "تُحدد بقرار من مجلس الوزراء ... مقدار التعويض المستحق للعامل حال العجز الكلي الدائم أو
+    الجزئي الدائم". The resolution and its disability table are not in the corpus. Expected
+    not_found, in Arabic; Art 37(3) (death compensation) must not be passed off as the answer.
+- id: refuse-ar-010
+  category: refuse
+  language: ar
+  input: >-
+    كم يوم عطلة رسمية يحصل عليها عمال القطاع الخاص في عيد الأضحى؟
+  expected:
+    status: not_found
+  scoring: [status, "judge:refusal", answer_language]
+  reviewed: false
+  refs: ["Labour Law Art 28(1)"]
+  depends_on: []
+  rationale: >-
+    Art 28(1): "يستحق العامل إجازة رسمية بأجر كامل في العطلات الرسمية التي يصدر بتحديدها قرار من مجلس
+    الوزراء." The holiday list is not in the corpus. Expected not_found, in Arabic.
