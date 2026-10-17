@@ -197,7 +197,7 @@
   scoring: [status, tool_call]
   reviewed: false
   refs: ["Executive Regulations Art 30"]
-  depends_on: []
+  depends_on: [OQ-006]
   rationale: >-
     ER Art 30(2): the end of service pay does not apply to the temporary work pattern,
     whatever the length of service (547 days here). Expected answer: no gratuity is due under

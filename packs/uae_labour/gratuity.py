@@ -30,6 +30,7 @@ TEMPORARY_WORK = Ref(EXECUTIVE_REGULATIONS, "30", "2")
 
 CAP_QUESTION = "OQ-002"
 PRO_RATA_QUESTION = "OQ-008"
+TEMPORARY_WORK_QUESTION = "OQ-006"
 
 FIRST_YEARS_DAYS = 5 * DAYS_IN_YEAR
 DAYS_PER_YEAR_FIRST_FIVE = 21
@@ -71,7 +72,7 @@ def calculate_gratuity(
     if nationality == "national":
         return GratuityResult("national_worker", None, [NATIONAL_WORKER])
     if work_pattern == "temporary":
-        return GratuityResult("temporary_work", None, [TEMPORARY_WORK])
+        return GratuityResult("temporary_work", None, [TEMPORARY_WORK], [TEMPORARY_WORK_QUESTION])
 
     service_days = (end_date - start_date).days + 1
     counted_days = service_days - unpaid_absence_days

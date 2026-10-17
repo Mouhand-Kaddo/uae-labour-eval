@@ -75,11 +75,19 @@ Until this is decided, the annual-leave tool gives nothing for exactly 180 days 
 
 **Decision:** _open_
 
-## OQ-006: Scope of "less than a year" in ER Art 30(2)
+## OQ-006: Temporary work and "less than a year" in ER Art 30(2); English and Arabic differ
 
-- **ER Art 30(2):** "The end of service pay shall not be applicable in the event of operating under a temporary employment model or if its duration is less than a year."
+- **ER Art 30(2) (EN):** "The end of service pay shall not be applicable in the event of operating under a temporary employment model or if its duration is less than a year."
+- **ER Art 30(2) (AR):** "لا تنطبق مكافأة نهاية الخدمة في حال العمل بنمط التوظيف المؤقت إذا كانت مدته أقل من سنة" (end-of-service pay does not apply to work under the temporary pattern *if its duration is less than a year*).
 
-Does "if its duration is less than a year" apply only to temporary work, or to part-time and job-sharing too? (Art 51(2) already requires one year of continuous service for full-time workers.)
+The English reads as two separate exclusions (all temporary work, or any contract under a year). The Arabic reads as one: temporary work shorter than a year. The portal says the Arabic prevails, which would mean temporary work of a year or more earns gratuity, but the Arabic doesn't say how it is computed (Art 51 as for full-time, or otherwise).
+
+Questions:
+1. Does temporary work of one year or more earn gratuity?
+2. If so, is it computed under Art 51 like full-time work?
+3. Does "less than a year" also apply to part-time and job-sharing (only relevant under the English reading)?
+
+Until this is decided, the gratuity tool returns no gratuity for temporary work, cites ER Art 30(2) and returns OQ-006; cases that depend on it carry `depends_on: [OQ-006]`.
 
 **Decision:** _open_
 
