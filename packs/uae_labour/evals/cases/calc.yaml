@@ -800,7 +800,7 @@
     notice must they give me, and is a probation that long allowed?
   expected:
     status: answered
-    numbers: [14, 6]
+    numbers: [14, 180]
     tool_call:
       name: check_probation
       arguments:
@@ -816,7 +816,7 @@
     (Art 67), so at most 180 days. 1 Feb to 30 Sep 2025 inclusive = 28 + 31 + 30 + 31 + 30 + 31
     + 31 + 30 = 242 days, which exceeds the maximum. The employer may end the contract during
     probation with at least 14 days' written notice. Expected answer: 14 days' notice; probation
-    may be at most 6 months.
+    may be at most 180 days (six 30-day months).
 
 - id: calc-probation-en-002
   category: calc
