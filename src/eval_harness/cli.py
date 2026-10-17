@@ -10,6 +10,7 @@ import httpx
 from eval_harness.budget import remaining_budget
 from eval_harness.config import Config, ConfigError, load_config
 from eval_harness.fetch import FetchError, fetch_sources
+from eval_harness.ingest import IngestError, ingest
 from eval_harness.ledger import Ledger
 from eval_harness.manifest import ManifestError, load_manifest
 from eval_harness.openrouter import OpenRouterClient, OpenRouterError
@@ -28,6 +29,8 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
         return EXIT_REFUSED
     if args.command == "fetch":
         return _fetch(config, transport)
+    if args.command == "ingest":
+        return _ingest(config)
 
     api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if not api_key:
@@ -65,6 +68,20 @@ def _fetch(config: Config, transport: httpx.BaseTransport | None) -> int:
     return 0
 
 
+def _ingest(config: Config) -> int:
+    try:
+        chunks = ingest(load_manifest(config.pack), config.sources_dir, config.index_dir)
+    except (ManifestError, IngestError) as exc:
+        print(f"ingest failed: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    for source in sorted({c.source for c in chunks}):
+        articles = {c.article for c in chunks if c.source == source}
+        count = sum(c.source == source for c in chunks)
+        print(f"ok {source}: {len(articles)} articles, {count} chunks")
+    print(f"wrote {len(chunks)} chunks to {config.index_dir}")
+    return 0
+
+
 def _budget(config: Config, client: OpenRouterClient) -> int:
     ledger_total = Ledger(config.ledger_path).total()
     print(f"ledger total USD {ledger_total:.6f}")
@@ -98,5 +115,6 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--repeats", type=_positive_int, default=1, help="run each case K times")
 
     commands.add_parser("fetch", help="download the manifest's sources and verify their SHA-256")
+    commands.add_parser("ingest", help="chunk the fetched sources into the search index")
     commands.add_parser("budget", help="show ledger total, key usage and remaining budget")
     return parser

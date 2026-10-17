@@ -163,3 +163,16 @@ def test_fetch_rejects_a_manifest_entry_missing_a_field(project, capsys):
     assert fetch(project, FakeWeb({})) == 2
 
     assert "language" in capsys.readouterr().err
+
+
+def test_ingest_refuses_a_source_that_has_not_been_fetched(project, capsys):
+    (project / "pack" / "corpus" / "manifest.toml").write_text(
+        manifest(sha256(OFFICIAL)).replace(
+            "indexed = false", "indexed = true\nheading_pattern = 'Article \\((\\d+)\\)'"
+        )
+    )
+
+    assert main(["--config", str(project / "config.toml"), "ingest"]) == 2
+
+    assert "run fetch" in capsys.readouterr().err
+    assert not (project / "data" / "index").exists()
