@@ -5,7 +5,7 @@ from fake_openrouter import fake_embedding
 
 from eval_harness.embeddings import append_vectors
 from eval_harness.ingest import Chunk, IngestError, write_chunks
-from eval_harness.search import SearchIndex, search_tools
+from eval_harness.search import SearchIndex, search_tools, tokenize
 
 
 def chunk(article, part, text, instrument="statute", language="en"):
@@ -222,3 +222,13 @@ def test_get_section_reads_a_planted_article_like_any_other(index):
 
     assert result_ids(result) == ["statute:en:112:1"]
     assert retrieved[0] == [PLANTED]
+
+
+def test_tokenize_normalises_arabic_spelling_variants():
+    text = "الأَجْرُ الأساسيّ إلى الإجـــازة آخر ٱلعمل"
+
+    assert tokenize(text) == ["الاجر", "الاساسي", "الي", "الاجازه", "اخر", "العمل"]
+
+
+def test_tokenize_casefolds_english():
+    assert tokenize("Basic WAGE, Art 51") == ["basic", "wage", "art", "51"]

@@ -4,7 +4,7 @@ import datetime as dt
 import hashlib
 import re
 import tomllib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -24,6 +24,7 @@ class Source:
     indexed: bool
     heading_pattern: re.Pattern[str] | None = None
     drop_line_pattern: re.Pattern[str] | None = None
+    glyphs: dict[tuple[str, int], str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -83,7 +84,7 @@ def _parse_source(entry: object, instruments: dict[str, str]) -> Source:
     missing = REQUIRED_FIELDS.keys() - entry.keys()
     if missing:
         raise ManifestError(f"{label}: missing fields {sorted(missing)}")
-    unknown = entry.keys() - REQUIRED_FIELDS.keys() - set(PATTERN_FIELDS)
+    unknown = entry.keys() - REQUIRED_FIELDS.keys() - set(PATTERN_FIELDS) - {"glyphs"}
     if unknown:
         raise ManifestError(f"{label}: unknown fields {sorted(unknown)}")
     for name, expected_type in REQUIRED_FIELDS.items():
@@ -96,7 +97,24 @@ def _parse_source(entry: object, instruments: dict[str, str]) -> Source:
     patterns = {name: _compile(label, name, entry.get(name)) for name in PATTERN_FIELDS}
     if entry["indexed"] and patterns["heading_pattern"] is None:
         raise ManifestError(f"{label}: an indexed source needs a heading_pattern")
-    return Source(**{name: entry[name] for name in REQUIRED_FIELDS}, **patterns)
+    glyphs = _glyph_table(label, entry.get("glyphs", {}))
+    return Source(**{name: entry[name] for name in REQUIRED_FIELDS}, **patterns, glyphs=glyphs)
+
+
+def _glyph_table(label: str, raw: object) -> dict[tuple[str, int], str]:
+    """`{font name: {glyph ID: text}}` from the manifest, keyed by (font name, glyph ID)."""
+    problem = f"{label}: glyphs must map font names to tables of glyph ID = text"
+    if not isinstance(raw, dict):
+        raise ManifestError(problem)
+    table = {}
+    for font, glyphs in raw.items():
+        if not isinstance(glyphs, dict):
+            raise ManifestError(problem)
+        for glyph_id, text in glyphs.items():
+            if not (glyph_id.isascii() and glyph_id.isdigit()) or not isinstance(text, str):
+                raise ManifestError(f"{problem}; bad entry {font!r} {glyph_id!r}")
+            table[(font, int(glyph_id))] = text
+    return table
 
 
 def _compile(label: str, name: str, pattern: object) -> re.Pattern[str] | None:

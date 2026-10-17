@@ -10,10 +10,12 @@ from pdfminer.high_level import extract_text
 
 from eval_harness.fetch import source_path, verified
 from eval_harness.manifest import Manifest, Source
+from eval_harness.pdf_text import REPLACEMENT, pdf_text
 
 MAX_PART_CHARS = 1500
 CLAUSE_START = re.compile(r"\d+\.\s")
 CHUNKS_FILE = "chunks.jsonl"
+RIGHT_TO_LEFT_LANGUAGES = {"ar"}
 
 
 class IngestError(Exception):
@@ -33,7 +35,15 @@ class Chunk:
 
 
 def chunk_text(text: str, source: Source, *, max_chars: int = MAX_PART_CHARS) -> list[Chunk]:
-    """Split one source's text into article chunks; long articles become several parts."""
+    """Split one source's text into article chunks; long articles become several parts.
+
+    Raises IngestError if the text still holds U+FFFD (a glyph with no known letters).
+    """
+    if REPLACEMENT in text:
+        raise IngestError(
+            f"{source.id}: {text.count(REPLACEMENT)} unmapped glyph(s) (U+FFFD) in the text; "
+            "add them to the source's glyph table"
+        )
     chunks = []
     for article, lines in _split_articles(_clean_lines(text, source), source):
         for part, part_text in enumerate(_parts(lines, max_chars), start=1):
@@ -106,6 +116,31 @@ def extract_pdf_text(path: Path) -> str:
     return extract_text(path)
 
 
+def source_text(path: Path, source: Source) -> str:
+    """A source's text; right-to-left languages are rebuilt glyph by glyph (ADR-0004)."""
+    if source.language in RIGHT_TO_LEFT_LANGUAGES:
+        return pdf_text(path, source.glyphs)
+    return extract_pdf_text(path)
+
+
+def check_article_sets(chunks: list[Chunk]) -> None:
+    """Raise IngestError unless every language of an instrument has the same articles."""
+    articles: dict[str, dict[str, set[str]]] = {}
+    for chunk in chunks:
+        articles.setdefault(chunk.instrument, {}).setdefault(chunk.language, set()).add(
+            chunk.article
+        )
+    for instrument, by_language in articles.items():
+        union = set().union(*by_language.values())
+        differences = {
+            language: sorted(union - found, key=int)
+            for language, found in sorted(by_language.items())
+            if union - found
+        }
+        if differences:
+            raise IngestError(f"{instrument}: article sets differ; missing {differences}")
+
+
 def ingest(manifest: Manifest, sources_dir: Path, index_dir: Path) -> list[Chunk]:
     """Chunk every indexed source and write them to the index directory."""
     chunks: list[Chunk] = []
@@ -113,7 +148,8 @@ def ingest(manifest: Manifest, sources_dir: Path, index_dir: Path) -> list[Chunk
         path = source_path(sources_dir, source)
         if not verified(path, source):
             raise IngestError(f"{source.id}: {path} is missing or fails its hash; run fetch")
-        chunks.extend(chunk_text(extract_pdf_text(path), source))
+        chunks.extend(chunk_text(source_text(path, source), source))
+    check_article_sets(chunks)
     write_chunks(chunks, index_dir)
     return chunks
 

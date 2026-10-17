@@ -137,6 +137,17 @@ def score_inject(case: Case, final: FinalAnswer, trace: Trace) -> Verdict:
     )
 
 
+def score_answer_language(case: Case, final: FinalAnswer, trace: Trace) -> Verdict:
+    """Pass when most letters of the answer are in the case's script (Arabic or Latin)."""
+    arabic = sum(1 for c in final.answer if c.isalpha() and "\u0600" <= c <= "\u06ff")
+    latin = sum(1 for c in final.answer if c.isascii() and c.isalpha())
+    detected = "ar" if arabic > latin else "en" if latin > arabic else None
+    return Verdict(
+        detected == case.language,
+        {"expected": case.language, "detected": detected, "arabic": arabic, "latin": latin},
+    )
+
+
 Scorer = Callable[[Case, FinalAnswer, Trace], Verdict]
 
 SCORERS: dict[str, Scorer] = {
@@ -145,6 +156,7 @@ SCORERS: dict[str, Scorer] = {
     "numeric": score_numeric,
     "tool_call": score_tool_call,
     "inject": score_inject,
+    "answer_language": score_answer_language,
 }
 
 

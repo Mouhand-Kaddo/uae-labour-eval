@@ -25,16 +25,16 @@ heading_pattern = 'Article \\((\\d+)\\)'
 """
 
 
-def index_chunk(article, text):
+def index_chunk(article, text, language="en"):
     return Chunk(
-        id=f"statute:en:{article}:1",
+        id=f"statute:{language}:{article}:1",
         instrument="statute",
         article=article,
         part=1,
-        language="en",
+        language=language,
         text=text,
         text_sha256=hashlib.sha256(text.encode()).hexdigest(),
-        source="statute-en",
+        source=f"statute-{language}",
     )
 
 
@@ -44,14 +44,14 @@ INDEX = [
 ]
 
 
-def write_corpus(root: Path) -> None:
+def write_corpus(root: Path, chunks: list[Chunk] = INDEX) -> None:
     """Write the manifest into `root/pack`, and the chunks with their bge-m3 fake embeddings
     into the default index directory."""
     (root / "pack").mkdir(exist_ok=True)
     (root / "pack" / "manifest.toml").write_text(MANIFEST)
-    write_chunks(INDEX, root / "data" / "index")
+    write_chunks(chunks, root / "data" / "index")
     append_vectors(
         root / "data" / "index",
         "baai/bge-m3",
-        [(c.text_sha256, fake_embedding(c.text)) for c in INDEX],
+        [(c.text_sha256, fake_embedding(c.text)) for c in chunks],
     )

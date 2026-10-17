@@ -34,10 +34,10 @@ def test_committed_config_points_at_a_pack_whose_cases_load():
     assert not any(case.reviewed for case in CASES)
 
 
-def test_committed_manifest_indexes_only_the_english_labour_law_for_now():
+def test_committed_manifest_indexes_the_labour_law_in_both_languages_for_now():
     manifest = load_manifest(CONFIG.pack)
 
-    assert [s.id for s in manifest.indexed_sources] == ["labour-law-en"]
+    assert [s.id for s in manifest.indexed_sources] == ["labour-law-en", "labour-law-ar"]
     assert all(s.wayback_url.startswith("https://web.archive.org/web/") for s in manifest.sources)
 
 
