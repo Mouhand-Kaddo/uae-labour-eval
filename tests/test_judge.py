@@ -228,12 +228,15 @@ def test_judge_calls_are_recorded_in_the_ledger_and_the_run_spend(project, capsy
     records = read_jsonl(project / "runs" / "ledger.jsonl")
     assert [(r["purpose"], r["model"]) for r in records] == [
         ("agent", HAIKU),
+        ("embedding", "baai/bge-m3"),
         ("agent", HAIKU),
         ("judge", JUDGE),
     ]
     assert records[-1]["case_id"] == "grounding-en-001"
     assert records[-1]["cost"] == 0.003
-    assert "run spend USD 0.003200" in capsys.readouterr().out
+    total = sum(r["cost"] for r in records)
+    assert total > 0.003
+    assert f"run spend USD {total:.6f}" in capsys.readouterr().out
 
 
 def test_judge_spend_that_crosses_the_remaining_budget_aborts_the_run(project, capsys):

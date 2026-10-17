@@ -9,6 +9,7 @@ import httpx
 
 from eval_harness.budget import remaining_budget
 from eval_harness.config import Config, ConfigError, load_config
+from eval_harness.embeddings import EmbedRefused, embed_corpus
 from eval_harness.fetch import FetchError, fetch_sources
 from eval_harness.ingest import IngestError, ingest
 from eval_harness.ledger import Ledger
@@ -43,6 +44,8 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
 
     if args.command == "budget":
         return _budget(config, client)
+    if args.command == "embed":
+        return _embed(config, client)
 
     try:
         run = run_eval(
@@ -82,6 +85,16 @@ def _ingest(config: Config) -> int:
         count = sum(c.source == source for c in chunks)
         print(f"ok {source}: {len(articles)} articles, {count} chunks")
     print(f"wrote {len(chunks)} chunks to {config.index_dir}")
+    return 0
+
+
+def _embed(config: Config, client: OpenRouterClient) -> int:
+    try:
+        count = embed_corpus(config, client)
+    except (EmbedRefused, IngestError, OpenRouterError) as exc:
+        print(f"embed failed: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    print(f"embedded {count} chunk(s) with {config.embedding_model}")
     return 0
 
 
@@ -133,6 +146,7 @@ def _parser() -> argparse.ArgumentParser:
 
     commands.add_parser("fetch", help="download the manifest's sources and verify their SHA-256")
     commands.add_parser("ingest", help="chunk the fetched sources into the search index")
+    commands.add_parser("embed", help="embed chunks that have no cached vector (paid)")
     commands.add_parser("budget", help="show ledger total, key usage and remaining budget")
 
     report = commands.add_parser("report", help="write the HTML report for a run")

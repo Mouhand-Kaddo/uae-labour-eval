@@ -1,6 +1,7 @@
 """A scripted stand-in for OpenRouter, served through httpx.MockTransport."""
 
 import json
+import re
 
 import httpx
 
@@ -29,6 +30,24 @@ MODELS = [
         ],
     },
 ]
+
+EMBEDDING_MODELS = [
+    {"id": "baai/bge-m3", "pricing": {"prompt": "0.00000001", "completion": "0"}},
+]
+
+CONCEPTS = {
+    "probation": {"probation", "التجربة"},
+    "leave": {"leave", "إجازة"},
+    "gratuity": {"gratuity", "مكافأة"},
+    "notice": {"notice", "warning", "الإنذار"},
+    "wage": {"wage", "الأجر"},
+}
+
+
+def fake_embedding(text):
+    """A deterministic stand-in for bge-m3: one dimension per concept, in either language."""
+    words = re.findall(r"\w+", text.casefold())
+    return [float(sum(word in terms for word in words)) for terms in CONCEPTS.values()]
 
 
 def usage(cost, prompt_tokens=900, completion_tokens=60, cached_tokens=0):
@@ -89,12 +108,25 @@ def text_response(text, finish_reason="stop", cost=0.0001):
     }
 
 
+def embeddings_response(texts, cost):
+    return {
+        "data": [
+            {"object": "embedding", "index": i, "embedding": fake_embedding(text)}
+            for i, text in enumerate(texts)
+        ],
+        "model": "baai/bge-m3",
+        "usage": {"prompt_tokens": 10 * len(texts), "total_tokens": 10 * len(texts), "cost": cost},
+    }
+
+
 class FakeOpenRouter:
-    def __init__(self, chat_responses, key_usage=0.0, key_status=200):
+    def __init__(self, chat_responses=(), key_usage=0.0, key_status=200, embedding_cost=0.00001):
         self.chat_responses = list(chat_responses)
         self.key_usage = key_usage
         self.key_status = key_status
+        self.embedding_cost = embedding_cost
         self.chat_requests = []
+        self.embedding_requests = []
         self.transport = httpx.MockTransport(self.handle)
 
     def handle(self, request: httpx.Request) -> httpx.Response:
@@ -109,4 +141,10 @@ class FakeOpenRouter:
         if path == "/api/v1/chat/completions":
             self.chat_requests.append(json.loads(request.content))
             return httpx.Response(200, json=self.chat_responses.pop(0))
+        if path == "/api/v1/embeddings/models":
+            return httpx.Response(200, json={"data": EMBEDDING_MODELS})
+        if path == "/api/v1/embeddings":
+            body = json.loads(request.content)
+            self.embedding_requests.append(body)
+            return httpx.Response(200, json=embeddings_response(body["input"], self.embedding_cost))
         return httpx.Response(404)
