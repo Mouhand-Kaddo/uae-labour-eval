@@ -37,7 +37,7 @@ def fetch_sources(
     ) as http:
         for source in manifest.sources:
             path = source_path(sources_dir, source)
-            if path.is_file() and _sha256(path.read_bytes()) == source.sha256:
+            if verified(path, source):
                 echo(f"ok {source.id}: already saved")
                 continue
             attempts = []
@@ -56,6 +56,11 @@ def fetch_sources(
                 failures.append(f"{source.id}: " + "; ".join(attempts))
     if failures:
         raise FetchError("\n".join(failures))
+
+
+def verified(path: Path, source: Source) -> bool:
+    """True when `path` exists and matches the source's expected SHA-256."""
+    return path.is_file() and _sha256(path.read_bytes()) == source.sha256
 
 
 def _download(http: httpx.Client, url: str) -> bytes | str:
