@@ -71,6 +71,8 @@ Questions:
 2. Under (b), are part months counted pro rata, rounded down, or ignored?
 3. Does (a) mean 30 days per completed year only, with part years falling under (c) "parts of the last year"?
 
+Until this is decided, the annual-leave tool gives nothing for exactly 180 days of service, counts part months under (b) pro rata (service days × 2 ÷ 30), gives 30 days per completed 365-day year plus part years pro rata (days × 30 ÷ 365), and returns OQ-005 with every result that rests on one of these readings.
+
 **Decision:** _open_
 
 ## OQ-006: Scope of "less than a year" in ER Art 30(2)
@@ -113,6 +115,43 @@ Until this is decided, the gratuity tool applies the percentage to a full-time g
 - Remote work is not a gap: ER Art 5(1)(a) says it applies "whether the work was parttime or fulltime", so the full-time or part-time rule follows.
 
 Is a flexible worker's gratuity computed like part-time under ER Art 30(1), like full-time under Art 51, or not at all? The gratuity tool rejects the flexible work pattern until this is decided.
+
+**Decision:** _open_
+
+## OQ-010: How ER Art 18 turns part-time hours into annual leave
+
+- **Art 29(2) (EN):** "The part-time Worker is entitled to an annual leave according to the actual working hours spent by the Worker with the Employer ... in accordance with what is determined by the Executive Regulation".
+- **ER Art 18 (EN):** the duration "shall be determined based upon the total working hours after converting it to working days, divided by the number of working days per annum, multiplied by the leaves determined by law, with a minimum limit of five working days per annum for annual leaves; and in calculating these due leaves, the part of a day shall be considered as a full day". Clause 4: the percentage is the yearly part-time hours ÷ full-time hours × 100.
+- The Arabic ER Art 18 is not quoted yet: its text layer still has unmapped glyphs (ADR-0004).
+
+Questions:
+1. For service that is not a whole year, is the five-day minimum pro-rated, applied in full, or not applied?
+2. Is a part day rounded up on the total leave, or on each year's leave?
+3. ER Art 18 counts "working days" while Art 29(1) counts "days": are part-time leave days working days and full-time leave days calendar days?
+
+Until this is decided, the annual-leave tool takes the full-time entitlement for the same service, multiplies it by the hours percentage (but not less than 5 ÷ 30, the five-day minimum as a share of a 30-day year), rounds the total up to a whole day, and returns OQ-010 with every part-time result.
+
+**Decision:** _open_
+
+## OQ-011: Annual leave for six months' service or less
+
+- **Art 29(1)(b):** two days a month "if his service period is more than six months and less than one year."
+- **Art 29(1)(c):** "A leave for parts of the last year he spent at work, in the event that his service ends before using his annual leave balance."
+- **Art 29(9) (AR):** "كما يستحق أجرة الإجازة عن أجزاء السنة بنسبة ما قضاه منها في العمل" (he is also entitled to leave pay for parts of the year in proportion to the time worked); the English has no such words (OQ-004).
+
+Read alone, (b) gives a worker with six months' service or less no leave. (c) and the Arabic 29(9) could give a pro-rata leave for any part of a year, including a first and only year. Does a worker whose service ends within six months earn any annual leave or leave pay?
+
+Until this is decided, the annual-leave tool gives no leave for fewer than 180 days of service and returns OQ-011 with that result (exactly 180 days is OQ-005).
+
+**Decision:** _open_
+
+## OQ-012: A contract notice period outside 30–90 days
+
+- **Art 43(1):** the notice period agreed in the contract must be "not less than thirty (30) days, and not more than ninety (90) days."
+- **Art 43(3):** pay in lieu of notice equals "the Worker's wage for the entire warning period or the remaining part of it."
+- **Art 65(3):** "Every condition that violates the provisions of this Decree by law ... shall be considered null unless it is more beneficial to the Worker".
+
+When a contract sets, say, 15 or 120 days, which notice period applies: the nearest limit (30 or 90), the contract's figure if it is more beneficial to the worker, or none? And which period does pay in lieu use? The notice tool reports the period as below the minimum or above the maximum, returns OQ-012, and computes no pay in lieu until this is decided.
 
 **Decision:** _open_
 
