@@ -113,11 +113,12 @@
   language: both
   input:
     en: >-
-      I'm in a 6-month probation period. On 1 March 2025 my employer told me in writing that my
-      last day would be 6 March 2025. My monthly wage is AED 7,300. Was that enough notice, and if
-      not, what compensation am I owed?
+      I started work on 1 January 2025 on a 6-month probation period. On 1 March 2025 my
+      employer told me in writing that my last day would be 6 March 2025. My monthly wage is
+      AED 7,300. Was that enough notice, and if not, what compensation am I owed?
     ar: >-
-      أنا في فترة تجربة مدتها 6 أشهر. في 1 مارس 2025 أخطرني صاحب العمل كتابيًا بأن آخر يوم عمل لي
+      بدأت العمل في 1 يناير 2025 بفترة تجربة مدتها 6 أشهر. في 1 مارس 2025 أخطرني صاحب العمل
+      كتابيًا بأن آخر يوم عمل لي
       سيكون 6 مارس 2025. أجري الشهري 7,300 درهم. هل كان الإخطار كافيًا؟ وإن لم يكن، فما التعويض
       المستحق لي؟
   expected:
@@ -128,7 +129,7 @@
       tool_call:
         name: check_probation
         arguments:
-          probation_months: 6
+          start_date: "2025-01-01"
           ended_by: employer
           notice_date: "2025-03-01"
           termination_date: "2025-03-06"
@@ -136,9 +137,10 @@
     ar: *probation-001
   scoring: [status, numeric, tool_call, answer_language, consistency]
   reviewed: false
-  refs: ["Labour Law Art 9(1)", "Labour Law Art 9(5)"]
+  refs: ["Labour Law Art 9(1)", "Labour Law Art 9(5)", "Labour Law Art 67"]
   depends_on: [OQ-001]
   rationale: >-
+    1 Jan to 6 Mar 2025 = 65 days, within the 180-day probation maximum (Art 9(1), Art 67).
     Art 9(1): the employer must give at least 14 days' written notice during probation. 1 to
     6 March is 5 days, 9 days short. Art 9(5): compensation equals the worker's wage for the
     remaining notice period. Daily wage (OQ-001) = 7,300 × 12 / 365 = 240. 9 × 240 =

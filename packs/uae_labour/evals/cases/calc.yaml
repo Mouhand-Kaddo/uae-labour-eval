@@ -795,32 +795,37 @@
   category: calc
   language: en
   input: >-
-    My offer letter sets an 8-month probation period. If my employer decides to let me go
-    during probation, how much written notice must they give me, and is 8 months allowed?
+    I started work on 1 February 2025 and my offer letter says my probation period runs until
+    30 September 2025. If my employer decides to let me go during probation, how much written
+    notice must they give me, and is a probation that long allowed?
   expected:
     status: answered
     numbers: [14, 6]
     tool_call:
       name: check_probation
       arguments:
-        probation_months: 8
+        start_date: "2025-02-01"
+        probation_end_date: "2025-09-30"
         ended_by: employer
   scoring: [status, numeric, tool_call]
   reviewed: false
-  refs: ["Labour Law Art 9"]
+  refs: ["Labour Law Art 9", "Labour Law Art 67"]
   depends_on: []
   rationale: >-
-    Art 9(1): probation may not exceed six months from the start of work, so 8 months exceeds
-    the maximum; the employer may end the contract during probation with at least 14 days'
-    written notice. Expected answer: 14 days' notice; probation may be at most 6 months.
+    Art 9(1): probation may not exceed six months from the start of work; a month is 30 days
+    (Art 67), so at most 180 days. 1 Feb to 30 Sep 2025 inclusive = 28 + 31 + 30 + 31 + 30 + 31
+    + 31 + 30 = 242 days, which exceeds the maximum. The employer may end the contract during
+    probation with at least 14 days' written notice. Expected answer: 14 days' notice; probation
+    may be at most 6 months.
 
 - id: calc-probation-en-002
   category: calc
   language: en
   input: >-
-    I'm in my 6-month probation and have a job offer from another company in Dubai. I gave my
-    employer written notice on 1 May 2025 and want my last day to be 15 May 2025. My monthly
-    wage is AED 9,125. Is that enough notice, and if not, how much compensation would I owe?
+    I started work on 1 March 2025 on a 6-month probation and have a job offer from another
+    company in Dubai. I gave my employer written notice on 1 May 2025 and want my last day to be
+    15 May 2025. My monthly wage is AED 9,125. Is that enough notice, and if not, how much
+    compensation would I owe?
   expected:
     status: answered
     numbers: [4800]
@@ -828,7 +833,7 @@
     tool_call:
       name: check_probation
       arguments:
-        probation_months: 6
+        start_date: "2025-03-01"
         ended_by: worker_moving_in_uae
         notice_date: "2025-05-01"
         termination_date: "2025-05-15"
@@ -838,6 +843,7 @@
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
   depends_on: [OQ-001]
   rationale: >-
+    1 Mar to 15 May 2025 = 76 days, within the 180-day probation maximum (Art 9(1), Art 67).
     Moving to another UAE employer during probation needs at least one month's written notice
     (Art 9(3)); a month is 30 days (Art 67). 1 May to 15 May = 14 days, so 16 days short.
     Art 9(5): compensation = the wage for the remaining notice period. Daily wage (OQ-001) =
@@ -847,7 +853,8 @@
   category: calc
   language: ar
   input: >-
-    أنا في فترة التجربة (6 أشهر). أخطرني صاحب العمل كتابيًا في 10 فبراير 2025 بإنهاء خدمتي في
+    بدأت العمل في 1 ديسمبر 2024 وأنا في فترة التجربة (6 أشهر). أخطرني صاحب العمل كتابيًا في 10
+    فبراير 2025 بإنهاء خدمتي في
     17 فبراير 2025. أجري الشهري 18,250 درهمًا. هل الإخطار كافٍ؟ وإن لم يكن، فكم التعويض المستحق
     لي؟
   expected:
@@ -857,17 +864,18 @@
     tool_call:
       name: check_probation
       arguments:
-        probation_months: 6
+        start_date: "2024-12-01"
         ended_by: employer
         notice_date: "2025-02-10"
         termination_date: "2025-02-17"
         monthly_wage: 18250
   scoring: [status, numeric, tool_call]
   reviewed: false
-  refs: ["Labour Law Art 9"]
+  refs: ["Labour Law Art 9", "Labour Law Art 67"]
   depends_on: [OQ-001]
   rationale: >-
-    Art 9(1): the employer must give at least 14 days' written notice. 10 Feb to 17 Feb = 7
+    1 Dec 2024 to 17 Feb 2025 = 79 days, within the 180-day probation maximum (Art 9(1),
+    Art 67). Art 9(1): the employer must give at least 14 days' written notice. 10 Feb to 17 Feb = 7
     days, so 7 days short. Art 9(5): compensation = the wage for the remaining notice period.
     Daily wage (OQ-001) = 18,250 × 12 / 365 = 600. 7 × 600 = AED 4,200.
 
@@ -875,22 +883,24 @@
   category: calc
   language: ar
   input: >-
-    أنا عامل أجنبي في فترة تجربة مدتها 3 أشهر، وأرغب في إنهاء العقد ومغادرة الدولة نهائيًا. كم
-    يومًا يجب أن أخطر صاحب العمل مسبقًا؟
+    أنا عامل أجنبي بدأت العمل في 1 يونيو 2025 بفترة تجربة تنتهي في 31 أغسطس 2025، وأرغب في إنهاء
+    العقد ومغادرة الدولة نهائيًا. كم يومًا يجب أن أخطر صاحب العمل مسبقًا؟
   expected:
     status: answered
     numbers: [14]
     tool_call:
       name: check_probation
       arguments:
-        probation_months: 3
+        start_date: "2025-06-01"
+        probation_end_date: "2025-08-31"
         ended_by: worker_leaving_uae
   scoring: [status, numeric, tool_call]
   reviewed: false
-  refs: ["Labour Law Art 9"]
+  refs: ["Labour Law Art 9", "Labour Law Art 67"]
   depends_on: []
   rationale: >-
-    3 months is within the six-month maximum (Art 9(1)). A foreign worker ending the contract
+    1 Jun to 31 Aug 2025 = 30 + 31 + 31 = 92 days, within the six-month maximum of 180 days
+    (Art 9(1), Art 67). A foreign worker ending the contract
     during probation to leave the State must give written notice at least 14 days before the
     termination date (Art 9(4)). Expected answer: 14 days.
 
@@ -898,14 +908,15 @@
   category: calc
   language: ar
   input: >-
-    أنا في فترة التجربة (6 أشهر) وحصلت على عرض عمل من شركة أخرى في الإمارات. أخطرت صاحب العمل
-    كتابيًا في 1 مارس 2025 بأن آخر يوم لي سيكون 31 مارس 2025. هل التزمت بمدة الإخطار المطلوبة؟
+    بدأت العمل في 1 يناير 2025 وأنا في فترة التجربة (6 أشهر)، وحصلت على عرض عمل من شركة أخرى في
+    الإمارات. أخطرت صاحب العمل كتابيًا في 1 مارس 2025 بأن آخر يوم لي سيكون 31 مارس 2025. هل التزمت
+    بمدة الإخطار المطلوبة؟
   expected:
     status: answered
     tool_call:
       name: check_probation
       arguments:
-        probation_months: 6
+        start_date: "2025-01-01"
         ended_by: worker_moving_in_uae
         notice_date: "2025-03-01"
         termination_date: "2025-03-31"
@@ -914,6 +925,7 @@
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
   depends_on: []
   rationale: >-
+    1 Jan to 31 Mar 2025 = 90 days, within the 180-day probation maximum (Art 9(1), Art 67).
     Moving to another UAE employer needs at least one month's notice (Art 9(3)) = 30 days
     (Art 67). 1 March to 31 March = 30 days, so the notice is enough and no compensation is
     owed under Art 9(5). Expected answer: yes, the notice meets the minimum.

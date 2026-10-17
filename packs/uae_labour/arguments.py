@@ -23,6 +23,17 @@ def date_arg(args: dict[str, Any], name: str) -> date:
         raise ValueError(f"{name} must be a date in YYYY-MM-DD form") from None
 
 
+def optional_date_arg(args: dict[str, Any], name: str) -> date | None:
+    return None if args.get(name) is None else date_arg(args, name)
+
+
+def check_date_order(dates: dict[str, date | None], first: str, last: str) -> None:
+    """Reject the date named `last` falling before the one named `first`, when both are given."""
+    earlier, later = dates[first], dates[last]
+    if earlier is not None and later is not None and later < earlier:
+        raise ValueError(f"{last} must not be before {first}")
+
+
 def ordered_dates_arg(args: dict[str, Any], first: str, last: str) -> tuple[date, date]:
     """Two dates, the second not before the first."""
     earlier, later = date_arg(args, first), date_arg(args, last)
