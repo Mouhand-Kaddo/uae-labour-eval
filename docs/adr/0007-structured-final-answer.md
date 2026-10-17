@@ -1,0 +1,3 @@
+# The agent ends with a structured `final_answer` tool call
+
+The agent must finish by calling `final_answer` with answer text, cited articles (instrument and article number), a status (`answered`, `refused`, `not_found`) and a refusal reason. Scoring citations, refusals and "not found" from free prose would mean parsing "Art. 51" and "المادة (51)" out of two languages and many phrasings, which makes scorer errors indistinguishable from agent errors. A cited article that does not appear in a chunk the agent retrieved during that case is an automatic fail, which catches made-up citations deterministically. Citations are scored at article level, not clause level.
