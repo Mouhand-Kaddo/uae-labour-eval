@@ -4,14 +4,18 @@ import pytest
 
 from eval_harness.cases import load_cases, load_open_questions
 from eval_harness.config import load_config
+from eval_harness.judge import load_rubrics
 from eval_harness.manifest import load_manifest
 from eval_harness.pack import load_pack_tools
 from eval_harness.scorers import SCORERS
 
 REPO = Path(__file__).resolve().parent.parent
 CONFIG = load_config(REPO / "config.toml")
+RUBRICS = load_rubrics(CONFIG.pack)
 CASES = load_cases(
-    CONFIG.pack / "evals" / "cases", SCORERS, load_open_questions(CONFIG.open_questions)
+    CONFIG.pack / "evals" / "cases",
+    [*SCORERS, *RUBRICS],
+    load_open_questions(CONFIG.open_questions),
 )
 TOOLS = {tool.name: tool for tool in load_pack_tools(CONFIG.pack)}
 GRATUITY_CASES = [
@@ -25,6 +29,8 @@ def test_committed_config_points_at_a_pack_whose_cases_load():
     assert CONFIG.budget.ceiling_usd == 20.0
     assert (CONFIG.pack / "system_prompt.md").is_file()
     assert any(case.category == "refuse" for case in CASES)
+    assert {"judge:grounding", "judge:refusal"} <= RUBRICS.keys()
+    assert any("judge:grounding" in case.scoring for case in CASES)
     assert not any(case.reviewed for case in CASES)
 
 

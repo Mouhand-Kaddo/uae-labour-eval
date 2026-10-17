@@ -195,6 +195,8 @@ def test_temperature_is_zero_where_the_model_supports_it(project):
 
 
 def test_no_cache_breakpoints_for_providers_that_cache_automatically(project):
+    config = project / "config.toml"
+    config.write_text(config.read_text().replace("openai/gpt-5.6-terra", "qwen/qwen3.8-flash"))
     fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
 
     run(project, fake, "run", "--model", "openai/gpt-5.6-terra", "--limit", "1")
