@@ -8,8 +8,10 @@ from pathlib import Path
 import httpx
 
 from eval_harness.budget import remaining_budget
-from eval_harness.config import ConfigError, load_config
+from eval_harness.config import Config, ConfigError, load_config
+from eval_harness.fetch import FetchError, fetch_sources
 from eval_harness.ledger import Ledger
+from eval_harness.manifest import ManifestError, load_manifest
 from eval_harness.openrouter import OpenRouterClient, OpenRouterError
 from eval_harness.runner import RunRefused, run_eval
 
@@ -24,6 +26,9 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
     except ConfigError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_REFUSED
+    if args.command == "fetch":
+        return _fetch(config, transport)
+
     api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if not api_key:
         print("error: OPENROUTER_API_KEY is not set", file=sys.stderr)
@@ -51,7 +56,16 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
     return 0
 
 
-def _budget(config, client: OpenRouterClient) -> int:
+def _fetch(config: Config, transport: httpx.BaseTransport | None) -> int:
+    try:
+        fetch_sources(load_manifest(config.pack), config.sources_dir, transport=transport)
+    except (ManifestError, FetchError) as exc:
+        print(f"fetch failed:\n{exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    return 0
+
+
+def _budget(config: Config, client: OpenRouterClient) -> int:
     ledger_total = Ledger(config.ledger_path).total()
     print(f"ledger total USD {ledger_total:.6f}")
     try:
@@ -83,5 +97,6 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--limit", type=_positive_int, help="run at most N cases")
     run.add_argument("--repeats", type=_positive_int, default=1, help="run each case K times")
 
+    commands.add_parser("fetch", help="download the manifest's sources and verify their SHA-256")
     commands.add_parser("budget", help="show ledger total, key usage and remaining budget")
     return parser

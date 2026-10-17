@@ -48,6 +48,8 @@ def project(tmp_path, monkeypatch):
         f"""
 pack = "pack"
 runs_dir = "runs"
+sources_dir = "data/sources"
+index_dir = "data/index"
 
 [models]
 agent = "{HAIKU}"

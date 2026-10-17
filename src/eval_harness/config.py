@@ -1,4 +1,4 @@
-"""config.toml: model IDs, pack path, agent caps and budget, with paths relative to the file."""
+"""config.toml: model IDs, pack and data paths, agent caps and budget, relative to the file."""
 
 import tomllib
 from dataclasses import dataclass
@@ -28,6 +28,8 @@ class BudgetSettings:
 class Config:
     pack: Path
     runs_dir: Path
+    sources_dir: Path
+    index_dir: Path
     agent_model: str
     judge_model: str
     embedding_model: str
@@ -49,6 +51,8 @@ def load_config(path: Path) -> Config:
         return Config(
             pack=base / raw["pack"],
             runs_dir=base / raw["runs_dir"],
+            sources_dir=base / raw["sources_dir"],
+            index_dir=base / raw["index_dir"],
             agent_model=raw["models"]["agent"],
             judge_model=raw["models"]["judge"],
             embedding_model=raw["models"]["embedding"],
