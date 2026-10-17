@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from fake_openrouter import (
 )
 
 from eval_harness.cli import main
+from eval_harness.ingest import Chunk, write_chunks
 
 HAIKU = "anthropic/claude-haiku-5.5"
 
@@ -37,6 +39,56 @@ REFUSE_CASES = """
   rationale: DIFC has its own employment law.
 """
 
+CITE_CASES = """
+- id: cite-en-001
+  category: cite
+  language: en
+  input: "What is the longest probation period the Statute allows?"
+  expected:
+    status: answered
+    citations: [{instrument: statute, article: "9"}]
+  scoring: [status, citations]
+  reviewed: false
+  refs: []
+  depends_on: []
+  rationale: Art 9 caps probation at six months.
+"""
+
+MANIFEST = """
+[instruments.statute]
+title = "The Statute"
+
+[[sources]]
+id = "statute-en"
+instrument = "statute"
+language = "en"
+official_url = "https://official.example/en"
+wayback_url = "https://web.archive.org/web/20260101000000id_/https://official.example/en"
+retrieved = 2026-10-17
+sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+indexed = true
+heading_pattern = 'Article \\((\\d+)\\)'
+"""
+
+
+def index_chunk(article, text):
+    return Chunk(
+        id=f"statute:en:{article}:1",
+        instrument="statute",
+        article=article,
+        part=1,
+        language="en",
+        text=text,
+        text_sha256=hashlib.sha256(text.encode()).hexdigest(),
+        source="statute-en",
+    )
+
+
+INDEX = [
+    index_chunk("9", "Article (9) Probation. Probation shall not exceed six months."),
+    index_chunk("29", "Article (29) Annual leave of thirty days."),
+]
+
 
 @pytest.fixture
 def project(tmp_path, monkeypatch):
@@ -44,6 +96,10 @@ def project(tmp_path, monkeypatch):
     (pack / "evals" / "cases").mkdir(parents=True)
     (pack / "system_prompt.md").write_text("You answer questions about the corpus.")
     (pack / "evals" / "cases" / "refuse.yaml").write_text(REFUSE_CASES)
+    (pack / "evals" / "cases" / "cite.yaml").write_text(CITE_CASES)
+    (pack / "corpus").mkdir()
+    (pack / "corpus" / "manifest.toml").write_text(MANIFEST)
+    write_chunks(INDEX, tmp_path / "data" / "index")
     (tmp_path / "config.toml").write_text(
         f"""
 pack = "pack"
@@ -154,7 +210,11 @@ def test_requests_carry_caps_routing_and_a_cacheable_prefix(project):
     assert request["reasoning"] == {"effort": "low"}
     assert request["provider"] == {"require_parameters": True}
     assert "temperature" not in request
-    assert [t["function"]["name"] for t in request["tools"]] == ["final_answer"]
+    assert [t["function"]["name"] for t in request["tools"]] == [
+        "search_sources",
+        "get_section",
+        "final_answer",
+    ]
     system = request["messages"][0]
     assert system["role"] == "system"
     assert system["content"][0]["cache_control"] == {"type": "ephemeral"}
@@ -204,7 +264,7 @@ def test_a_response_cut_off_by_the_token_cap_gets_status_limit(project):
 def test_tool_errors_go_back_to_the_model_and_the_loop_continues(project):
     fake = FakeOpenRouter(
         [
-            tool_call_response("search_sources", {"query": "sue employer"}, call_id="c1"),
+            tool_call_response("read_contract", {"path": "contract.pdf"}, call_id="c1"),
             tool_call_response("final_answer", {"answer": "x", "status": "maybe"}, call_id="c2"),
             final_answer_response("refused", "legal_advice"),
         ]
@@ -219,7 +279,7 @@ def test_tool_errors_go_back_to_the_model_and_the_loop_continues(project):
     assert "status must be one of" in tool_messages[1]["content"]
     steps = read_jsonl(only_run_dir(project) / "traces" / "refuse-en-001.1.jsonl")
     assert [s["name"] for s in steps if s["type"] == "tool_call"] == [
-        "search_sources",
+        "read_contract",
         "final_answer",
     ]
     assert steps[-1]["passed"] is True
@@ -305,3 +365,90 @@ def test_budget_command_prints_ledger_total_key_usage_and_remaining(project, cap
     assert "ledger total USD 0.250000" in out
     assert "key usage USD 1.500000" in out
     assert "remaining USD 18.500000" in out
+
+
+def cite_answer(*articles, call_id="c2"):
+    return tool_call_response(
+        "final_answer",
+        {
+            "answer": "Probation may not exceed six months (Art 9).",
+            "citations": [{"instrument": "statute", "article": a} for a in articles],
+            "status": "answered",
+            "refusal_reason": None,
+        },
+        call_id=call_id,
+    )
+
+
+def cite_run(project, fake):
+    return run(project, fake, "run", "--model", HAIKU, "--category", "cite")
+
+
+def test_cite_case_searches_the_corpus_and_passes_with_a_retrieved_citation(project, capsys):
+    fake = FakeOpenRouter(
+        [tool_call_response("search_sources", {"query": "probation period"}), cite_answer("9")]
+    )
+
+    assert cite_run(project, fake) == 0
+
+    assert "PASS cite-en-001" in capsys.readouterr().out
+    tool_message = fake.chat_requests[1]["messages"][-1]
+    assert tool_message["role"] == "tool"
+    assert "six months" in tool_message["content"]
+    steps = read_jsonl(only_run_dir(project) / "traces" / "cite-en-001.1.jsonl")
+    [retrieval] = [s for s in steps if s["type"] == "retrieval"]
+    assert retrieval["tool"] == "search_sources"
+    assert [c["id"] for c in retrieval["chunks"]] == ["statute:en:9:1"]
+    verdict = steps[-1]
+    assert verdict["passed"] is True
+    assert verdict["details"]["citations"]["cited"] == ["statute 9"]
+
+
+def test_cite_case_fails_a_made_up_citation(project, capsys):
+    fake = FakeOpenRouter(
+        [tool_call_response("search_sources", {"query": "probation"}), cite_answer("9", "120")]
+    )
+
+    cite_run(project, fake)
+
+    assert "FAIL cite-en-001" in capsys.readouterr().out
+    steps = read_jsonl(only_run_dir(project) / "traces" / "cite-en-001.1.jsonl")
+    assert steps[-1]["details"]["citations"]["not_retrieved"] == ["statute 120"]
+
+
+def test_get_section_reads_an_article_and_records_the_retrieval(project):
+    fake = FakeOpenRouter(
+        [
+            tool_call_response(
+                "get_section", {"instrument": "statute", "article": "9", "language": "en"}
+            ),
+            cite_answer("9"),
+        ]
+    )
+
+    cite_run(project, fake)
+
+    steps = read_jsonl(only_run_dir(project) / "traces" / "cite-en-001.1.jsonl")
+    [retrieval] = [s for s in steps if s["type"] == "retrieval"]
+    assert retrieval["tool"] == "get_section"
+    assert steps[-1]["passed"] is True
+
+
+def test_refuses_to_start_without_an_index(project, capsys):
+    (project / "data" / "index" / "chunks.jsonl").unlink()
+    fake = FakeOpenRouter([])
+
+    assert cite_run(project, fake) == 2
+
+    assert fake.chat_requests == []
+    assert "ingest" in capsys.readouterr().err
+
+
+def test_summary_records_the_corpus_manifest_hash(project):
+    fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
+
+    eval_run(project, fake, "--limit", "1")
+
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    manifest_bytes = (project / "pack" / "corpus" / "manifest.toml").read_bytes()
+    assert summary["corpus_manifest_sha256"] == hashlib.sha256(manifest_bytes).hexdigest()

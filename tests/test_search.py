@@ -67,7 +67,10 @@ def test_index_loads_the_chunks_ingest_wrote(tmp_path):
 
 
 def tools(index, retrieved):
-    return {t.name: t for t in search_tools(index, INSTRUMENTS, retrieved.append)}
+    def record(_tool, chunks):
+        retrieved.append(chunks)
+
+    return {t.name: t for t in search_tools(index, INSTRUMENTS, record)}
 
 
 def test_search_sources_tool_returns_citable_chunks_and_reports_what_it_retrieved(index):
@@ -89,7 +92,7 @@ def test_search_sources_tool_returns_citable_chunks_and_reports_what_it_retrieve
 def test_search_sources_tool_returns_eight_chunks_at_most(index):
     many = SearchIndex([chunk(str(n), 1, f"wage rule {n}") for n in range(1, 20)])
 
-    assert len(search_tools(many, INSTRUMENTS, lambda _: None)[0].run({"query": "wage"})) == 8
+    assert len(search_tools(many, INSTRUMENTS, lambda *_: None)[0].run({"query": "wage"})) == 8
 
 
 def test_get_section_tool_returns_the_whole_article(index):
@@ -119,5 +122,5 @@ def test_bad_tool_arguments_raise_value_error_for_the_model(index, tool, argumen
 
 
 def test_tool_descriptions_name_the_instruments_to_cite(index):
-    for tool in search_tools(index, INSTRUMENTS, lambda _: None):
+    for tool in search_tools(index, INSTRUMENTS, lambda *_: None):
         assert '"statute" (The Statute)' in tool.description

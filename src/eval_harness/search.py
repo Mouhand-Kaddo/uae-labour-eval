@@ -53,21 +53,21 @@ class SearchIndex:
 def search_tools(
     index: SearchIndex,
     instruments: dict[str, str],
-    on_retrieve: Callable[[list[Chunk]], None],
+    on_retrieve: Callable[[str, list[Chunk]], None],
 ) -> list[Tool]:
     """The retrieval tools; every chunk they return is reported to `on_retrieve` first."""
     citable = ", ".join(f'"{key}" ({title})' for key, title in instruments.items())
     cite_hint = f" Cite results by instrument ID and article number. Instruments: {citable}."
 
-    def retrieved(chunks: list[Chunk]) -> list[dict[str, Any]]:
-        on_retrieve(chunks)
+    def retrieved(tool: str, chunks: list[Chunk]) -> list[dict[str, Any]]:
+        on_retrieve(tool, chunks)
         return [_tool_view(c) for c in chunks]
 
     def search_sources(args: dict[str, Any]) -> list[dict[str, Any]]:
         query = args.get("query")
         if not isinstance(query, str) or not query.strip():
             raise ValueError("query must be a non-empty string")
-        return retrieved(index.search(query, TOP_K))
+        return retrieved("search_sources", index.search(query, TOP_K))
 
     def get_section(args: dict[str, Any]) -> list[dict[str, Any]]:
         instrument, article, language = (args.get(k) for k in ("instrument", "article", "language"))
@@ -82,7 +82,7 @@ def search_tools(
             raise ValueError(
                 f"article {article} of {instrument} in {language} is not in the corpus"
             )
-        return retrieved(parts)
+        return retrieved("get_section", parts)
 
     return [
         Tool(

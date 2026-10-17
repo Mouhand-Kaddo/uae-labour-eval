@@ -13,9 +13,12 @@ from eval_harness.budget import decide_start, estimate_run_cost, remaining_budge
 from eval_harness.cases import Case, CaseError, load_cases
 from eval_harness.config import Config
 from eval_harness.final_answer import FinalAnswer
+from eval_harness.ingest import Chunk, IngestError
 from eval_harness.ledger import Ledger
+from eval_harness.manifest import Manifest, ManifestError, load_manifest
 from eval_harness.openrouter import ChatResponse, OpenRouterClient, OpenRouterError
 from eval_harness.scorers import SCORERS, score_case
+from eval_harness.search import SearchIndex, search_tools
 from eval_harness.trace import Trace
 
 
@@ -66,6 +69,10 @@ def run_eval(
     model = models[model_id]
 
     cases = _select_cases(config, category, limit)
+    manifest, index = _load_corpus(config)
+    instruments = {
+        s.instrument: manifest.instruments[s.instrument] for s in manifest.indexed_sources
+    }
     system_prompt = (config.pack / "system_prompt.md").read_text(encoding="utf-8")
 
     ledger = Ledger(config.ledger_path)
@@ -122,6 +129,17 @@ def run_eval(
                         raise _BudgetCrossed
 
                 trace = Trace(run_dir / "traces" / f"{case.id}.{repeat}.jsonl")
+
+                def record_retrieval(tool: str, chunks: list[Chunk], trace: Trace = trace) -> None:
+                    trace.add(
+                        "retrieval",
+                        tool=tool,
+                        chunks=[
+                            {"id": c.id, "instrument": c.instrument, "article": c.article}
+                            for c in chunks
+                        ],
+                    )
+
                 trace.add(
                     "case",
                     case_id=case.id,
@@ -138,7 +156,7 @@ def run_eval(
                         model=model,
                         system_prompt=system_prompt,
                         user_input=case.input,
-                        tools=[],
+                        tools=search_tools(index, instruments, record_retrieval),
                         settings=config.agent,
                         trace=trace,
                         on_response=record,
@@ -186,6 +204,7 @@ def run_eval(
             },
             "pricing": asdict(model) | {"supported_parameters": sorted(model.supported_parameters)},
             "selection": {"category": category, "limit": limit, "repeats": repeats},
+            "corpus_manifest_sha256": manifest.sha256,
             "estimate_usd": estimate,
             "ledger_total_at_start_usd": ledger_total,
             "key_usage_at_start_usd": key_usage,
@@ -198,6 +217,13 @@ def run_eval(
         f"remaining USD {remaining:.6f}"
     )
     return run
+
+
+def _load_corpus(config: Config) -> tuple[Manifest, SearchIndex]:
+    try:
+        return load_manifest(config.pack), SearchIndex.load(config.index_dir)
+    except (ManifestError, IngestError) as exc:
+        raise RunRefused(str(exc)) from exc
 
 
 def _select_cases(config: Config, category: str | None, limit: int | None) -> list[Case]:
