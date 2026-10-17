@@ -44,8 +44,11 @@ def test_long_articles_are_split_into_parts_that_fit(chunks):
 
 
 def test_bm25_finds_the_right_article_for_plain_questions(chunks):
-    index = SearchIndex(chunks)
+    index = SearchIndex(chunks, [[0.0]] * len(chunks))
 
-    assert index.search("maximum probation period", 3)[0].article == "9"
-    assert index.search("end of service gratuity basic wage", 3)[0].article == "51"
-    assert "29" in {c.article for c in index.search("annual leave days", 3)}
+    def bm25_only(query):
+        return index.search(query, [0.0], 3)
+
+    assert bm25_only("maximum probation period")[0].article == "9"
+    assert bm25_only("end of service gratuity basic wage")[0].article == "51"
+    assert "29" in {c.article for c in bm25_only("annual leave days")}

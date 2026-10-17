@@ -18,7 +18,12 @@ from eval_harness.final_answer import FinalAnswer
 from eval_harness.ingest import Chunk, IngestError
 from eval_harness.ledger import Ledger
 from eval_harness.manifest import Manifest, ManifestError, load_manifest
-from eval_harness.openrouter import ChatResponse, OpenRouterClient, OpenRouterError
+from eval_harness.openrouter import (
+    ChatResponse,
+    EmbeddingResponse,
+    OpenRouterClient,
+    OpenRouterError,
+)
 from eval_harness.pack import PackError, load_pack_tools
 from eval_harness.scorers import SCORERS, score_case
 from eval_harness.search import SearchIndex, search_tools
@@ -121,12 +126,18 @@ def run_eval(
             for case in cases:
                 case_spend = 0.0
 
-                def record(response: ChatResponse, case: Case = case, repeat: int = repeat) -> None:
+                def record(
+                    response: ChatResponse | EmbeddingResponse,
+                    purpose: str = "agent",
+                    model_used: str = model_id,
+                    case: Case = case,
+                    repeat: int = repeat,
+                ) -> None:
                     nonlocal run_spend, case_spend
                     ledger.append(
                         run_id=run_id,
-                        purpose="agent",
-                        model=model_id,
+                        purpose=purpose,
+                        model=model_used,
                         usage=response.usage,
                         case_id=case.id,
                         category=case.category,
@@ -136,6 +147,11 @@ def run_eval(
                     case_spend += response.cost
                     if should_abort(run_spend_usd=run_spend, remaining_usd=decision.remaining_usd):
                         raise _BudgetCrossed
+
+                def embed_query(query: str, record=record) -> list[float]:
+                    response = client.embed(config.embedding_model, [query])
+                    record(response, "embedding", config.embedding_model)
+                    return response.vectors[0]
 
                 trace = Trace(run_dir / "traces" / f"{case.id}.{repeat}.jsonl")
 
@@ -165,7 +181,10 @@ def run_eval(
                         model=model,
                         system_prompt=system_prompt,
                         user_input=case.input,
-                        tools=[*search_tools(index, instruments, record_retrieval), *tools],
+                        tools=[
+                            *search_tools(index, instruments, record_retrieval, embed_query),
+                            *tools,
+                        ],
                         settings=config.agent,
                         trace=trace,
                         on_response=record,
@@ -238,7 +257,9 @@ def run_eval(
 
 def _load_corpus(config: Config) -> tuple[Manifest, SearchIndex]:
     try:
-        return load_manifest(config.pack), SearchIndex.load(config.index_dir)
+        return load_manifest(config.pack), SearchIndex.load(
+            config.index_dir, config.embedding_model
+        )
     except (ManifestError, IngestError) as exc:
         raise RunRefused(str(exc)) from exc
 

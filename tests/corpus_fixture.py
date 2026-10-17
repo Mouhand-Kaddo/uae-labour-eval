@@ -3,6 +3,9 @@
 import hashlib
 from pathlib import Path
 
+from fake_openrouter import fake_embedding
+
+from eval_harness.embeddings import append_vectors
 from eval_harness.ingest import Chunk, write_chunks
 
 MANIFEST = """
@@ -42,7 +45,13 @@ INDEX = [
 
 
 def write_corpus(root: Path) -> None:
-    """Write the manifest into `root/pack` and the chunks into the default index directory."""
+    """Write the manifest into `root/pack`, and the chunks with their bge-m3 fake embeddings
+    into the default index directory."""
     (root / "pack").mkdir(exist_ok=True)
     (root / "pack" / "manifest.toml").write_text(MANIFEST)
     write_chunks(INDEX, root / "data" / "index")
+    append_vectors(
+        root / "data" / "index",
+        "baai/bge-m3",
+        [(c.text_sha256, fake_embedding(c.text)) for c in INDEX],
+    )

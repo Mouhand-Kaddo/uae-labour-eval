@@ -24,6 +24,16 @@ class ChatResponse:
 
 
 @dataclass(frozen=True)
+class EmbeddingResponse:
+    vectors: list[list[float]]
+    usage: dict[str, Any]
+
+    @property
+    def cost(self) -> float:
+        return float(self.usage["cost"])
+
+
+@dataclass(frozen=True)
 class ModelInfo:
     id: str
     prompt_price_usd: float
@@ -58,9 +68,30 @@ class OpenRouterClient:
             raise OpenRouterError(f"chat response lacks choices or usage.cost: {exc!r}") from exc
         return ChatResponse(choice["message"], choice.get("finish_reason"), usage)
 
+    def embed(self, model: str, texts: list[str]) -> EmbeddingResponse:
+        """POST /embeddings; one vector per text, in input order, plus the raw `usage` object."""
+        body = self._request("POST", "/embeddings", json={"model": model, "input": texts})
+        try:
+            rows = sorted(body["data"], key=lambda row: row["index"])
+            vectors = [[float(x) for x in row["embedding"]] for row in rows]
+            usage = body["usage"]
+            float(usage["cost"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise OpenRouterError(f"embeddings response lacks data or usage.cost: {exc!r}") from exc
+        if len(vectors) != len(texts):
+            raise OpenRouterError(f"asked for {len(texts)} embeddings, got {len(vectors)}")
+        return EmbeddingResponse(vectors, usage)
+
     def models(self) -> dict[str, ModelInfo]:
-        """Live prices and capabilities for every model, keyed by model ID."""
-        body = self._request("GET", "/models")
+        """Live prices and capabilities for every chat model, keyed by model ID."""
+        return self._model_list("/models")
+
+    def embedding_models(self) -> dict[str, ModelInfo]:
+        """Live prices for every embedding model, keyed by model ID."""
+        return self._model_list("/embeddings/models")
+
+    def _model_list(self, path: str) -> dict[str, ModelInfo]:
+        body = self._request("GET", path)
         try:
             return {
                 m["id"]: ModelInfo(

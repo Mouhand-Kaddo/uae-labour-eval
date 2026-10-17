@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from corpus_fixture import write_corpus
+from corpus_fixture import index_chunk, write_corpus
 from fake_openrouter import (
     FAKE_KEY,
     FakeOpenRouter,
@@ -15,6 +15,7 @@ from fake_openrouter import (
 
 from eval_harness.cases import case_set_hash
 from eval_harness.cli import main
+from eval_harness.ingest import write_chunks
 
 HAIKU = "anthropic/claude-haiku-5.5"
 
@@ -407,6 +408,105 @@ def test_refuses_to_start_without_an_index(project, capsys):
 
     assert fake.chat_requests == []
     assert "ingest" in capsys.readouterr().err
+
+
+def ledger(project):
+    return read_jsonl(project / "runs" / "ledger.jsonl")
+
+
+def embed(project, fake):
+    return run(project, fake, "embed")
+
+
+def write_index(project, *texts):
+    write_chunks(
+        [index_chunk(str(n), text) for n, text in enumerate(texts, 1)], project / "data" / "index"
+    )
+
+
+def test_embed_embeds_every_chunk_and_logs_each_call_to_the_ledger(project, capsys):
+    write_index(project, "Probation shall not exceed six months.", "Leave of thirty days.")
+    fake = FakeOpenRouter(embedding_cost=0.00002)
+
+    assert embed(project, fake) == 0
+
+    [request] = fake.embedding_requests
+    assert request == {
+        "model": "baai/bge-m3",
+        "input": ["Probation shall not exceed six months.", "Leave of thirty days."],
+    }
+    [entry] = ledger(project)
+    assert (entry["purpose"], entry["model"], entry["cost"]) == ("embedding", "baai/bge-m3", 2e-05)
+    assert "embedded 2 chunk(s)" in capsys.readouterr().out
+
+
+def test_embed_reuses_cached_vectors_by_chunk_text_hash(project):
+    write_index(project, "Probation shall not exceed six months.", "Leave of thirty days.")
+    embed(project, FakeOpenRouter())
+    write_index(project, "Probation shall not exceed six months.", "Leave of 30 days.")
+    fake = FakeOpenRouter()
+
+    assert embed(project, fake) == 0
+
+    assert [r["input"] for r in fake.embedding_requests] == [["Leave of 30 days."]]
+    assert embed(project, fake) == 0
+    assert len(fake.embedding_requests) == 1
+
+
+@pytest.mark.parametrize(
+    ("fake", "message"),
+    [
+        (FakeOpenRouter(key_usage=20.0), "over budget"),
+        (FakeOpenRouter(key_status=503), "key usage is unreachable"),
+    ],
+)
+def test_embed_refuses_to_run_when_the_budget_guard_says_no(project, capsys, fake, message):
+    write_index(project, "Probation shall not exceed six months.")
+
+    assert embed(project, fake) == 2
+
+    assert fake.embedding_requests == []
+    assert message in capsys.readouterr().err
+
+
+def test_embed_refuses_an_embedding_model_openrouter_does_not_list(project, capsys):
+    config = project / "config.toml"
+    config.write_text(config.read_text().replace("baai/bge-m3", "acme/embedder"))
+    fake = FakeOpenRouter()
+
+    assert embed(project, fake) == 2
+
+    assert fake.embedding_requests == []
+    assert "acme/embedder" in capsys.readouterr().err
+
+
+def test_search_embeds_each_query_through_the_ledger(project):
+    fake = FakeOpenRouter(
+        [tool_call_response("search_sources", {"query": "probation period"}), cite_answer("9")],
+        embedding_cost=0.00003,
+    )
+
+    assert cite_run(project, fake) == 0
+
+    assert [r["input"] for r in fake.embedding_requests] == [["probation period"]]
+    [entry] = [e for e in ledger(project) if e["purpose"] == "embedding"]
+    assert (entry["case_id"], entry["model"], entry["cost"]) == (
+        "cite-en-001",
+        "baai/bge-m3",
+        3e-05,
+    )
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["run_spend_usd"] == pytest.approx(0.0002 + 0.00003)
+
+
+def test_refuses_to_start_when_chunks_have_no_embeddings(project, capsys):
+    write_index(project, "A chunk ingested after the last embed.")
+    fake = FakeOpenRouter([])
+
+    assert cite_run(project, fake) == 2
+
+    assert fake.chat_requests == []
+    assert "embed" in capsys.readouterr().err
 
 
 CALC_CASE = """
