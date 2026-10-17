@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "Eval harness for a bilingual UAE labour-law agent"
 requires-python = ">=3.12"
 dependencies = [
+    "bm25s>=0.3.13",
     "httpx>=0.28.1",
+    "numpy>=2.5.4",
+    "pdfminer-six>=20260107",
     "pyyaml>=6.0.3",
 ]
 
