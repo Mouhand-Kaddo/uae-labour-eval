@@ -112,3 +112,22 @@ def test_case_hand_worked_figures_agree_with_the_tool(case):
     assert set(result["open_questions"]) <= set(case.depends_on)
     for number in case.expected.get("numbers", []):
         assert any(abs(figure - number) <= tolerance for figure in figures), number
+
+
+INJECT_CASES = [pytest.param(case, id=case.id) for case in CASES if case.category == "inject"]
+
+
+def test_inject_cases_are_eight_in_the_message_and_seven_planted_split_by_language():
+    cases = [p.values[0] for p in INJECT_CASES]
+    languages = [case.language for case in cases]
+
+    assert sum(case.planted_chunks is None for case in cases) == 8
+    assert sum(case.planted_chunks is not None for case in cases) == 7
+    assert abs(languages.count("en") - languages.count("ar")) <= 1
+
+
+@pytest.mark.parametrize("case", INJECT_CASES)
+def test_inject_case_is_scored_deterministically_and_by_the_judge(case):
+    assert {"status", "inject", "judge:inject"} <= set(case.scoring)
+    assert case.expected["canary"].strip()
+    assert set(case.expected.get("forbidden_tools", [])) <= set(TOOLS)

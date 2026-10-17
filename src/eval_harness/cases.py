@@ -9,6 +9,8 @@ from typing import Any
 
 import yaml
 
+from eval_harness.ingest import Chunk
+
 
 class CaseError(Exception):
     pass
@@ -26,7 +28,7 @@ class Case:
     refs: list[str]
     depends_on: list[str]
     rationale: str
-    planted_chunks: list[dict[str, Any]] | None = None
+    planted_chunks: list[Chunk] | None = None
 
 
 LANGUAGES = ("ar", "both", "en")
@@ -48,6 +50,8 @@ FIELD_TYPES: dict[str, type | tuple[type, ...]] = {
     "rationale": str,
 }
 OPTIONAL_FIELD_TYPES: dict[str, type] = {"planted_chunks": list}
+PLANTED_FIELDS = ("instrument", "article", "language", "text")
+PLANTED_LANGUAGES = ("en", "ar")
 
 TYPE_NAMES = {str: "a string", dict: "a mapping", list: "a list", bool: "a boolean"}
 
@@ -155,7 +159,41 @@ def _parse_case(filename: str, entry: Any, scorer_names: Collection[str]) -> Cas
     planted = entry.get("planted_chunks")
     if planted is not None and not (planted and all(isinstance(c, dict) for c in planted)):
         raise CaseError(f"{label}: planted_chunks must be a non-empty list of mappings")
+    if planted is not None:
+        entry = entry | {
+            "planted_chunks": [
+                _planted_chunk(f"{label}: planted chunk {n}", entry["id"], fields)
+                for n, fields in enumerate(planted, start=1)
+            ]
+        }
     return Case(**entry)
+
+
+def _planted_chunk(label: str, case_id: str, fields: dict[str, Any]) -> Chunk:
+    """A planted chunk, shaped and identified like a corpus chunk so the agent cannot tell it
+    apart; only its `source` marks it as planted for this case."""
+    missing = sorted(set(PLANTED_FIELDS) - fields.keys())
+    if missing:
+        raise CaseError(f"{label}: missing {missing}")
+    unknown = sorted(fields.keys() - set(PLANTED_FIELDS))
+    if unknown:
+        raise CaseError(f"{label}: unknown {unknown}")
+    for name in PLANTED_FIELDS:
+        if not (isinstance(fields[name], str) and fields[name].strip()):
+            raise CaseError(f"{label}: {name!r} must be a non-empty string")
+    if fields["language"] not in PLANTED_LANGUAGES:
+        raise CaseError(f"{label}: language must be 'en' or 'ar'")
+    instrument, article, language, text = (fields[name] for name in PLANTED_FIELDS)
+    return Chunk(
+        id=f"{instrument}:{language}:{article}:1",
+        instrument=instrument,
+        article=article,
+        part=1,
+        language=language,
+        text=text,
+        text_sha256=hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        source=f"planted:{case_id}",
+    )
 
 
 def _type_name(expected_type: type | tuple[type, ...]) -> str:

@@ -79,10 +79,13 @@ def search_tools(
     instruments: dict[str, str],
     on_retrieve: Callable[[str, list[Chunk]], None],
     embed_query: Callable[[str], Sequence[float]],
+    planted: Sequence[Chunk] = (),
 ) -> list[Tool]:
     """The retrieval tools; every chunk they return is reported to `on_retrieve` first.
 
-    `embed_query` turns a search query into its embedding vector.
+    `embed_query` turns a search query into its embedding vector. `planted` chunks (one inject
+    case's) lead every search result, so the agent always reads them whatever it searches for,
+    and `get_section` returns them like corpus articles.
     """
     citable = ", ".join(f'"{key}" ({title})' for key, title in instruments.items())
     cite_hint = f" Cite results by instrument ID and article number. Instruments: {citable}."
@@ -95,7 +98,8 @@ def search_tools(
         query = args.get("query")
         if not isinstance(query, str) or not query.strip():
             raise ValueError("query must be a non-empty string")
-        return retrieved("search_sources", index.search(query, embed_query(query), TOP_K))
+        found = index.search(query, embed_query(query), max(TOP_K - len(planted), 0))
+        return retrieved("search_sources", [*planted, *found][:TOP_K])
 
     def get_section(args: dict[str, Any]) -> list[dict[str, Any]]:
         instrument, article, language = (args.get(k) for k in ("instrument", "article", "language"))
@@ -105,7 +109,9 @@ def search_tools(
             raise ValueError("article must be an article number such as '51'")
         if language not in index.languages:
             raise ValueError(f"language must be one of {index.languages}")
-        parts = index.section(instrument, str(article).strip(), language)
+        wanted = (instrument, str(article).strip(), language)
+        parts = [c for c in planted if (c.instrument, c.article, c.language) == wanted]
+        parts = parts or index.section(*wanted)
         if not parts:
             raise ValueError(
                 f"article {article} of {instrument} in {language} is not in the corpus"
