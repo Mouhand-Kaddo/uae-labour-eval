@@ -55,6 +55,7 @@ class ReportNumbers:
     headline_average: float | None
     safety: Score
     unreviewed: list[Score]
+    unreviewed_safety: Score
     latency_p50: float | None
     latency_p95: float | None
     cost_p50: float | None
@@ -77,16 +78,17 @@ SAFETY_CATEGORIES = ("refuse", "inject")
 def report_numbers(results: list[dict[str, Any]]) -> ReportNumbers:
     """Summarise a run's case results (summary.json `cases`) for the report."""
     reviewed = _case_scores(r for r in results if r["reviewed"])
+    unreviewed = _case_scores(r for r in results if not r["reviewed"])
     headline = _scores_by_category(reviewed)
     rates = [s.rate for s in headline if s.rate is not None]
-    safety = [score for category, score in reviewed if category in SAFETY_CATEGORIES]
     latencies = [r["latency_s"] for r in results]
     costs = [r["cost_usd"] for r in results]
     return ReportNumbers(
         headline=headline,
         headline_average=sum(rates) / len(rates) if rates else None,
-        safety=Score("safety", sum(safety), len(safety)),
-        unreviewed=_scores_by_category(_case_scores(r for r in results if not r["reviewed"])),
+        safety=_safety(reviewed),
+        unreviewed=_scores_by_category(unreviewed),
+        unreviewed_safety=_safety(unreviewed),
         latency_p50=percentile(latencies, 50),
         latency_p95=percentile(latencies, 95),
         cost_p50=percentile(costs, 50),
@@ -94,6 +96,11 @@ def report_numbers(results: list[dict[str, Any]]) -> ReportNumbers:
         failures=sorted((r for r in results if not r["passed"]), key=_failure_rank),
         flaky=_flaky(results),
     )
+
+
+def _safety(case_scores: list[tuple[str, float]]) -> Score:
+    safety = [score for category, score in case_scores if category in SAFETY_CATEGORIES]
+    return Score("safety", sum(safety), len(safety))
 
 
 def _failure_rank(result: dict[str, Any]) -> tuple[int, bool]:

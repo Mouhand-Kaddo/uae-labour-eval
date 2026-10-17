@@ -108,16 +108,8 @@ RESULT_FIELDS = frozenset(
 
 def write_report(run_dir: Path) -> Path:
     """Write `<run_dir>/report/index.html` and one page per trace; return the index path."""
-    summary = _read_summary(run_dir)
-    results = summary.get("cases")
-    if not isinstance(results, list):
-        raise ReportError(f"{run_dir / 'summary.json'} has no case results")
-    for result in results:
-        missing = RESULT_FIELDS - set(result) if isinstance(result, dict) else RESULT_FIELDS
-        if missing:
-            raise ReportError(
-                f"{run_dir / 'summary.json'}: a case result is missing {sorted(missing)}"
-            )
+    summary = read_run(run_dir)
+    results = summary["cases"]
     numbers = report_numbers(results)
     out = run_dir / "report"
     (out / "traces").mkdir(parents=True, exist_ok=True)
@@ -139,7 +131,8 @@ def write_report(run_dir: Path) -> Path:
     return index
 
 
-def _read_summary(run_dir: Path) -> dict[str, Any]:
+def read_run(run_dir: Path) -> dict[str, Any]:
+    """A run's summary.json, checked to hold a list of complete case results."""
     path = run_dir / "summary.json"
     try:
         summary = json.loads(path.read_text(encoding="utf-8"))
@@ -147,6 +140,13 @@ def _read_summary(run_dir: Path) -> dict[str, Any]:
         raise ReportError(f"cannot read {path}: {exc}") from exc
     if not isinstance(summary, dict):
         raise ReportError(f"{path} is not a JSON object")
+    results = summary.get("cases")
+    if not isinstance(results, list):
+        raise ReportError(f"{path} has no case results")
+    for result in results:
+        missing = RESULT_FIELDS - set(result) if isinstance(result, dict) else RESULT_FIELDS
+        if missing:
+            raise ReportError(f"{path}: a case result is missing {sorted(missing)}")
     return summary
 
 
@@ -212,7 +212,7 @@ and the rate is the mean of those case scores.</p>
 <caption>Reviewed cases by category</caption>
 {_score_head()}
 <tbody>{rows or _empty_row("No reviewed cases in this run.")}</tbody>
-<tfoot><tr><td>Average</td><td class="num">{_pct(average)}</td><td class="note" colspan="3">
+<tfoot><tr><td>Average</td><td class="num">{pct(average)}</td><td class="note" colspan="3">
 unweighted mean of the category pass rates</td></tr></tfoot>
 </table></div>
 </section>"""
@@ -225,7 +225,7 @@ def _safety_section(safety: Score) -> str:
 so the headline average cannot hide a safety failure.</p>
 <div class="tiles"><div class="tile">
 <div class="label">Safety pass rate</div>
-<div class="value">{_pct(safety.rate)}</div>
+<div class="value">{pct(safety.rate)}</div>
 <div class="sub">n = {safety.n} cases · 95% CI {_interval(safety)}</div>
 {_strip(safety)}
 </div></div>
@@ -234,12 +234,12 @@ so the headline average cannot hide a safety failure.</p>
 
 def _cost_section(summary: dict[str, Any], numbers: ReportNumbers) -> str:
     tiles = [
-        ("Latency p50", _seconds(numbers.latency_p50), "per case"),
-        ("Latency p95", _seconds(numbers.latency_p95), "per case"),
-        ("Cost p50", _usd(numbers.cost_p50), "per case"),
-        ("Cost p95", _usd(numbers.cost_p95), "per case"),
-        ("Run spend", _usd(summary.get("run_spend_usd")), "this run"),
-        ("Cumulative spend", _usd(summary.get("cumulative_usd")), "all runs so far"),
+        ("Latency p50", seconds(numbers.latency_p50), "per case"),
+        ("Latency p95", seconds(numbers.latency_p95), "per case"),
+        ("Cost p50", usd(numbers.cost_p50), "per case"),
+        ("Cost p95", usd(numbers.cost_p95), "per case"),
+        ("Run spend", usd(summary.get("run_spend_usd")), "this run"),
+        ("Cumulative spend", usd(summary.get("cumulative_usd")), "all runs so far"),
     ]
     html = "".join(
         f'<div class="tile"><div class="label">{label}</div>'
@@ -310,7 +310,7 @@ not in the headline scores or the safety pass rate.</p>
 def _judge_section(agreement: Any) -> str:
     if isinstance(agreement, dict):
         content = (
-            f"<p>{_pct(agreement.get('agreement'))} agreement with the project owner's labels, "
+            f"<p>{pct(agreement.get('agreement'))} agreement with the project owner's labels, "
             f"Cohen's kappa {_text(_fixed(agreement.get('kappa'), 2))}, "
             f"n = {_text(agreement.get('n'))}.</p>"
         )
@@ -325,8 +325,8 @@ def _all_results_section(
     rows = "".join(
         f"<tr><td>{_case_link(r, trace_links)}</td><td>{_text(r['category'])}</td>"
         f"<td>{'yes' if r['reviewed'] else 'no'}</td><td>{_text(r['status'])}</td>"
-        f"<td>{_verdict(r['passed'])}</td><td class='num'>{_seconds(r['latency_s'])}</td>"
-        f"<td class='num'>{_usd(r['cost_usd'])}</td></tr>"
+        f"<td>{_verdict(r['passed'])}</td><td class='num'>{seconds(r['latency_s'])}</td>"
+        f"<td class='num'>{usd(r['cost_usd'])}</td></tr>"
         for r in results
     )
     return f"""<section id="results">
@@ -370,7 +370,7 @@ def _score_head() -> str:
 
 def _score_row(score: Score) -> str:
     return (
-        f'<tr><th scope="row">{_text(score.label)}</th><td class="num">{_pct(score.rate)}</td>'
+        f'<tr><th scope="row">{_text(score.label)}</th><td class="num">{pct(score.rate)}</td>'
         f'<td class="num">{score.n}</td><td>{_interval(score)}</td><td>{_strip(score)}</td></tr>'
     )
 
@@ -380,7 +380,7 @@ def _strip(score: Score) -> str:
         return ""
     low, high = (STRIP_WIDTH * v for v in score.interval)
     x = STRIP_WIDTH * score.rate
-    label = f"{score.label}: {_pct(score.rate)}, 95% CI {_interval(score)}, n = {score.n}"
+    label = f"{score.label}: {pct(score.rate)}, 95% CI {_interval(score)}, n = {score.n}"
     return (
         f'<svg class="strip" width="{STRIP_WIDTH + 12}" height="16" viewBox="-6 0 '
         f'{STRIP_WIDTH + 12} 16" role="img" aria-label="{_text(label)}">'
@@ -418,15 +418,15 @@ def _interval(score: Score) -> str:
     return f"{low * 100:.0f}%–{high * 100:.0f}%"
 
 
-def _pct(value: Any) -> str:
+def pct(value: Any) -> str:
     return f"{value:.0%}" if isinstance(value, int | float) else "–"
 
 
-def _seconds(value: Any) -> str:
+def seconds(value: Any) -> str:
     return f"{value:.2f} s" if isinstance(value, int | float) else "–"
 
 
-def _usd(value: Any) -> str:
+def usd(value: Any) -> str:
     return f"USD {value:.6f}" if isinstance(value, int | float) else "–"
 
 

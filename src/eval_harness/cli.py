@@ -8,6 +8,7 @@ from pathlib import Path
 import httpx
 
 from eval_harness.budget import remaining_budget
+from eval_harness.compare import compare_runs
 from eval_harness.config import Config, ConfigError, load_config
 from eval_harness.embeddings import EmbedRefused, embed_corpus
 from eval_harness.fetch import FetchError, fetch_sources
@@ -15,7 +16,7 @@ from eval_harness.ingest import IngestError, ingest
 from eval_harness.ledger import Ledger
 from eval_harness.manifest import ManifestError, load_manifest
 from eval_harness.openrouter import OpenRouterClient, OpenRouterError
-from eval_harness.report import ReportError, write_report
+from eval_harness.report import ReportError, read_run, write_report
 from eval_harness.runner import RunRefused, run_eval
 
 EXIT_REFUSED = 2
@@ -36,6 +37,8 @@ def main(argv: list[str] | None = None, transport: httpx.BaseTransport | None = 
 
     if args.command == "report":
         return _report(config, args.run)
+    if args.command == "compare":
+        return _compare(config, args.run_a, args.run_b)
     api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if not api_key:
         print("error: OPENROUTER_API_KEY is not set", file=sys.stderr)
@@ -113,17 +116,30 @@ def _budget(config: Config, client: OpenRouterClient) -> int:
     return 0
 
 
-def _report(config, run: str) -> int:
+def _run_dir(config: Config, run: str) -> Path:
     run_dir = Path(run) if Path(run).is_dir() else config.runs_dir / run
     if not run_dir.is_dir():
-        print(f"error: no run directory {run!r} (looked in {config.runs_dir})", file=sys.stderr)
-        return EXIT_REFUSED
+        raise ReportError(f"no run directory {run!r} (looked in {config.runs_dir})")
+    return run_dir
+
+
+def _report(config: Config, run: str) -> int:
     try:
-        index = write_report(run_dir)
+        index = write_report(_run_dir(config, run))
     except ReportError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_REFUSED
     print(f"report written to {index}")
+    return 0
+
+
+def _compare(config: Config, run_a: str, run_b: str) -> int:
+    try:
+        summaries = [read_run(_run_dir(config, run)) for run in (run_a, run_b)]
+    except ReportError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    print(compare_runs(*summaries))
     return 0
 
 
@@ -153,4 +169,8 @@ def _parser() -> argparse.ArgumentParser:
 
     report = commands.add_parser("report", help="write the HTML report for a run")
     report.add_argument("run", help="run ID under runs_dir, or a path to a run directory")
+
+    compare = commands.add_parser("compare", help="show two runs side by side")
+    compare.add_argument("run_a", help="run ID under runs_dir, or a path to a run directory")
+    compare.add_argument("run_b", help="run ID under runs_dir, or a path to a run directory")
     return parser
