@@ -107,14 +107,29 @@ def extract_pdf_text(path: Path) -> str:
 
 
 def ingest(manifest: Manifest, sources_dir: Path, index_dir: Path) -> list[Chunk]:
-    """Chunk every indexed source and write `<index_dir>/chunks.jsonl`."""
+    """Chunk every indexed source and write them to the index directory."""
     chunks: list[Chunk] = []
     for source in manifest.indexed_sources:
         path = source_path(sources_dir, source)
         if not verified(path, source):
             raise IngestError(f"{source.id}: {path} is missing or fails its hash; run fetch")
         chunks.extend(chunk_text(extract_pdf_text(path), source))
-    index_dir.mkdir(parents=True, exist_ok=True)
-    lines = (json.dumps(asdict(c), ensure_ascii=False) for c in chunks)
-    (index_dir / CHUNKS_FILE).write_text("\n".join(lines) + "\n", encoding="utf-8")
+    write_chunks(chunks, index_dir)
     return chunks
+
+
+def write_chunks(chunks: list[Chunk], index_dir: Path) -> None:
+    index_dir.mkdir(parents=True, exist_ok=True)
+    lines = (json.dumps(asdict(c), ensure_ascii=False) + "\n" for c in chunks)
+    (index_dir / CHUNKS_FILE).write_text("".join(lines), encoding="utf-8")
+
+
+def read_chunks(index_dir: Path) -> list[Chunk]:
+    """Read the chunks ingest wrote; raises IngestError if they are missing or malformed."""
+    path = index_dir / CHUNKS_FILE
+    try:
+        return [Chunk(**json.loads(line)) for line in path.read_text("utf-8").splitlines()]
+    except FileNotFoundError as exc:
+        raise IngestError(f"{path} not found; run fetch and ingest first") from exc
+    except (OSError, ValueError, TypeError) as exc:
+        raise IngestError(f"{path} is unreadable: {exc}") from exc
