@@ -1,7 +1,7 @@
 """Scorers: (case, final answer, trace) -> verdict. A case passes only if all its scorers pass."""
 
 import re
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Collection, Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -160,11 +160,32 @@ SCORERS: dict[str, Scorer] = {
 }
 
 
+SKIPPED = "a deterministic scorer already failed"
+
+
 def score_case(
-    case: Case, final: FinalAnswer, trace: Trace, scorers: Mapping[str, Scorer] = SCORERS
+    case: Case,
+    final: FinalAnswer,
+    trace: Trace,
+    scorers: Mapping[str, Scorer] = SCORERS,
+    deferred: Collection[str] = (),
 ) -> Verdict:
-    """Run every scorer the case names; the case passes only if all of them pass."""
-    verdicts = {name: scorers[name](case, final, trace) for name in case.scoring}
+    """Run every scorer the case names; the case passes only if all of them pass.
+
+    Scorers in `deferred` (paid ones, like the judge) run only after every other scorer passed;
+    otherwise they are recorded as skipped and failed, since the case has failed anyway.
+    """
+    verdicts = {
+        name: scorers[name](case, final, trace) for name in case.scoring if name not in deferred
+    }
+    may_spend = all(v.passed for v in verdicts.values())
+    verdicts |= {
+        name: scorers[name](case, final, trace)
+        if may_spend
+        else Verdict(False, {"skipped": SKIPPED})
+        for name in case.scoring
+        if name in deferred
+    }
     return Verdict(
         all(v.passed for v in verdicts.values()),
         {name: {"passed": v.passed, **v.details} for name, v in verdicts.items()},

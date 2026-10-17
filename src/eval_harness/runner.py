@@ -5,7 +5,7 @@ import json
 import secrets
 import subprocess
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from typing import Any
@@ -258,7 +258,9 @@ def run_eval(
                     }
                 agent_spend = case_spend
                 try:
-                    result = _score(case, repeat, final, trace, agent_spend, latency, scorers)
+                    result = _score(
+                        case, repeat, final, trace, agent_spend, latency, scorers, rubrics
+                    )
                 except _BudgetCrossed:
                     results.append(_aborted(case, repeat, trace, agent_spend, latency))
                     raise
@@ -418,13 +420,14 @@ def _score(
     cost: float,
     latency: float,
     scorers: dict[str, Scorer],
+    deferred: Collection[str],
 ) -> CaseResult:
     if final is None:
         trace.add("verdict", passed=False, details={"error": "the case did not finish"})
         return CaseResult(
             case.id, repeat, case.category, case.reviewed, "error", False, cost, latency
         )
-    verdict = score_case(case, final, trace.steps, scorers)
+    verdict = score_case(case, final, trace.steps, scorers, deferred)
     trace.add("verdict", passed=verdict.passed, details=verdict.details)
     return CaseResult(
         case.id, repeat, case.category, case.reviewed, final.status, verdict.passed, cost, latency

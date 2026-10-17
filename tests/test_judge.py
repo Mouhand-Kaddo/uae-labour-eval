@@ -258,6 +258,23 @@ def test_judge_spend_that_crosses_the_remaining_budget_aborts_the_run(project, c
     assert trace_steps(project, "grounding-en-001")[-1]["type"] == "aborted"
 
 
+def test_the_judge_is_skipped_when_a_deterministic_scorer_already_failed(project, capsys):
+    fake = FakeOpenRouter([search("probation"), grounded_answer("51")])
+
+    assert grounding_run(project, fake) == 0
+
+    assert "FAIL grounding-en-001" in capsys.readouterr().out
+    assert len(fake.chat_requests) == 2
+    details = trace_steps(project, "grounding-en-001")[-1]["details"]
+    assert details["citations"]["passed"] is False
+    assert details["judge:grounding"] == {
+        "passed": False,
+        "skipped": "a deterministic scorer already failed",
+    }
+    ledger = read_jsonl(project / "runs" / "ledger.jsonl")
+    assert "judge" not in {r["purpose"] for r in ledger}
+
+
 def test_the_budget_estimate_includes_the_judge_calls(project, capsys):
     fake = FakeOpenRouter([], key_usage=19.97)
 
