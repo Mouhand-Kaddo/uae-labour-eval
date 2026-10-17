@@ -2,7 +2,13 @@ import json
 from pathlib import Path
 
 import pytest
-from fake_openrouter import FAKE_KEY, FakeOpenRouter, final_answer_response
+from fake_openrouter import (
+    FAKE_KEY,
+    FakeOpenRouter,
+    final_answer_response,
+    text_response,
+    tool_call_response,
+)
 
 from eval_harness.cli import main
 
@@ -133,3 +139,167 @@ def test_the_key_never_appears_in_traces_ledger_summary_or_output(project, capsy
     assert written
     for path in written:
         assert FAKE_KEY not in path.read_text()
+
+
+def test_requests_carry_caps_routing_and_a_cacheable_prefix(project):
+    fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
+
+    eval_run(project, fake, "--limit", "1")
+
+    [request] = fake.chat_requests
+    assert request["model"] == HAIKU
+    assert request["max_tokens"] == 1024
+    assert request["reasoning"] == {"effort": "low"}
+    assert request["provider"] == {"require_parameters": True}
+    assert "temperature" not in request
+    assert [t["function"]["name"] for t in request["tools"]] == ["final_answer"]
+    system = request["messages"][0]
+    assert system["role"] == "system"
+    assert system["content"][0]["cache_control"] == {"type": "ephemeral"}
+
+
+def test_temperature_is_zero_where_the_model_supports_it(project):
+    fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
+
+    run(project, fake, "run", "--model", "qwen/qwen3.8-flash", "--limit", "1")
+
+    [request] = fake.chat_requests
+    assert request["temperature"] == 0
+
+
+def test_no_cache_breakpoints_for_providers_that_cache_automatically(project):
+    fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
+
+    run(project, fake, "run", "--model", "openai/gpt-5.6-terra", "--limit", "1")
+
+    [request] = fake.chat_requests
+    assert "cache_control" not in request["messages"][0]["content"][0]
+
+
+def test_a_case_that_never_calls_final_answer_stops_at_six_turns_with_status_limit(project, capsys):
+    fake = FakeOpenRouter([text_response("Let me think.") for _ in range(6)])
+
+    exit_code = eval_run(project, fake, "--limit", "1")
+
+    assert exit_code == 0
+    assert len(fake.chat_requests) == 6
+    assert "FAIL refuse-en-001" in capsys.readouterr().out
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["cases"][0]["status"] == "limit"
+    assert len(read_jsonl(project / "runs" / "ledger.jsonl")) == 6
+
+
+def test_a_response_cut_off_by_the_token_cap_gets_status_limit(project):
+    fake = FakeOpenRouter([text_response("The answer is", finish_reason="length")])
+
+    eval_run(project, fake, "--limit", "1")
+
+    assert len(fake.chat_requests) == 1
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["cases"][0]["status"] == "limit"
+
+
+def test_tool_errors_go_back_to_the_model_and_the_loop_continues(project):
+    fake = FakeOpenRouter(
+        [
+            tool_call_response("search_sources", {"query": "sue employer"}, call_id="c1"),
+            tool_call_response("final_answer", {"answer": "x", "status": "maybe"}, call_id="c2"),
+            final_answer_response("refused", "legal_advice"),
+        ]
+    )
+
+    eval_run(project, fake, "--limit", "1")
+
+    assert len(fake.chat_requests) == 3
+    tool_messages = [m for m in fake.chat_requests[2]["messages"] if m["role"] == "tool"]
+    assert [m["tool_call_id"] for m in tool_messages] == ["c1", "c2"]
+    assert "unknown tool" in tool_messages[0]["content"]
+    assert "status must be one of" in tool_messages[1]["content"]
+    steps = read_jsonl(only_run_dir(project) / "traces" / "refuse-en-001.1.jsonl")
+    assert [s["name"] for s in steps if s["type"] == "tool_call"] == [
+        "search_sources",
+        "final_answer",
+    ]
+    assert steps[-1]["passed"] is True
+
+
+def test_refuses_to_start_when_the_estimate_exceeds_the_remaining_budget(project, capsys):
+    fake = FakeOpenRouter([], key_usage=19.999)
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 2
+    assert fake.chat_requests == []
+    assert "over budget" in capsys.readouterr().err
+    assert not (project / "runs" / "ledger.jsonl").exists()
+
+
+def test_refuses_to_start_when_key_usage_is_unreachable(project, capsys):
+    fake = FakeOpenRouter([], key_status=503)
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 2
+    assert fake.chat_requests == []
+    assert "key usage" in capsys.readouterr().err
+
+
+def test_estimate_uses_ledger_history_for_the_model_and_category(project, capsys):
+    history = {
+        "time": "2026-10-17T00:00:00+00:00",
+        "run_id": "earlier",
+        "purpose": "agent",
+        "model": HAIKU,
+        "case_id": "refuse-en-001",
+        "category": "refuse",
+        "repeat": 1,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "cost": 8.0,
+    }
+    (project / "runs").mkdir()
+    (project / "runs" / "ledger.jsonl").write_text(json.dumps(history) + "\n")
+    fake = FakeOpenRouter([], key_usage=0.0)
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 2
+    assert fake.chat_requests == []
+    assert "over budget" in capsys.readouterr().err
+
+
+def test_run_aborts_when_its_spend_crosses_the_remaining_budget(project, capsys):
+    fake = FakeOpenRouter(
+        [
+            final_answer_response("refused", "legal_advice", cost=0.006),
+            final_answer_response("refused", "out_of_scope", cost=0.006),
+        ],
+        key_usage=19.995,
+    )
+
+    exit_code = eval_run(project, fake)
+
+    assert exit_code == 3
+    assert len(fake.chat_requests) == 1
+    assert "aborted" in capsys.readouterr().err
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["status"] == "aborted"
+    assert [c["status"] for c in summary["cases"]] == ["aborted"]
+    assert len(read_jsonl(project / "runs" / "ledger.jsonl")) == 1
+
+
+def test_budget_command_prints_ledger_total_key_usage_and_remaining(project, capsys):
+    fake = FakeOpenRouter([final_answer_response("refused", "legal_advice", cost=0.25)])
+    eval_run(project, fake, "--limit", "1")
+    capsys.readouterr()
+    fake.key_usage = 1.5
+
+    exit_code = run(project, fake, "budget")
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "ledger total USD 0.250000" in out
+    assert "key usage USD 1.500000" in out
+    assert "remaining USD 18.500000" in out
