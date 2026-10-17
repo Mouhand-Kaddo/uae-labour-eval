@@ -24,6 +24,7 @@ SHORT_NOTICE_COMPENSATION = Ref(LABOUR_LAW, "9", "5")
 
 MAXIMUM_MONTHS = 6
 MAXIMUM_DAYS = MAXIMUM_MONTHS * DAYS_IN_MONTH
+MAXIMUM_QUESTION = "OQ-013"
 NOTICE = {
     "employer": (14, [MAXIMUM_AND_EMPLOYER_NOTICE]),
     "worker_moving_in_uae": (
@@ -77,18 +78,20 @@ def check_probation(
         "ended_by": ended_by,
     }
     if notice_date is None or termination_date is None:
-        return ProbationResult(refs=list(refs), **checked)
+        return ProbationResult(refs=list(refs), open_questions=[MAXIMUM_QUESTION], **checked)
 
     given = (termination_date - notice_date).days
     shortfall = max(required - given, 0)
     notice = {"notice_days_given": given, "notice_shortfall_days": shortfall}
     if monthly_wage is None:
-        return ProbationResult(refs=list(refs), **checked, **notice)
+        return ProbationResult(
+            refs=list(refs), open_questions=[MAXIMUM_QUESTION], **checked, **notice
+        )
 
     daily = daily_rate(Fraction(str(monthly_wage)))
     return ProbationResult(
         refs=[*refs, SHORT_NOTICE_COMPENSATION],
-        open_questions=[DAILY_RATE_QUESTION],
+        open_questions=[MAXIMUM_QUESTION, DAILY_RATE_QUESTION],
         **checked,
         **notice,
         daily_wage=money(daily),

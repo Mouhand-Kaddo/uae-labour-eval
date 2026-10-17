@@ -161,7 +161,7 @@ def test_short_notice_costs_the_wage_for_the_missing_days(facts, given, short, e
     assert result.notice_shortfall_days == short
     assert result.compensation == expected, working
     assert "Labour Law Art 9(5)" in {str(r) for r in result.refs}
-    assert result.open_questions == ["OQ-001"]
+    assert result.open_questions == ["OQ-013", "OQ-001"]
 
 
 def test_shortfall_without_a_wage_has_no_compensation_figure():
@@ -187,7 +187,7 @@ def test_without_notice_dates_only_the_required_notice_is_given():
     assert result.notice_days_given is None
     assert result.compensation is None
     assert {str(r) for r in result.refs} == {"Labour Law Art 9(1)", "Labour Law Art 67"}
-    assert result.open_questions == []
+    assert result.open_questions == ["OQ-013"]
 
 
 TOOL_ARGS = {

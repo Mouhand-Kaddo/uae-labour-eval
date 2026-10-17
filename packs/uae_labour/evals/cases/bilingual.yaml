@@ -138,7 +138,7 @@
   scoring: [status, numeric, tool_call, answer_language, consistency]
   reviewed: false
   refs: ["Labour Law Art 9(1)", "Labour Law Art 9(5)", "Labour Law Art 67"]
-  depends_on: [OQ-001]
+  depends_on: [OQ-001, OQ-013]
   rationale: >-
     1 Jan to 6 Mar 2025 = 65 days, within the 180-day probation maximum (Art 9(1), Art 67).
     Art 9(1): the employer must give at least 14 days' written notice during probation. 1 to

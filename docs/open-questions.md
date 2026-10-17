@@ -163,6 +163,19 @@ When a contract sets, say, 15 or 120 days, which notice period applies: the near
 
 **Decision:** _open_
 
+## OQ-013: How long is "six months" of probation?
+
+- **Art 9(1):** the employer may appoint the worker under probation "for a period not exceeding six (6) months as of the date of commencing work".
+- **Art 67:** "a calendar year shall be deemed as three hundred and sixty-five (365) days, and the month shall be deemed as thirty (30) days."
+
+Options:
+- **A.** six months = 180 days (Art 67's 30-day month), so a probation from 1 January to 30 June (181 days) is too long
+- **B.** six calendar months from the start date (Gregorian calendar, Art 67), so 1 January to 30 June is within the limit
+
+The probation tool uses A for now and returns OQ-013 with every result; the probation cases carry `depends_on: [OQ-013]`.
+
+**Decision:** _open_
+
 ---
 
 ## Facts still to verify (agent work, not owner decisions)
