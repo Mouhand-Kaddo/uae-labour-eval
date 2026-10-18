@@ -3,7 +3,7 @@
 from dataclasses import asdict, dataclass, field
 from datetime import date
 from fractions import Fraction
-from typing import Any
+from typing import Any, TypedDict
 
 from eval_harness.agent import Tool
 from eval_harness.refs import Ref
@@ -34,6 +34,18 @@ NOTICE = {
     ),
     "worker_leaving_uae": (14, [MAXIMUM_AND_EMPLOYER_NOTICE, WORKER_LEAVING_UAE]),
 }
+
+
+class ProbationChecks(TypedDict):
+    probation_within_maximum: bool
+    required_notice_days: int
+    probation_days: int
+    ended_by: str
+
+
+class NoticeGiven(TypedDict):
+    notice_days_given: int
+    notice_shortfall_days: int
 
 
 @dataclass(frozen=True)
@@ -78,18 +90,18 @@ def check_probation(
         if MAXIMUM_DAYS < probation_days <= LONGEST_SIX_CALENDAR_MONTHS_DAYS
         else []
     )
-    checked = {
-        "probation_within_maximum": probation_days <= MAXIMUM_DAYS,
-        "required_notice_days": required,
-        "probation_days": probation_days,
-        "ended_by": ended_by,
-    }
+    checked = ProbationChecks(
+        probation_within_maximum=probation_days <= MAXIMUM_DAYS,
+        required_notice_days=required,
+        probation_days=probation_days,
+        ended_by=ended_by,
+    )
     if notice_date is None or termination_date is None:
         return ProbationResult(refs=list(refs), open_questions=questions, **checked)
 
     given = (termination_date - notice_date).days
     shortfall = max(required - given, 0)
-    notice = {"notice_days_given": given, "notice_shortfall_days": shortfall}
+    notice = NoticeGiven(notice_days_given=given, notice_shortfall_days=shortfall)
     if monthly_wage is None:
         return ProbationResult(refs=list(refs), open_questions=questions, **checked, **notice)
 
@@ -158,17 +170,28 @@ def _run(args: dict[str, Any]) -> dict[str, Any]:
     check_names(args, PARAMETERS)
     if args["ended_by"] not in NOTICE:
         raise ValueError(f"ended_by must be one of {list(NOTICE)}")
-    dates = {"start_date": date_arg(args, "start_date")} | {
+    start = date_arg(args, "start_date")
+    optional_dates = {
         name: optional_date_arg(args, name)
         for name in ("probation_end_date", "notice_date", "termination_date")
     }
+    dates = {"start_date": start} | optional_dates
     if dates["notice_date"] is not None and dates["termination_date"] is None:
         raise ValueError("notice_date needs the termination_date the notice is for")
     for first, last in DATE_ORDER:
         check_date_order(dates, first, last)
     wage = positive_number_arg(args, "monthly_wage")
 
-    return asdict(check_probation(**dates, ended_by=args["ended_by"], monthly_wage=wage))
+    return asdict(
+        check_probation(
+            start_date=start,
+            probation_end_date=optional_dates["probation_end_date"],
+            notice_date=optional_dates["notice_date"],
+            termination_date=optional_dates["termination_date"],
+            ended_by=args["ended_by"],
+            monthly_wage=wage,
+        )
+    )
 
 
 PROBATION_TOOL = Tool(

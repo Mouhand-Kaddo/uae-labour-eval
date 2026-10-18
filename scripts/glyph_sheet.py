@@ -62,7 +62,7 @@ def sample_words(path: Path, keys: list[tuple[str, int]]) -> dict[tuple[str, int
 def sheet(font: TTFont, glyph_ids: list[int]) -> str:
     glyph_set = font.getGlyphSet()
     names = font.getGlyphOrder()
-    scale = CELL * 0.45 / font["head"].unitsPerEm
+    scale = CELL * 0.45 / font["head"].unitsPerEm  # ty: ignore[unresolved-attribute]
     rows = -(-len(glyph_ids) // COLUMNS)
     cells = []
     for n, glyph_id in enumerate(glyph_ids):

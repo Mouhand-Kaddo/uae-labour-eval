@@ -37,15 +37,18 @@ class Case:
 
     def inputs(self) -> dict[str, str]:
         """The questions to put to the agent, by language: one, or both halves of a pair."""
-        if self.is_pair:
-            return {language: self.input[language] for language in PAIR_LANGUAGES}
-        return {self.language: self.input}
+        if isinstance(self.input, str):
+            return {self.language: self.input}
+        return {language: self.input[language] for language in PAIR_LANGUAGES}
 
-    def half(self, language: str) -> "Case":
+    def half(self, language: str) -> Case:
         """One language of a bilingual pair, as a single-language case with that language's
         input and expectations."""
         return replace(
-            self, language=language, input=self.input[language], expected=self.expected[language]
+            self,
+            language=language,
+            input=self.inputs()[language],
+            expected=self.expected[language],
         )
 
 
@@ -74,7 +77,12 @@ OPTIONAL_FIELD_TYPES: dict[str, type] = {"planted_chunks": list}
 PLANTED_FIELDS = ("instrument", "article", "language", "text")
 PLANTED_LANGUAGES = ("en", "ar")
 
-TYPE_NAMES = {str: "a string", dict: "a mapping", list: "a list", bool: "a boolean"}
+TYPE_NAMES: dict[type, str] = {
+    str: "a string",
+    dict: "a mapping",
+    list: "a list",
+    bool: "a boolean",
+}
 
 
 def load_cases(

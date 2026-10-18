@@ -1,6 +1,7 @@
 import datetime as dt
 import hashlib
 import re
+from typing import Any
 
 import pytest
 
@@ -12,7 +13,7 @@ FOOTER = re.compile(r"The Statute of 2021|\d+")
 
 
 def source(**overrides):
-    fields = dict(
+    fields: dict[str, Any] = dict(
         id="statute-en",
         instrument="statute",
         language="en",

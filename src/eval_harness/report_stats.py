@@ -61,7 +61,7 @@ class ReportNumbers:
     cost_p50: float | None
     cost_p95: float | None
     failures: list[dict[str, Any]]
-    flaky: list["Flaky"]
+    flaky: list[Flaky]
 
 
 @dataclass(frozen=True)

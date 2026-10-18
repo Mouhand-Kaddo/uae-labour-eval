@@ -22,7 +22,7 @@ class FinalAnswer:
     refusal_reason: str | None = None
 
     @classmethod
-    def limit(cls) -> "FinalAnswer":
+    def limit(cls) -> FinalAnswer:
         """The runner-assigned answer for a case that hit a turn or token cap."""
         return cls(answer="", status=LIMIT)
 

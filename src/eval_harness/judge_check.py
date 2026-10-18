@@ -457,7 +457,7 @@ def judge_agreement(pack: Path) -> dict[str, Any]:
         raise JudgeCheckError(
             f"no labelled decisions with a judge verdict yet: fill in {directory / LABELS_FILE}"
         )
-    by_rubric = {}
+    by_rubric: dict[str, dict[str, Any]] = {}
     for name, by_criterion in decisions.items():
         overall = measure([pair for pairs in by_criterion.values() for pair in pairs])
         by_rubric[name] = asdict(overall) | {
@@ -508,7 +508,7 @@ def owner_labels(
     labels: dict[tuple[str, str], bool] = {}
     for entry in entries:
         item_id = entry.get("id")
-        if item_id not in items:
+        if not isinstance(item_id, str) or item_id not in items:
             raise JudgeCheckError(f"{LABELS_FILE}: unknown item {item_id!r}")
         criteria = entry.get("criteria")
         expected = set(rubrics[items[item_id]["rubric"]].criteria)

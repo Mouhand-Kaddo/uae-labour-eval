@@ -205,10 +205,7 @@ def consistency_scorer(judge: PairScorer) -> PairScorer:
             ]
             for lang, final in finals.items()
         }
-        numbers_match = all(
-            all(v is not None for v in values) and _same_values(values)
-            for values in zip(*reported.values(), strict=True)
-        )
+        numbers_match = all(_same_values(values) for values in zip(*reported.values(), strict=True))
         cited = {
             lang: sorted({article_key(c.instrument, c.article) for c in final.citations})
             for lang, final in finals.items()
@@ -230,12 +227,14 @@ def consistency_scorer(judge: PairScorer) -> PairScorer:
 def _reported(number: float, text: str, tolerance: float) -> float | None:
     """The number in `text` closest to `number`, if one is within tolerance."""
     close = [f for f in numbers_in(text) if abs(number - f) <= tolerance + FLOAT_NOISE]
-    return min(close, key=lambda f: abs(number - f), default=None)
+    closest = min(close, key=lambda f: abs(number - f), default=None)
+    return closest
 
 
 def _same_values(values: tuple[float | None, ...]) -> bool:
-    first, *rest = values
-    return all(abs(first - v) <= FLOAT_NOISE for v in rest)
+    """Every value was found and all are within float noise of the first."""
+    found = [v for v in values if v is not None]
+    return len(found) == len(values) and all(abs(found[0] - v) <= FLOAT_NOISE for v in found)
 
 
 def score_pair(

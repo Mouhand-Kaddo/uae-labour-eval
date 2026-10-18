@@ -3,7 +3,7 @@
 from dataclasses import asdict, dataclass, field
 from datetime import date
 from fractions import Fraction
-from typing import Any
+from typing import Any, TypedDict
 
 from eval_harness.agent import Tool
 from eval_harness.refs import Ref
@@ -53,6 +53,12 @@ CAP_MONTHS = 24
 PRO_RATA_PATTERNS = (PART_TIME, JOB_SHARING)
 
 
+class ServiceDays(TypedDict):
+    service_days: int
+    unpaid_absence_days: int
+    counted_service_days: int
+
+
 @dataclass(frozen=True)
 class GratuityResult:
     outcome: str
@@ -77,7 +83,7 @@ def calculate_gratuity(
     *,
     start_date: date,
     end_date: date,
-    monthly_basic_wage: float,
+    monthly_basic_wage: float | None,
     nationality: str,
     work_pattern: str,
     unpaid_absence_days: int = 0,
@@ -105,11 +111,11 @@ def calculate_gratuity(
 
     service_days = (end_date - start_date).days + 1
     counted_days = service_days - unpaid_absence_days
-    service = {
-        "service_days": service_days,
-        "unpaid_absence_days": unpaid_absence_days,
-        "counted_service_days": counted_days,
-    }
+    service = ServiceDays(
+        service_days=service_days,
+        unpaid_absence_days=unpaid_absence_days,
+        counted_service_days=counted_days,
+    )
     temporary = work_pattern == TEMPORARY
     pro_rata = work_pattern in (*PRO_RATA_PATTERNS, FLEXIBLE) or (
         temporary and part_time_hours_ratio is not None and part_time_hours_ratio < 1
@@ -137,6 +143,8 @@ def calculate_gratuity(
     refs += [LAST_BASIC_WAGE, CAP]
     open_questions = [DAILY_RATE_QUESTION, CAP_QUESTION]
 
+    if monthly_basic_wage is None:
+        raise ValueError("monthly_basic_wage must be a number")
     hours_ratio = Fraction(str(part_time_hours_ratio)) if pro_rata else Fraction(1)
     basic = Fraction(str(monthly_basic_wage)) / hours_ratio
     daily = daily_rate(basic)

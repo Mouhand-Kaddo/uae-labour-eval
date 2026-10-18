@@ -13,7 +13,6 @@ from typing import Any
 
 from eval_harness.agent import Tool, run_agent
 from eval_harness.budget import (
-    BudgetDecision,
     decide_start,
     estimate_run_cost,
     remaining_budget,
@@ -105,13 +104,13 @@ def run_eval(
     ledger = Ledger(config.ledger_path)
     ledger_total = ledger.total()
     estimate = _estimate(config, plan, ledger, category, repeats)
-    key_usage, decision = _ask_guard(config, client, estimate, ledger_total)
-    echo(f"budget ok: {decision.reason}")
+    key_usage, remaining_usd, reason = _ask_guard(config, client, estimate, ledger_total)
+    echo(f"budget ok: {reason}")
 
     started_at = datetime.now(UTC)
     run_id = f"{started_at:%Y%m%dT%H%M%SZ}-{secrets.token_hex(3)}"
     run_dir = config.runs_dir / run_id
-    spend = _Spend(ledger, run_id, decision.remaining_usd)
+    spend = _Spend(ledger, run_id, remaining_usd)
     run = _Run(client, config, plan, spend, run_dir)
     results: list[CaseResult] = []
     status = "completed"
@@ -309,8 +308,9 @@ def _estimate(
 
 def _ask_guard(
     config: Config, client: OpenRouterClient, estimate: float, ledger_total: float
-) -> tuple[float, BudgetDecision]:
-    """The key's usage and the guard's go-ahead; raises RunRefused when the guard says no."""
+) -> tuple[float, float, str]:
+    """The key's usage, the remaining budget and the guard's reason for going ahead; raises
+    RunRefused when the guard says no."""
     try:
         key_usage: float | None = client.key_usage()
     except OpenRouterError:
@@ -323,7 +323,7 @@ def _ask_guard(
     )
     if not decision.allowed or key_usage is None or decision.remaining_usd is None:
         raise RunRefused(decision.reason)
-    return key_usage, decision
+    return key_usage, decision.remaining_usd, decision.reason
 
 
 @dataclass
@@ -601,7 +601,7 @@ def _git_commit(config: Config) -> str | None:
             text=True,
             check=True,
         )
-    except (OSError, subprocess.CalledProcessError):
+    except OSError, subprocess.CalledProcessError:
         return None
     return completed.stdout.strip()
 

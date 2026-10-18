@@ -40,7 +40,7 @@ class SearchIndex:
         self._unit_vectors = _unit_rows(np.asarray(vectors, dtype=float))
 
     @classmethod
-    def load(cls, index_dir: Path, embedding_model: str) -> "SearchIndex":
+    def load(cls, index_dir: Path, embedding_model: str) -> SearchIndex:
         """The ingested chunks with their cached vectors; IngestError if any vector is missing."""
         chunks = read_chunks(index_dir)
         vectors = cached_vectors(index_dir, embedding_model)

@@ -238,7 +238,7 @@ def single_material(
 def _pair_material(
     case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Steps]
 ) -> str:
-    return pair_material(case.input, finals, cited_sources(finals, traces))
+    return pair_material(case.inputs(), finals, cited_sources(finals, traces))
 
 
 def pair_material(

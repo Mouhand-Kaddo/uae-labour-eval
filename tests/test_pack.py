@@ -1,30 +1,25 @@
 import re
 from collections import Counter
+from operator import attrgetter
 from pathlib import Path
 
 import pytest
 
-from eval_harness.cases import CONSISTENCY, PAIR_LANGUAGES, load_cases, load_open_questions
+from eval_harness.cases import CONSISTENCY, PAIR_LANGUAGES
 from eval_harness.config import load_config
 from eval_harness.ingest import CHUNKS_FILE, read_chunks
 from eval_harness.judge import load_rubrics
 from eval_harness.manifest import load_manifest
-from eval_harness.pack import load_pack_tools
-from eval_harness.scorers import SCORERS
+from eval_harness.pack import load_pack_cases, load_pack_tools
 
 REPO = Path(__file__).resolve().parent.parent
 CONFIG = load_config(REPO / "config.toml")
 RUBRICS = load_rubrics(CONFIG.pack)
-CASES = load_cases(
-    CONFIG.pack / "evals" / "cases",
-    [*SCORERS, *RUBRICS, CONSISTENCY],
-    load_open_questions(CONFIG.open_questions),
-)
+CASES = load_pack_cases(CONFIG, RUBRICS).cases
+CASE_ID = attrgetter("id")
 TOOLS = {tool.name: tool for tool in load_pack_tools(CONFIG.pack)}
 GRATUITY_CASES = [
-    pytest.param(case, id=case.id)
-    for case in CASES
-    if case.expected.get("tool_call", {}).get("name") == "calculate_gratuity"
+    case for case in CASES if case.expected.get("tool_call", {}).get("name") == "calculate_gratuity"
 ]
 
 
@@ -54,13 +49,13 @@ def test_committed_pack_offers_the_gratuity_tool():
 
 
 def test_gratuity_cases_are_about_fifteen_and_split_between_english_and_arabic():
-    languages = [case.language for case in (p.values[0] for p in GRATUITY_CASES)]
+    languages = [case.language for case in GRATUITY_CASES]
 
     assert 14 <= len(languages) <= 16
     assert abs(languages.count("en") - languages.count("ar")) <= 1
 
 
-@pytest.mark.parametrize("case", GRATUITY_CASES)
+@pytest.mark.parametrize("case", GRATUITY_CASES, ids=CASE_ID)
 def test_gratuity_case_is_scored_on_the_tool_call_and_its_hand_worked_figure(case):
     assert {"status", "tool_call"} <= set(case.scoring)
     if "numeric" in case.scoring:
@@ -69,7 +64,7 @@ def test_gratuity_case_is_scored_on_the_tool_call_and_its_hand_worked_figure(cas
     assert all(question.startswith("OQ-") for question in case.depends_on)
 
 
-@pytest.mark.parametrize("case", GRATUITY_CASES)
+@pytest.mark.parametrize("case", GRATUITY_CASES, ids=CASE_ID)
 def test_gratuity_case_hand_worked_figure_agrees_with_the_tool(case):
     result = TOOLS["calculate_gratuity"].run(case.expected["tool_call"]["arguments"])
 
@@ -98,9 +93,7 @@ FIGURES = {
     ),
 }
 LEAVE_NOTICE_PROBATION_CASES = [
-    pytest.param(case, id=case.id)
-    for case in CASES
-    if case.expected.get("tool_call", {}).get("name") in FIGURES
+    case for case in CASES if case.expected.get("tool_call", {}).get("name") in FIGURES
 ]
 
 
@@ -109,7 +102,7 @@ def test_committed_pack_offers_the_leave_notice_and_probation_tools():
 
 
 def test_leave_notice_and_probation_cases_are_ten_five_five_and_half_arabic():
-    cases = [p.values[0] for p in LEAVE_NOTICE_PROBATION_CASES]
+    cases = LEAVE_NOTICE_PROBATION_CASES
     tools = [case.expected["tool_call"]["name"] for case in cases]
     languages = [case.language for case in cases]
 
@@ -119,7 +112,7 @@ def test_leave_notice_and_probation_cases_are_ten_five_five_and_half_arabic():
     assert languages.count("en") == languages.count("ar")
 
 
-@pytest.mark.parametrize("case", LEAVE_NOTICE_PROBATION_CASES)
+@pytest.mark.parametrize("case", LEAVE_NOTICE_PROBATION_CASES, ids=CASE_ID)
 def test_case_hand_worked_figures_agree_with_the_tool(case):
     name = case.expected["tool_call"]["name"]
     result = TOOLS[name].run(case.expected["tool_call"]["arguments"])
@@ -133,11 +126,11 @@ def test_case_hand_worked_figures_agree_with_the_tool(case):
         assert any(abs(figure - number) <= tolerance for figure in figures), number
 
 
-INJECT_CASES = [pytest.param(case, id=case.id) for case in CASES if case.category == "inject"]
+INJECT_CASES = [case for case in CASES if case.category == "inject"]
 
 
 def test_inject_cases_are_eight_in_the_message_and_seven_planted_split_by_language():
-    cases = [p.values[0] for p in INJECT_CASES]
+    cases = INJECT_CASES
     languages = [case.language for case in cases]
 
     assert sum(case.planted_chunks is None for case in cases) == 8
@@ -145,14 +138,14 @@ def test_inject_cases_are_eight_in_the_message_and_seven_planted_split_by_langua
     assert abs(languages.count("en") - languages.count("ar")) <= 1
 
 
-@pytest.mark.parametrize("case", INJECT_CASES)
+@pytest.mark.parametrize("case", INJECT_CASES, ids=CASE_ID)
 def test_inject_case_is_scored_deterministically_and_by_the_judge(case):
     assert {"status", "inject", "judge:inject"} <= set(case.scoring)
     assert case.expected["canary"].strip()
     assert set(case.expected.get("forbidden_tools", [])) <= set(TOOLS)
 
 
-PAIRS = [pytest.param(case, id=case.id) for case in CASES if case.language == "both"]
+PAIRS = [case for case in CASES if case.language == "both"]
 
 
 def pair_topic(case):
@@ -163,7 +156,7 @@ def pair_topic(case):
 
 
 def test_bilingual_pairs_are_ten_spread_over_calc_cite_and_refusals():
-    cases = [p.values[0] for p in PAIRS]
+    cases = PAIRS
     topics = [pair_topic(case) for case in cases]
 
     assert len(cases) == 10
@@ -173,14 +166,14 @@ def test_bilingual_pairs_are_ten_spread_over_calc_cite_and_refusals():
     assert "judge:bilingual" in RUBRICS
 
 
-@pytest.mark.parametrize("case", PAIRS)
+@pytest.mark.parametrize("case", PAIRS, ids=CASE_ID)
 def test_bilingual_pair_halves_share_their_expectations_and_are_checked_for_language(case):
     assert case.expected["en"] == case.expected["ar"]
     assert {"status", "answer_language", CONSISTENCY} <= set(case.scoring)
     assert case.rationale.strip()
 
 
-@pytest.mark.parametrize("case", [p for p in PAIRS if pair_topic(p.values[0]) == "calc"])
+@pytest.mark.parametrize("case", [p for p in PAIRS if pair_topic(p) == "calc"], ids=CASE_ID)
 def test_bilingual_calc_pair_figures_agree_with_the_tool(case):
     for language in PAIR_LANGUAGES:
         expected = case.half(language).expected
@@ -211,7 +204,7 @@ def test_cite_grounding_and_refuse_cases_hit_their_targets_split_between_languag
 
 REF = re.compile(r"(Labour Law|Executive Regulations) Art (\d+)(?:\((\d+)\))?")
 REF_INSTRUMENTS = {"Labour Law": "labour-law", "Executive Regulations": "executive-regulations"}
-CASES_WITH_REFS = [pytest.param(case, id=case.id) for case in CASES if case.refs]
+CASES_WITH_REFS = [case for case in CASES if case.refs]
 
 
 @pytest.fixture(scope="module")
@@ -225,7 +218,7 @@ def article_texts():
     return texts
 
 
-@pytest.mark.parametrize("case", CASES_WITH_REFS)
+@pytest.mark.parametrize("case", CASES_WITH_REFS, ids=CASE_ID)
 def test_every_ref_names_an_ingested_article_in_both_languages_and_an_existing_clause(
     case, article_texts
 ):

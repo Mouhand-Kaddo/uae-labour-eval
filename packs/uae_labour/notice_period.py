@@ -2,7 +2,7 @@
 
 from dataclasses import asdict, dataclass, field
 from fractions import Fraction
-from typing import Any
+from typing import Any, TypedDict
 
 from eval_harness.agent import Tool
 from eval_harness.refs import Ref
@@ -20,6 +20,14 @@ OUT_OF_RANGE_QUESTION = "OQ-012"
 MINIMUM_NOTICE_DAYS = 30
 MAXIMUM_NOTICE_DAYS = 90
 TERMINATING_PARTIES = ("employer", "worker")
+
+
+class NoticeFacts(TypedDict):
+    notice_days: int
+    terminated_by: str | None
+    applicable_notice_days: int | None
+    notice_days_worked: int
+    unserved_days: int | None
 
 
 @dataclass(frozen=True)
@@ -63,13 +71,14 @@ def check_notice_period(
 ) -> NoticePeriodResult:
     """Check a contract's notice period against Art 43(1) and price the unserved applicable days."""
     applicable = applicable_notice_days(notice_days, terminated_by)
-    facts = {
-        "notice_days": notice_days,
-        "terminated_by": terminated_by,
-        "applicable_notice_days": applicable,
-        "notice_days_worked": notice_days_worked,
-        "unserved_days": None if applicable is None else applicable - notice_days_worked,
-    }
+    unserved = None if applicable is None else applicable - notice_days_worked
+    facts = NoticeFacts(
+        notice_days=notice_days,
+        terminated_by=terminated_by,
+        applicable_notice_days=applicable,
+        notice_days_worked=notice_days_worked,
+        unserved_days=unserved,
+    )
     if notice_days < MINIMUM_NOTICE_DAYS:
         outcome = "below_minimum"
     elif notice_days > MAXIMUM_NOTICE_DAYS:
@@ -79,13 +88,13 @@ def check_notice_period(
     in_range = outcome == "within_range"
     refs = [NOTICE_RANGE] if in_range else [NOTICE_RANGE, NULL_UNLESS_MORE_BENEFICIAL]
     open_questions = [] if in_range else [OUT_OF_RANGE_QUESTION]
-    if monthly_wage is None or applicable is None:
+    if monthly_wage is None or unserved is None:
         return NoticePeriodResult(outcome, None, refs, open_questions, **facts)
 
     daily = daily_rate(Fraction(str(monthly_wage)))
     return NoticePeriodResult(
         outcome,
-        money(facts["unserved_days"] * daily),
+        money(unserved * daily),
         [*refs, PAY_IN_LIEU, LAST_WAGE, PERIODS],
         [*open_questions, DAILY_RATE_QUESTION],
         **facts,

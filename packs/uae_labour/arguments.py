@@ -19,7 +19,7 @@ def check_names(args: dict[str, Any], parameters: dict[str, Any]) -> None:
 def date_arg(args: dict[str, Any], name: str) -> date:
     try:
         return date.fromisoformat(args[name])
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         raise ValueError(f"{name} must be a date in YYYY-MM-DD form") from None
 
 
@@ -63,7 +63,7 @@ def work_pattern_arg(
     args: dict[str, Any], supported: Sequence[str], default: str | None = None
 ) -> str:
     pattern = args.get("work_pattern") or default
-    if pattern not in supported:
+    if pattern is None or pattern not in supported:
         raise ValueError(f"work_pattern must be one of {list(supported)}")
     return pattern
 

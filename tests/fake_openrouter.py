@@ -2,12 +2,13 @@
 
 import json
 import re
+from typing import Any
 
 import httpx
 
 FAKE_KEY = "sk-or-v1-fake-key-that-must-never-leak-0123456789"
 
-MODELS = [
+MODELS: list[dict[str, Any]] = [
     {
         "id": "anthropic/claude-haiku-5.5",
         "pricing": {"prompt": "0.0000001", "completion": "0.0000005"},

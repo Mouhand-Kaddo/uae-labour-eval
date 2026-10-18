@@ -23,9 +23,14 @@ module-name = "eval_harness"
 
 [tool.ruff]
 line-length = 100
+target-version = "py315"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+
+[tool.ty.environment]
+python-version = "3.15"
+root = [".", "src", "packs", "tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -36,4 +41,5 @@ dev = [
     "fonttools>=4.67.0",
     "pytest>=9.1.1",
     "ruff>=0.17.1",
+    "ty>=0.0.89",
 ]

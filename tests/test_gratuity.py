@@ -462,6 +462,7 @@ BAD_ARGUMENTS = [
     pytest.param({"end_date": "2022-12-31"}, "end_date", id="end-before-start"),
     pytest.param({"monthly_basic_wage": 0}, "monthly_basic_wage", id="basic-wage-not-positive"),
     pytest.param({"monthly_basic_wage": "36500"}, "monthly_basic_wage", id="basic-wage-not-number"),
+    pytest.param({"monthly_basic_wage": None}, "monthly_basic_wage", id="basic-wage-null"),
     pytest.param({"monthly_wage": 30000}, "monthly_wage", id="wage-below-basic-wage-Art1"),
     pytest.param({"unpaid_absence_days": -1}, "unpaid_absence_days", id="negative-absence"),
     pytest.param({"unpaid_absence_days": 1.5}, "unpaid_absence_days", id="part-day-absence"),
