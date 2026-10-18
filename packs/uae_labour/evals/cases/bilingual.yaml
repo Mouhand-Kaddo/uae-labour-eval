@@ -26,7 +26,7 @@
           nationality: foreign
     ar: *gratuity-001
   scoring: [status, numeric, citations, tool_call, answer_language, consistency]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 67"]
   depends_on: [OQ-001, OQ-002]
   rationale: >-
@@ -64,7 +64,7 @@
           monthly_basic_wage: 7300
     ar: *leave-001
   scoring: [status, numeric, citations, tool_call, answer_language, consistency]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(1)", "Executive Regulations Art 19(2)"]
   depends_on: [OQ-001, OQ-003]
   rationale: >-
@@ -101,7 +101,7 @@
           monthly_wage: 9125
     ar: *notice-001
   scoring: [status, numeric, citations, tool_call, answer_language, consistency]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 43(1)", "Labour Law Art 43(3)", "Labour Law Art 43(4)"]
   depends_on: [OQ-001]
   rationale: >-
@@ -140,7 +140,7 @@
           monthly_wage: 7300
     ar: *probation-001
   scoring: [status, numeric, citations, tool_call, answer_language, consistency]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 9(1)", "Labour Law Art 9(5)", "Labour Law Art 67"]
   depends_on: [OQ-001]
   rationale: >-
@@ -170,7 +170,7 @@
         - {instrument: labour-law, article: "9"}
     ar: *cite-probation-001
   scoring: [status, citations, answer_language, consistency]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 9(3)"]
   depends_on: []
   rationale: >-
@@ -199,7 +199,7 @@
         - {instrument: labour-law, article: "43"}
     ar: *cite-notice-001
   scoring: [status, citations, answer_language, consistency]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 43(1)"]
   depends_on: []
   rationale: >-
@@ -225,7 +225,7 @@
         - {instrument: labour-law, article: "51"}
     ar: *cite-gratuity-001
   scoring: [status, citations, answer_language, consistency]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)"]
   depends_on: []
   rationale: >-
@@ -253,7 +253,7 @@
         - {instrument: executive-regulations, article: "19"}
     ar: *cite-leave-001
   scoring: [status, citations, answer_language, consistency]
-  reviewed: false
+  reviewed: true
   refs: ["Executive Regulations Art 19(1)", "Executive Regulations Art 19(2)"]
   depends_on: []
   rationale: >-
@@ -282,7 +282,7 @@
       refusal_reason: legal_advice
     ar: *refuse-advice-001
   scoring: [status, "judge:refusal", answer_language, consistency]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -307,7 +307,7 @@
       refusal_reason: out_of_scope
     ar: *refuse-scope-001
   scoring: [status, "judge:refusal", answer_language, consistency]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-

@@ -16,7 +16,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
   depends_on: []
   rationale: >-
@@ -45,7 +45,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
   depends_on: [OQ-001, OQ-002]
   rationale: >-
@@ -74,7 +74,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
   depends_on: [OQ-001, OQ-002]
   rationale: >-
@@ -104,7 +104,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 51(6)"]
   depends_on: [OQ-001, OQ-002]
   rationale: >-
@@ -138,7 +138,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 51(4)"]
   depends_on: [OQ-001, OQ-002]
   rationale: >-
@@ -171,7 +171,7 @@
         part_time_hours_ratio: 0.5
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Executive Regulations Art 30", "Labour Law Art 51(2)"]
   depends_on: [OQ-001, OQ-002, OQ-008]
   rationale: >-
@@ -202,7 +202,7 @@
         work_pattern: temporary
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Executive Regulations Art 30(2)", "Labour Law Art 51(2)", "Labour Law Art 51(3)"]
   depends_on: [OQ-001, OQ-002, OQ-006]
   rationale: >-
@@ -233,7 +233,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)"]
   depends_on: [OQ-001, OQ-002]
   rationale: >-
@@ -256,7 +256,7 @@
     citations:
       - {instrument: labour-law, article: "51"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(1)"]
   depends_on: []
   rationale: >-
@@ -284,7 +284,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 67"]
   depends_on: [OQ-001, OQ-002]
   rationale: >-
@@ -312,7 +312,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
   depends_on: [OQ-001, OQ-002]
   rationale: >-
@@ -340,7 +340,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)"]
   depends_on: [OQ-001, OQ-002]
   rationale: >-
@@ -369,7 +369,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 51(4)"]
   depends_on: []
   rationale: >-
@@ -396,7 +396,7 @@
         work_pattern: full_time
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)"]
   depends_on: [OQ-001, OQ-002]
   rationale: >-
@@ -426,7 +426,7 @@
         part_time_hours_ratio: 0.6
         nationality: foreign
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Executive Regulations Art 30", "Labour Law Art 51(2)", "Labour Law Art 51(3)"]
   depends_on: [OQ-001, OQ-002, OQ-008]
   rationale: >-
@@ -453,7 +453,7 @@
         start_date: "2021-03-01"
         end_date: "2024-02-28"
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(1)", "Labour Law Art 67"]
   depends_on: []
   rationale: >-
@@ -477,7 +477,7 @@
         start_date: "2025-01-01"
         end_date: "2025-08-28"
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(1)", "Labour Law Art 67"]
   depends_on: []
   rationale: >-
@@ -500,7 +500,7 @@
         start_date: "2025-01-01"
         end_date: "2025-06-29"
   scoring: [status, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(1)", "Labour Law Art 67"]
   depends_on: [OQ-005, OQ-011]
   rationale: >-
@@ -528,7 +528,7 @@
         leave_days_taken: 18
         monthly_basic_wage: 9125
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(1)", "Executive Regulations Art 19"]
   depends_on: [OQ-001, OQ-003]
   rationale: >-
@@ -554,7 +554,7 @@
         work_pattern: part_time
         part_time_hours_ratio: 0.6
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(2)", "Executive Regulations Art 18"]
   depends_on: [OQ-010]
   rationale: >-
@@ -582,7 +582,7 @@
         leave_days_taken: 30
         monthly_basic_wage: 18250
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(1)", "Executive Regulations Art 19"]
   depends_on: [OQ-001, OQ-003, OQ-005]
   rationale: >-
@@ -607,7 +607,7 @@
         start_date: "2025-01-01"
         end_date: "2025-10-27"
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(1)", "Labour Law Art 67"]
   depends_on: []
   rationale: >-
@@ -629,7 +629,7 @@
         start_date: "2025-01-01"
         end_date: "2025-05-31"
   scoring: [status, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(1)", "Labour Law Art 67"]
   depends_on: [OQ-011]
   rationale: >-
@@ -655,7 +655,7 @@
         end_date: "2025-02-27"
         monthly_basic_wage: 9125
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(1)", "Executive Regulations Art 19"]
   depends_on: [OQ-001, OQ-003, OQ-005]
   rationale: >-
@@ -683,7 +683,7 @@
         leave_days_taken: 100
         monthly_basic_wage: 7300
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(1)", "Labour Law Art 29(9)", "Executive Regulations Art 19"]
   depends_on: [OQ-001, OQ-003]
   rationale: >-
@@ -708,7 +708,7 @@
         notice_days: 60
         monthly_wage: 18250
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 43"]
   depends_on: [OQ-001]
   rationale: >-
@@ -730,7 +730,7 @@
       arguments:
         notice_days: 14
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 43(1)", "Labour Law Art 65(3)"]
   depends_on: [OQ-012]
   rationale: >-
@@ -758,7 +758,7 @@
         notice_days_worked: 30
         monthly_wage: 9125
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 43"]
   depends_on: [OQ-001]
   rationale: >-
@@ -783,7 +783,7 @@
         notice_days_worked: 10
         monthly_wage: 7300
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 43"]
   depends_on: [OQ-001]
   rationale: >-
@@ -804,7 +804,7 @@
         terminated_by: worker
     numbers: [90]
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 43(1)", "Labour Law Art 65(3)"]
   depends_on: [OQ-012]
   rationale: >-
@@ -830,7 +830,7 @@
         probation_end_date: "2025-09-30"
         ended_by: employer
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
   depends_on: []
   rationale: >-
@@ -862,7 +862,7 @@
         termination_date: "2025-05-15"
         monthly_wage: 9125
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
   depends_on: [OQ-001]
   rationale: >-
@@ -894,7 +894,7 @@
         termination_date: "2025-02-17"
         monthly_wage: 18250
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
   depends_on: [OQ-001]
   rationale: >-
@@ -919,7 +919,7 @@
         probation_end_date: "2025-08-31"
         ended_by: worker_leaving_uae
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
   depends_on: []
   rationale: >-
@@ -946,7 +946,7 @@
         notice_date: "2025-03-01"
         termination_date: "2025-03-31"
   scoring: [status, numeric, tool_call]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
   depends_on: []
   rationale: >-

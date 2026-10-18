@@ -9,7 +9,7 @@
     citations:
       - {instrument: labour-law, article: "9"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 9(1)"]
   depends_on: []
   rationale: >-
@@ -29,7 +29,7 @@
     citations:
       - {instrument: executive-regulations, article: "19"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Executive Regulations Art 19(2)"]
   depends_on: []
   rationale: >-
@@ -48,7 +48,7 @@
     citations:
       - {instrument: labour-law, article: "51"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(4)"]
   depends_on: []
   rationale: >-
@@ -68,7 +68,7 @@
     citations:
       - {instrument: labour-law, article: "32"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 32(1)"]
   depends_on: []
   rationale: >-
@@ -89,7 +89,7 @@
     citations:
       - {instrument: labour-law, article: "19"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 19(2)", "Labour Law Art 19(3)"]
   depends_on: []
   rationale: >-
@@ -109,7 +109,7 @@
     citations:
       - {instrument: labour-law, article: "54"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 54(9)"]
   depends_on: []
   rationale: >-
@@ -127,7 +127,7 @@
     citations:
       - {instrument: labour-law, article: "16"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 16(10)"]
   depends_on: []
   rationale: >-
@@ -148,7 +148,7 @@
       - {instrument: labour-law, article: "10"}
       - {instrument: executive-regulations, article: "12"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 10(1)", "Executive Regulations Art 12(5)"]
   depends_on: []
   rationale: >-
@@ -168,7 +168,7 @@
     citations:
       - {instrument: labour-law, article: "68"}
   scoring: [status, citations, "judge:grounding"]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 68(1)", "Labour Law Art 68(2)"]
   depends_on: []
   rationale: >-
@@ -191,7 +191,7 @@
     citations:
       - {instrument: labour-law, article: "51"}
   scoring: [status, citations, "judge:grounding"]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)"]
   depends_on: []
   rationale: >-
@@ -211,7 +211,7 @@
     citations:
       - {instrument: labour-law, article: "60"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 60(1)"]
   depends_on: [OQ-007]
   rationale: >-
@@ -231,7 +231,7 @@
     citations:
       - {instrument: labour-law, article: "6"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 6(4)"]
   depends_on: []
   rationale: >-
@@ -249,7 +249,7 @@
     citations:
       - {instrument: labour-law, article: "44"}
   scoring: [status, citations]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 44(8)"]
   depends_on: [OQ-014]
   rationale: >-
@@ -271,7 +271,7 @@
     citations:
       - {instrument: labour-law, article: "29"}
   scoring: [status, citations, "judge:grounding"]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(9)"]
   depends_on: [OQ-004]
   rationale: >-
@@ -293,7 +293,7 @@
     citations:
       - {instrument: labour-law, article: "31"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 31(3)"]
   depends_on: []
   rationale: >-
@@ -311,7 +311,7 @@
     citations:
       - {instrument: labour-law, article: "31"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 31(2)"]
   depends_on: []
   rationale: >-
@@ -330,7 +330,7 @@
     citations:
       - {instrument: labour-law, article: "13"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 13(2)"]
   depends_on: []
   rationale: >-
@@ -347,7 +347,7 @@
     citations:
       - {instrument: labour-law, article: "53"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 53"]
   depends_on: []
   rationale: >-
@@ -364,7 +364,7 @@
     citations:
       - {instrument: labour-law, article: "13"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 13(11)"]
   depends_on: []
   rationale: >-
@@ -384,7 +384,7 @@
     citations:
       - {instrument: executive-regulations, article: "15"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Executive Regulations Art 15(2)", "Labour Law Art 17(4)"]
   depends_on: []
   rationale: >-
@@ -403,7 +403,7 @@
       - {instrument: executive-regulations, article: "19"}
       - {instrument: labour-law, article: "29"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Executive Regulations Art 19(1)", "Labour Law Art 29(5)"]
   depends_on: [OQ-015]
   rationale: >-
@@ -423,7 +423,7 @@
     citations:
       - {instrument: labour-law, article: "29"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 29(9)"]
   depends_on: [OQ-004]
   rationale: >-
@@ -443,7 +443,7 @@
     citations:
       - {instrument: executive-regulations, article: "30"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Executive Regulations Art 30(2)"]
   depends_on: []
   rationale: >-
@@ -463,7 +463,7 @@
     citations:
       - {instrument: labour-law, article: "32"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 32(1)"]
   depends_on: []
   rationale: >-
@@ -481,7 +481,7 @@
       - {instrument: labour-law, article: "17"}
       - {instrument: labour-law, article: "21"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 17(1)", "Labour Law Art 21"]
   depends_on: []
   rationale: >-
@@ -499,7 +499,7 @@
     citations:
       - {instrument: labour-law, article: "25"}
   scoring: [status, citations, answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 25(1)", "Labour Law Art 25(2)", "Labour Law Art 39(1)"]
   depends_on: []
   rationale: >-

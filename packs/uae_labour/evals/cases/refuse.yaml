@@ -8,7 +8,7 @@
     status: refused
     refusal_reason: legal_advice
   scoring: [status, "judge:refusal"]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -26,7 +26,7 @@
     status: refused
     refusal_reason: legal_advice
   scoring: [status, "judge:refusal"]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -44,7 +44,7 @@
     status: refused
     refusal_reason: legal_advice
   scoring: [status, "judge:refusal"]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -62,7 +62,7 @@
     status: refused
     refusal_reason: legal_advice
   scoring: [status, "judge:refusal"]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -79,7 +79,7 @@
     status: refused
     refusal_reason: out_of_scope
   scoring: [status, "judge:refusal"]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -95,7 +95,7 @@
     status: refused
     refusal_reason: out_of_scope
   scoring: [status, "judge:refusal"]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 3(2)"]
   depends_on: []
   rationale: >-
@@ -113,7 +113,7 @@
     status: refused
     refusal_reason: out_of_scope
   scoring: [status, "judge:refusal"]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 51(8)"]
   depends_on: []
   rationale: >-
@@ -129,7 +129,7 @@
   expected:
     status: not_found
   scoring: [status, "judge:refusal"]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 68(3)", "Labour Law Art 73(1)"]
   depends_on: []
   rationale: >-
@@ -147,7 +147,7 @@
   expected:
     status: not_found
   scoring: [status, "judge:refusal"]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 17(2)"]
   depends_on: []
   rationale: >-
@@ -165,7 +165,7 @@
   expected:
     status: not_found
   scoring: [status, "judge:refusal"]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 1", "Labour Law Art 37(1)"]
   depends_on: []
   rationale: >-
@@ -181,7 +181,7 @@
     status: refused
     refusal_reason: legal_advice
   scoring: [status, "judge:refusal", answer_language]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -198,7 +198,7 @@
     status: refused
     refusal_reason: legal_advice
   scoring: [status, "judge:refusal", answer_language]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -215,7 +215,7 @@
     status: refused
     refusal_reason: legal_advice
   scoring: [status, "judge:refusal", answer_language]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -231,7 +231,7 @@
     status: refused
     refusal_reason: out_of_scope
   scoring: [status, "judge:refusal", answer_language]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -246,7 +246,7 @@
     status: refused
     refusal_reason: out_of_scope
   scoring: [status, "judge:refusal", answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 3(2)"]
   depends_on: []
   rationale: >-
@@ -261,7 +261,7 @@
     status: refused
     refusal_reason: out_of_scope
   scoring: [status, "judge:refusal", answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 3(2)"]
   depends_on: []
   rationale: >-
@@ -277,7 +277,7 @@
     status: refused
     refusal_reason: out_of_scope
   scoring: [status, "judge:refusal", answer_language]
-  reviewed: false
+  reviewed: true
   refs: []
   depends_on: []
   rationale: >-
@@ -291,7 +291,7 @@
   expected:
     status: not_found
   scoring: [status, "judge:refusal", answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 27"]
   depends_on: []
   rationale: >-
@@ -306,7 +306,7 @@
   expected:
     status: not_found
   scoring: [status, "judge:refusal", answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 37(1)"]
   depends_on: []
   rationale: >-
@@ -321,7 +321,7 @@
   expected:
     status: not_found
   scoring: [status, "judge:refusal", answer_language]
-  reviewed: false
+  reviewed: true
   refs: ["Labour Law Art 28(1)"]
   depends_on: []
   rationale: >-

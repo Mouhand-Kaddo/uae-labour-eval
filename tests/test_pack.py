@@ -29,7 +29,7 @@ def test_committed_config_points_at_a_pack_whose_cases_load():
     assert any(case.category == "refuse" for case in CASES)
     assert {"judge:grounding", "judge:refusal"} <= RUBRICS.keys()
     assert any("judge:grounding" in case.scoring for case in CASES)
-    assert not any(case.reviewed for case in CASES)
+    assert all(case.reviewed for case in CASES)
 
 
 def test_committed_manifest_indexes_the_law_and_its_regulations_in_both_languages():
@@ -167,7 +167,7 @@ def test_bilingual_pairs_are_ten_spread_over_calc_cite_and_refusals():
     topics = [pair_topic(case) for case in cases]
 
     assert len(cases) == 10
-    assert all(case.category == "bilingual" and not case.reviewed for case in cases)
+    assert all(case.category == "bilingual" for case in cases)
     assert topics.count("calc") >= 3 and topics.count("cite") >= 3
     assert topics.count("refused") >= 2
     assert "judge:bilingual" in RUBRICS
