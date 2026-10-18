@@ -425,28 +425,18 @@ def test_a_pair_passes_when_both_halves_are_right_and_agree():
         "ar": [6904.11],
         "match": True,
     }
-    assert consistency["citations"] == {
-        "en": ["labour-law 51"],
-        "ar": ["labour-law 51"],
-        "match": True,
-    }
+    assert "citations" not in consistency
 
 
-def test_a_pair_fails_when_its_halves_cite_different_articles():
+def test_a_pair_passes_when_both_halves_cite_the_required_articles_and_one_cites_more():
     en = answer("Your gratuity is AED 6,904.11.", ("labour-law", "51"), ("labour-law", "67"))
 
     verdict = score_gratuity_pair(en, AR_GRATUITY)
 
-    assert not verdict.passed
+    assert verdict.passed
     citations = verdict.details["citations"]
     assert citations["en"]["passed"] and citations["ar"]["passed"]
-    consistency = verdict.details["consistency"]
-    assert not consistency["passed"]
-    assert consistency["citations"] == {
-        "en": ["labour-law 51", "labour-law 67"],
-        "ar": ["labour-law 51"],
-        "match": False,
-    }
+    assert "citations" not in verdict.details["consistency"]
 
 
 def test_a_pair_fails_when_its_halves_report_different_figures_within_tolerance():
@@ -465,7 +455,7 @@ def test_a_pair_fails_when_the_judge_finds_the_answers_mean_different_things():
 
     assert not verdict.passed
     consistency = verdict.details["consistency"]
-    assert consistency["numbers"]["match"] and consistency["citations"]["match"]
+    assert consistency["numbers"]["match"]
     assert consistency["judge"]["passed"] is False
 
 

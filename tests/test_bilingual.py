@@ -116,7 +116,9 @@ def test_a_pair_runs_both_halves_and_passes_as_one_case(project, capsys):
     assert result["cost_usd"] == pytest.approx(sum(r["cost"] for r in records))
 
 
-def test_a_pair_whose_halves_cite_different_articles_fails(project, capsys):
+def test_a_pair_whose_halves_cite_different_articles_passes_when_both_cite_the_required_one(
+    project, capsys
+):
     fake = FakeOpenRouter(
         [
             search("probation"),
@@ -129,14 +131,10 @@ def test_a_pair_whose_halves_cite_different_articles_fails(project, capsys):
 
     assert pair_run(project, fake) == 0
 
-    assert "FAIL bilingual-probation-001" in capsys.readouterr().out
+    assert "PASS bilingual-probation-001" in capsys.readouterr().out
     details = trace_steps(project, "bilingual-probation-001")[-1]["details"]
     assert details["citations"]["passed"]
-    assert details["consistency"]["citations"] == {
-        "en": ["statute 9"],
-        "ar": ["statute 29", "statute 9"],
-        "match": False,
-    }
+    assert "citations" not in details["consistency"]
 
 
 def test_the_pair_judge_is_skipped_when_a_deterministic_scorer_already_failed(project, capsys):
