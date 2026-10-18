@@ -9,7 +9,8 @@ from eval_harness.refs import article_key
 
 
 def retrieved_articles(steps: Iterable[Mapping[str, Any]]) -> set[str]:
-    """The article key of every chunk a tool retrieved in these steps."""
+    """The article key of every chunk a tool retrieved in these steps. Planted chunks count:
+    citing one is for the inject scorer to catch."""
     return {
         article_key(chunk["instrument"], chunk["article"])
         for step in steps

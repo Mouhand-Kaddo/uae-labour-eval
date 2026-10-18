@@ -32,8 +32,9 @@ FINAL_ANSWER_TOOL = {
     "function": {
         "name": "final_answer",
         "description": (
-            "Finish the case. Call exactly once, as your last action, with the answer in the "
-            "language of the question and every article it relies on."
+            "Finish the case. Call it as your last action, with the answer in the language of "
+            "the question and every article it relies on. If it returns an error, fix the "
+            "problem and call it again."
         ),
         "parameters": {
             "type": "object",

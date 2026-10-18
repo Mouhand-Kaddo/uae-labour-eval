@@ -9,11 +9,16 @@ from typing import Any
 from eval_harness.config import AgentSettings
 from eval_harness.final_answer import FINAL_ANSWER_TOOL, FinalAnswer, parse_final_answer
 from eval_harness.openrouter import ChatResponse, ModelInfo, OpenRouterClient
-from eval_harness.refs import article_key
+from eval_harness.refs import article_key, article_label
 from eval_harness.trace import Trace, retrieved_articles
 
 PROVIDERS_NEEDING_CACHE_CONTROL = ("anthropic/", "qwen/")
 FINISH_REMINDER = "Finish by calling the final_answer tool."
+UNREAD_CITATIONS = (
+    "these citations are not articles a tool returned in this conversation: {}. Read them with "
+    "your tools (check the instrument and article number), or remove them, then call "
+    "final_answer again."
+)
 
 
 @dataclass(frozen=True)
@@ -50,6 +55,7 @@ def run_agent(
     tools_by_name = {tool.name: tool for tool in tools}
     stable_prefix = _stable_prefix(model, system_prompt, tools, settings, provider)
     messages: list[dict[str, Any]] = [{"role": "user", "content": user_input}]
+    first_step = len(trace.steps)
 
     for turn in range(1, settings.max_turns + 1):
         payload = {**stable_prefix, "messages": [*stable_prefix["messages"], *messages]}
@@ -84,12 +90,15 @@ def run_agent(
                 arguments = json.loads(arguments or "{}")
                 if name == "final_answer":
                     final = parse_final_answer(arguments)
-                    _refuse_unread_citations(final, trace)
-                    trace.add("final_answer", turn=turn, **asdict(final))
-                    return final
-                if name not in tools_by_name:
+                    unread = unread_citations(final, trace.steps[first_step:])
+                    if not unread:
+                        trace.add("final_answer", turn=turn, **asdict(final))
+                        return final
+                    result = {"error": UNREAD_CITATIONS.format(", ".join(unread)), "unread": unread}
+                elif name not in tools_by_name:
                     raise ValueError(f"unknown tool {name!r}")
-                result = {"result": tools_by_name[name].run(arguments)}
+                else:
+                    result = {"result": tools_by_name[name].run(arguments)}
             except (ValueError, TypeError, KeyError) as exc:
                 result = {"error": str(exc)}
             trace.add(
@@ -107,15 +116,16 @@ def run_agent(
     return FinalAnswer.limit()
 
 
-def _refuse_unread_citations(final: FinalAnswer, trace: Trace) -> None:
-    cited = {article_key(c.instrument, c.article) for c in final.citations}
-    unread = sorted(cited - retrieved_articles(trace.steps))
-    if unread:
-        raise ValueError(
-            f"you cited articles you have not read in this conversation: {', '.join(unread)}. "
-            "Read them with your tools or remove them from the citations, then call "
-            "final_answer again."
+def unread_citations(final: FinalAnswer, steps: list[dict[str, Any]]) -> list[str]:
+    """The answer's citations of articles no tool returned in these steps, as article labels."""
+    retrieved = retrieved_articles(steps)
+    return list(
+        dict.fromkeys(
+            article_label(c.instrument, c.article)
+            for c in final.citations
+            if article_key(c.instrument, c.article) not in retrieved
         )
+    )
 
 
 def _stable_prefix(

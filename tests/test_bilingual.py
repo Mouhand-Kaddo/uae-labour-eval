@@ -137,6 +137,28 @@ def test_a_pair_whose_halves_cite_different_articles_passes_when_both_cite_the_r
     assert "citations" not in details["consistency"]
 
 
+def test_the_second_half_cannot_cite_an_article_only_the_first_half_read(project, capsys):
+    fake = FakeOpenRouter(
+        [
+            search("probation"),
+            answer(EN_ANSWER, "9"),
+            answer(AR_ANSWER, "9"),
+            search("التجربة"),
+            answer(AR_ANSWER, "9"),
+            judge_says(same_meaning=True),
+        ]
+    )
+
+    assert pair_run(project, fake) == 0
+
+    assert "PASS bilingual-probation-001" in capsys.readouterr().out
+    steps = trace_steps(project, "bilingual-probation-001")
+    [rejected] = [s for s in steps if s["type"] == "tool_call" and s["name"] == "final_answer"]
+    assert rejected["unread"] == ["statute Art 9"]
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["cases"][0]["sent_back"] == 1
+
+
 def test_the_pair_judge_is_skipped_when_a_deterministic_scorer_already_failed(project, capsys):
     fake = FakeOpenRouter(
         [search("probation"), answer(EN_ANSWER, "9"), search("probation"), answer(EN_ANSWER, "9")]

@@ -435,12 +435,14 @@ def test_a_citation_of_an_unread_article_is_sent_back_before_the_answer_is_accep
     assert "PASS cite-en-001" in capsys.readouterr().out
     rejection = fake.chat_requests[2]["messages"][-1]
     assert rejection["role"] == "tool"
-    assert "statute 120" in rejection["content"]
+    assert "statute Art 120" in rejection["content"]
     steps = read_jsonl(only_run_dir(project) / "traces" / "cite-en-001.1.jsonl")
     [rejected] = [s for s in steps if s["type"] == "tool_call" and s["name"] == "final_answer"]
-    assert "statute 120" in rejected["error"]
+    assert rejected["unread"] == ["statute Art 120"]
     [final] = [s for s in steps if s["type"] == "final_answer"]
     assert final["citations"] == [{"instrument": "statute", "article": "9"}]
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["cases"][0]["sent_back"] == 1
 
 
 def test_cite_case_fails_when_the_agent_keeps_citing_an_unread_article(project, capsys):

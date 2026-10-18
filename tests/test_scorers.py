@@ -182,6 +182,14 @@ def test_citation_scorer_fails_a_made_up_citation_that_was_never_retrieved():
     assert verdict.details["citations"]["not_retrieved"] == ["labour-law 120"]
 
 
+def test_citation_scorer_matches_an_article_number_written_in_arabic_indic_digits():
+    trace = [retrieval(("labour-law", "9"))]
+
+    verdict = score_case(cite_case(ART_9), cited(("labour-law", "٩")), trace)
+
+    assert verdict.passed
+
+
 def test_citation_scorer_fails_when_a_required_article_is_not_cited():
     trace = [retrieval(("labour-law", "9"), ("labour-law", "43"))]
 

@@ -76,6 +76,8 @@ class CaseResult:
     passed: bool
     cost_usd: float
     latency_s: float
+    sent_back: int = 0
+    """Final answers the agent loop sent back for citing articles no tool returned."""
 
 
 @dataclass(frozen=True)
@@ -447,6 +449,7 @@ class _Run:
             passed,
             self.spend.case_usd,
             latency,
+            sum(1 for step in trace.steps if step["type"] == "tool_call" and "unread" in step),
         )
         return result, False
 
