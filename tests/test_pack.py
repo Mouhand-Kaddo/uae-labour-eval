@@ -49,7 +49,7 @@ def test_committed_pack_offers_the_gratuity_tool():
 
 
 def test_gratuity_cases_are_about_fifteen_and_split_between_english_and_arabic():
-    languages = [case.language for case in GRATUITY_CASES]
+    languages = [case.language for case in CASES if case.id.startswith("calc-gratuity-")]
 
     assert 14 <= len(languages) <= 16
     assert abs(languages.count("en") - languages.count("ar")) <= 1
