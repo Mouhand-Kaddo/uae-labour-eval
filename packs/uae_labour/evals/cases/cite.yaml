@@ -41,23 +41,22 @@
   category: cite
   language: ar
   input: >-
-    وفق قانون العمل الإماراتي، كم يومًا من الأجر يستحقها العامل الأجنبي بدوام كامل عن كل سنة من
-    سنوات الخدمة الخمس الأولى في مكافأة نهاية الخدمة، وعلى أي أجر تُحسب المكافأة؟
+    انقطعت عن العمل بدون أجر لمدة شهرين خلال خدمتي لدى شركة خاصة. هل تُحسب أيام الانقطاع هذه ضمن
+    مدة الخدمة عند حساب مكافأة نهاية الخدمة وفق قانون العمل الإماراتي؟
   expected:
     status: answered
     citations:
       - {instrument: labour-law, article: "51"}
   scoring: [status, citations, answer_language]
   reviewed: false
-  refs: ["Labour Law Art 51(2)"]
+  refs: ["Labour Law Art 51(4)"]
   depends_on: []
   rationale: >-
-    Art 51(2) (Arabic text): "يستحق العامل الأجنبي الذي يعمل وفق نمط العمل بالدوام الكامل، والذي
-    أكمل سنة أو أكثر في الخدمة المستمرة مكافأة نهاية الخدمة عند انتهاء خدمته، تحسب وفق الأجر
-    الأساسي، وذلك على النحو الآتي: أ. أجر (21) واحد وعشرين يوم عن كل سنة من سنوات الخدمة الخمس
-    الأولى." Both facts (21 days, basic wage) come from Art 51, so the answer must cite Labour Law
-    Art 51, every cited article must have been retrieved during the case, and the answer must be
-    in Arabic like the question.
+    Art 51(4) (Arabic text): "لا تدخل أيام الانقطاع عن العمل بدون أجر في حساب مدة الخدمة." The
+    answer is no: the two months of unpaid absence are left out of the service on which the
+    gratuity is calculated. The rule is in Art 51, so the answer must cite Labour Law Art 51,
+    every cited article must have been retrieved during the case, and the answer must be in
+    Arabic like the question.
 - id: cite-en-003
   category: cite
   language: en
@@ -200,8 +199,7 @@
     foreign full-time worker "who has completed one or more years of continuous service, is
     entitled to an end-of-service gratuity upon the end of his service", 21 days' basic wage per
     year for the first five years; 51(3) adds parts of a year. Nothing in Art 51 turns on which
-    party ended the contract, so the judge fails any claim that resignation cuts the gratuity
-    (that was a 1980-law rule, not in the corpus).
+    party ended the contract, so the judge fails any claim that resignation cuts the gratuity.
 - id: cite-en-010
   category: cite
   language: en
@@ -215,7 +213,7 @@
   scoring: [status, citations]
   reviewed: false
   refs: ["Labour Law Art 60(1)"]
-  depends_on: []
+  depends_on: [OQ-007]
   rationale: >-
     Art 60(1)(a) "Employs a Worker with no permit to work for him." The English gives the fine as
     "not less than on hundred thousand AED (100,000) and not exceeding two million AED
@@ -253,12 +251,37 @@
   scoring: [status, citations]
   reviewed: false
   refs: ["Labour Law Art 44(8)"]
-  depends_on: []
+  depends_on: [OQ-014]
   rationale: >-
-    Art 44(8): the employer may dismiss without warning "If the Worker is absent from work
-    without a legitimate reason or an excuse acceptable to the Employer for more than twenty (20)
-    non-consecutive days, or more than seven (7) consecutive days", after a written investigation
-    and a written, reasoned decision (Art 44 opening words).
+    Arabic Art 44(8): the employer may dismiss without notice on "تغيب العامل دون سبب مشروع أو
+    عذر يقبله صاحب العمل لأكثر من (20) عشرين يومًا متقطعة خلال السنة الواحدة، أو أكثر من (7) سبعة
+    أيام متتالية", after a written investigation and a written, reasoned decision (Art 44 opening
+    words). The English omits "within one year" (خلال السنة الواحدة); OQ-014 decides the Arabic
+    applies. Expected answer: more than 20 non-consecutive days within one year, or more than 7
+    consecutive days.
+- id: cite-en-013
+  category: cite
+  language: en
+  input: >-
+    I resigned after two years and four months and never used my annual leave. Under the UAE
+    Labour Law, am I paid for the unused leave, does that include the four months of my last,
+    incomplete year, and on which wage is it calculated?
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "29"}
+  scoring: [status, citations, "judge:grounding"]
+  reviewed: false
+  refs: ["Labour Law Art 29(9)"]
+  depends_on: [OQ-004]
+  rationale: >-
+    Arabic Art 29(9): "يحق للعامل الحصو ل على أجرة أيام الإجازة المستحقة إذا ترك العمل قبل استعماله
+    لها، أيًّا كانت مدتها ... كما يستحق أجرة الإجازة عن أجزاء السنة بنسبة ما قضاه منها في العمل،
+    وتحسب وفق الأجر الأساسي." (the ingested text splits "الحصو ل"). The English 29(9) has the
+    first sentence but not the pro-rata sentence or the basic-wage basis; OQ-004 decides the
+    Arabic sentence is the law in both languages and English answers state it. Expected answer:
+    yes, the unused leave is paid; the four months of the last year are paid in proportion to
+    the time worked; on the basic wage.
 - id: cite-ar-002
   category: cite
   language: ar
@@ -334,23 +357,28 @@
   category: cite
   language: ar
   input: >-
-    ما أقل وأطول مدة إنذار يجوز الاتفاق عليها في عقد العمل لإنهائه وفق قانون العمل الإماراتي؟
+    انتهى عقد عملي، وطلبت من صاحب العمل شهادة خبرة فطلب مني دفع رسوم مقابلها. هل يلزم قانون العمل
+    الإماراتي صاحب العمل بإعطائي شهادة خبرة دون مقابل، وما البيانات التي يجب أن تتضمنها؟
   expected:
     status: answered
     citations:
-      - {instrument: labour-law, article: "43"}
+      - {instrument: labour-law, article: "13"}
   scoring: [status, citations, answer_language]
   reviewed: false
-  refs: ["Labour Law Art 43(1)"]
+  refs: ["Labour Law Art 13(11)"]
   depends_on: []
   rationale: >-
-    Art 43(1): written notice and work during the agreed notice period "على ألا تقل المدة عن (30)
-    ثلاثين يومًا، ولا تزيد على (90) تسعين يومًا".
+    Art 13(11): the employer must observe "إعطاء العامل بناءً على طلبه عند انتهاء عقد العمل، شهادة
+    خبرة دون مقابل، يبين فيها تاريخ التحاقه بالعمل، وتاريخ انتهائه، ومدة خدمته الإجمالية، والمسمى
+    الوظيفي أو نوع العمل الذي كان يؤديه، وآخر أجر كان يتقاضاه، وسبب انتهاء عقد العمل، على ألا يتم
+    تضمين الشهادة ما قد يسيء إلى سمعة العامل أو يقلل من فرص العمل أمامه." The answer is yes: on
+    the worker's request at the end of the contract, free of charge, with those details.
 - id: cite-ar-007
   category: cite
   language: ar
   input: >-
-    كم ساعة تُخفض ساعات العمل العادية للعاملين في القطاع الخاص خلال شهر رمضان؟
+    كم ساعة تُخفض ساعات العمل العادية للعاملين في القطاع الخاص خلال شهر رمضان وفق قانون العمل
+    الإماراتي ولائحته التنفيذية؟
   expected:
     status: answered
     citations:
@@ -367,25 +395,29 @@
   category: cite
   language: ar
   input: >-
-    لم أستخدم إجازتي السنوية كاملة هذا العام. هل يجوز لي ترحيل كامل الرصيد إلى السنة القادمة؟
+    لم أستخدم إجازتي السنوية كاملة هذا العام. هل يجوز لي ترحيل كامل الرصيد إلى السنة القادمة وفق
+    قانون العمل الإماراتي؟
   expected:
     status: answered
     citations:
       - {instrument: executive-regulations, article: "19"}
+      - {instrument: labour-law, article: "29"}
   scoring: [status, citations, answer_language]
   reviewed: false
   refs: ["Executive Regulations Art 19(1)", "Labour Law Art 29(5)"]
-  depends_on: []
+  depends_on: [OQ-015]
   rationale: >-
     ER Art 19(1): "يجوز للعامل ترحيل ما لا يزيد على نصف الإجازة السنوية للسنة التي تليها أو أن يتفق
-    مع صاحب العمل على منحه بدلاً نقديًّا عنها". Art 29(5) allows carrying forward "بموافقة صاحب
-    العمل". So not the whole balance: at most half, with the employer's approval.
+    مع صاحب العمل على منحه بدلاً نقديًّا عنها". Art 29(5): "للعامل بموافقة صاحب العمل ووفق اللوائح
+    التنظيمية المعمول بها في المنشأة، أن يرحل رصيد إجازته السنوية أو أيامًا منها إلى السنة التالية."
+    OQ-015 (provisional) reads them together: not the whole balance, at most half, with the
+    employer's approval. Both articles must be cited.
 - id: cite-ar-009
   category: cite
   language: ar
   input: >-
-    تركت العمل قبل أن أستخدم رصيد إجازتي السنوية. هل أستحق أجرًا عن أيام الإجازة التي لم أستعملها،
-    وهل يشمل ذلك أجزاء السنة الأخيرة؟ وعلى أي أجر يُحسب؟
+    تركت العمل بعد سنتين وأربعة أشهر من الخدمة قبل أن أستخدم رصيد إجازتي السنوية. هل أستحق أجرًا
+    عن أيام الإجازة التي لم أستعملها، وهل يشمل ذلك أجزاء السنة الأخيرة؟ وعلى أي أجر يُحسب؟
   expected:
     status: answered
     citations:
@@ -468,10 +500,12 @@
       - {instrument: labour-law, article: "25"}
   scoring: [status, citations, answer_language]
   reviewed: false
-  refs: ["Labour Law Art 25(1)", "Labour Law Art 25(2)"]
+  refs: ["Labour Law Art 25(1)", "Labour Law Art 25(2)", "Labour Law Art 39(1)"]
   depends_on: []
   rationale: >-
     Art 25(2): "إذا تعددت الأسباب الموجبة للاقتطاع أو الخصم من الأجر، فلا يجوز في جميع الأحوال أن
     تزيد نسبة الاستقطاع و/ أو الخصم على (50%) خمسين في المائة من الأجر." Art 25(1)(f) caps
-    deductions for violations at 5% of the wage, and 25(1)(a) requires written consent and no
-    interest for loans.
+    deductions for violations under the establishment's sanctions regulation at 5% of the wage,
+    while Art 39(1)(c) lets the employer impose, as a disciplinary sanction, "الخصم من الأجر بما
+    لا يجاوز أجر (5) خمسة أيام في الشهر". Art 25(1)(a) requires written consent and no interest
+    for loans.

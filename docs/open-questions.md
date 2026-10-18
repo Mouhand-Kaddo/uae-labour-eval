@@ -176,6 +176,28 @@ The probation tool uses A and returns OQ-013 only for probations of 181–184 da
 
 **Decision:** Option A: six months of probation is 180 days (Art 67's 30-day month). Only probations ending on days 181–184 differ from the calendar reading. Research confidence: medium. Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
 
+## OQ-014: Arabic and English Art 44(8) differ on "within one year"
+
+- **EN:** "If the Worker is absent from work without a legitimate reason or an excuse acceptable to the Employer for more than twenty (20) non-consecutive days, or more than seven (7) consecutive days."
+- **AR:** "تغيب العامل دون سبب مشروع أو عذر يقبله صاحب العمل لأكثر من (20) عشرين يومًا متقطعة خلال السنة الواحدة، أو أكثر من (7) سبعة أيام متتالية" (absence without a legitimate reason or an excuse the employer accepts for more than 20 non-consecutive days *within one year*, or more than 7 consecutive days).
+
+The English gives no period over which the 20 non-consecutive days are counted; the Arabic counts them within one year.
+
+**Decision:** The Arabic applies (the portal says the Arabic prevails): Art 44(8) allows dismissal without notice for more than 20 non-consecutive days of absence within one year, or more than 7 consecutive days. Decided by the project owner on 2026-10-18.
+
+## OQ-015: How much annual leave may be carried forward?
+
+- **Art 29(5) (AR):** "للعامل بموافقة صاحب العمل ووفق اللوائح التنظيمية المعمول بها في المنشأة، أن يرحل رصيد إجازته السنوية أو أيامًا منها إلى السنة التالية." The English: "The Worker may, upon the approval of the Employer and in accordance with the applicable organizational regulations in the Establishment, carry forward the balance of his annual leave, or days thereof, to the following year."
+- **ER Art 19(1) (AR):** opens "مع مراعاة أحكام البندين رقمي (8) و(9) من المادة رقم (29) من المرسوم بقانون" and says "يجوز للعامل ترحيل ما لا يزيد على نصف الإجازة السنوية للسنة التي تليها". The English: "Subject to the provisions of clauses (8) and (9) of Article (29) of the Decree-Law: 1. The worker may carry forward, into the following year, what does not exceed half of the annual leave".
+
+Art 29(5) lets the worker carry forward the balance, or days of it, with the employer's approval and names no limit. ER Art 19(1) caps the carry-forward at half the annual leave, does not mention the employer's approval, and is made subject to Art 29(8) and (9), not 29(5). May a worker carry forward more than half with the employer's approval?
+
+Options:
+- **A.** at most half the annual leave (ER Art 19(1)), and only with the employer's approval (Art 29(5))
+- **B.** any part of the balance, including all of it, with the employer's approval (Art 29(5) read alone)
+
+**Decision:** A. At most half the annual leave may be carried forward, with the employer's approval, because ER Art 19 is the implementing rule. Provisional (Art 29(5) read alone allows more). Decided by the project owner on 2026-10-18.
+
 ---
 
 ## Facts still to verify (agent work, not owner decisions)
