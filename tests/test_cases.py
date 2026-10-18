@@ -249,13 +249,11 @@ def test_without_the_questions_doc_a_reviewed_case_with_dependencies_is_rejected
         load(tmp_path, a_case(reviewed=True, depends_on=["OQ-001"]))
 
 
-def test_the_repo_questions_doc_has_oq_001_to_003_decided_and_the_rest_open():
+def test_the_repo_questions_doc_has_every_question_decided():
     questions = load_open_questions(REPO / "docs" / "open-questions.md")
 
-    decided = {question for question, is_open in questions.items() if not is_open}
-    still_open = {question for question, is_open in questions.items() if is_open}
-    assert decided == {"OQ-001", "OQ-002", "OQ-003"}
-    assert {"OQ-004", "OQ-005", "OQ-006", "OQ-007"} <= still_open
+    assert {f"OQ-{n:03d}" for n in range(1, 14)} <= set(questions)
+    assert not [question for question, is_open in questions.items() if is_open]
 
 
 def two_files(directory, order):
