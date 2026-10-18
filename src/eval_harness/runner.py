@@ -273,31 +273,37 @@ def _estimate(
 ) -> float:
     """The run's cost estimate: agent runs, from ledger history if any, plus judge calls, plus
     query embeddings, assuming at most one search per agent turn. Every price is the model's
-    peak (and history is scaled up to it), since a surcharge window can double the price."""
+    peak for a call of the assumed prompt size (and history is scaled up to it), since a
+    surcharge window can double the price; size surcharges above that prompt size are left out."""
+    prompt_tokens = config.budget.assumed_prompt_tokens_per_case
     history = ledger.per_case_average(model=plan.model.id, category=category)
+    agent_prompt_price, agent_completion_price = plan.model.peak_prices(prompt_tokens)
     estimate = estimate_run_cost(
         case_count=plan.agent_runs * repeats,
-        history_per_case_usd=None if history is None else history * plan.model.peak_factor,
-        prompt_price_usd=plan.model.peak_prompt_price_usd,
-        completion_price_usd=plan.model.peak_completion_price_usd,
-        assumed_prompt_tokens=config.budget.assumed_prompt_tokens_per_case,
+        history_per_case_usd=None
+        if history is None
+        else history * plan.model.peak_factor(prompt_tokens),
+        prompt_price_usd=agent_prompt_price,
+        completion_price_usd=agent_completion_price,
+        assumed_prompt_tokens=prompt_tokens,
         assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
         margin=config.budget.safety_margin,
     )
     if plan.judge is not None:
+        judge_prompt_price, judge_completion_price = plan.judge.peak_prices(prompt_tokens)
         estimate += estimate_run_cost(
             case_count=plan.judged_per_repeat * repeats,
             history_per_case_usd=None,
-            prompt_price_usd=plan.judge.peak_prompt_price_usd,
-            completion_price_usd=plan.judge.peak_completion_price_usd,
-            assumed_prompt_tokens=config.budget.assumed_prompt_tokens_per_case,
+            prompt_price_usd=judge_prompt_price,
+            completion_price_usd=judge_completion_price,
+            assumed_prompt_tokens=prompt_tokens,
             assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
             margin=config.budget.safety_margin,
         )
     estimate += estimate_run_cost(
         case_count=plan.agent_runs * repeats * config.agent.max_turns,
         history_per_case_usd=None,
-        prompt_price_usd=plan.embedding.peak_prompt_price_usd,
+        prompt_price_usd=plan.embedding.peak_prices(ASSUMED_TOKENS_PER_SEARCH_QUERY)[0],
         completion_price_usd=0.0,
         assumed_prompt_tokens=ASSUMED_TOKENS_PER_SEARCH_QUERY,
         assumed_completion_tokens=0,
@@ -547,8 +553,7 @@ def _as_routed(client: OpenRouterClient, model: ModelInfo, provider: dict[str, A
         supported_parameters=model.supported_parameters.intersection(
             *(e.supported_parameters for e in pinned)
         ),
-        peak_prompt_price_usd=max(e.peak_prompt_price_usd for e in pinned),
-        peak_completion_price_usd=max(e.peak_completion_price_usd for e in pinned),
+        overrides=tuple(o for e in pinned for o in e.overrides),
     )
 
 

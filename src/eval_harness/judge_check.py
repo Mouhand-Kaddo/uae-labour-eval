@@ -364,11 +364,12 @@ def judge_pending(
         raise JudgeCheckError(str(exc)) from exc
     except OpenRouterError:
         key_usage = None
+    prompt_price, completion_price = judge.peak_prices(config.budget.assumed_prompt_tokens_per_case)
     estimate = estimate_run_cost(
         case_count=len(pending),
         history_per_case_usd=None,
-        prompt_price_usd=judge.peak_prompt_price_usd,
-        completion_price_usd=judge.peak_completion_price_usd,
+        prompt_price_usd=prompt_price,
+        completion_price_usd=completion_price,
         assumed_prompt_tokens=config.budget.assumed_prompt_tokens_per_case,
         assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
         margin=config.budget.safety_margin,

@@ -143,8 +143,12 @@ def test_the_estimate_scales_ledger_history_up_to_the_highest_override(project, 
     assert "over budget: estimate USD 0.0060" in capsys.readouterr().err
 
 
-def test_the_estimate_prices_the_judge_at_its_highest_override(project, capsys):
-    surge = {"min_prompt_tokens": 272000, "prompt": "0.000004", "completion": "0.000018"}
+def judged_refusal_estimate(project, capsys, min_prompt_tokens):
+    surge = {
+        "min_prompt_tokens": min_prompt_tokens,
+        "prompt": "0.000004",
+        "completion": "0.000018",
+    }
     models = [
         m | {"pricing": m["pricing"] | {"overrides": [surge]}} if m["id"] == JUDGE else m
         for m in MODELS
@@ -154,11 +158,22 @@ def test_the_estimate_prices_the_judge_at_its_highest_override(project, capsys):
     rubrics = project / "pack" / "evals" / "rubrics"
     rubrics.mkdir()
     (rubrics / "refusal.md").write_text("# Refusal\n\n## explains_why\nSays why.\n")
-    fake = FakeOpenRouter([], key_usage=19.94, models=models)
+    fake = FakeOpenRouter([], key_usage=19.96, models=models)
 
     assert run(project, fake, "run", "--model", HAIKU, "--case", "refuse-en-001") == 2
+    return capsys.readouterr().err
 
-    assert "over budget: estimate USD 0.0785" in capsys.readouterr().err
+
+def test_the_estimate_prices_the_judge_at_a_size_override_its_calls_reach(project, capsys):
+    err = judged_refusal_estimate(project, capsys, min_prompt_tokens=6000)
+
+    assert "over budget: estimate USD 0.0785" in err
+
+
+def test_the_estimate_ignores_a_size_override_above_the_assumed_prompt_size(project, capsys):
+    err = judged_refusal_estimate(project, capsys, min_prompt_tokens=272000)
+
+    assert "over budget: estimate USD 0.0470" in err
 
 
 def test_a_pinned_model_is_priced_at_its_pinned_endpoint_not_the_cheapest_one(project, capsys):

@@ -66,9 +66,10 @@ def embed_corpus(
     models = client.embedding_models()
     if model not in models:
         raise EmbedRefused(f"embedding model {model!r} is not in the OpenRouter embeddings list")
+    upper_bound_tokens = sum(len(text.encode("utf-8")) for text in pending.values())
     estimate = (
-        models[model].peak_prompt_price_usd
-        * sum(len(text.encode("utf-8")) for text in pending.values())
+        models[model].peak_prices(upper_bound_tokens)[0]
+        * upper_bound_tokens
         * config.budget.safety_margin
     )
     ledger = Ledger(config.ledger_path)

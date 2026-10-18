@@ -38,26 +38,41 @@ class EmbeddingResponse:
 
 
 @dataclass(frozen=True)
+class PriceOverride:
+    """A `pricing.overrides` entry (USD per token): a time-based surcharge, or one for calls
+    whose prompt has at least `min_prompt_tokens` tokens."""
+
+    prompt_price_usd: float
+    completion_price_usd: float
+    min_prompt_tokens: int = 0
+
+
+@dataclass(frozen=True)
 class ModelInfo:
-    """Live prices (USD per token) and capabilities. The peak prices are the highest across the
-    base price and every `pricing.overrides` entry (time- or size-based surcharges)."""
+    """Live prices (USD per token), their surcharges, and capabilities."""
 
     id: str
     prompt_price_usd: float
     completion_price_usd: float
     supported_parameters: frozenset[str]
-    peak_prompt_price_usd: float
-    peak_completion_price_usd: float
+    overrides: tuple[PriceOverride, ...] = ()
 
-    @property
-    def peak_factor(self) -> float:
-        """How many times the base price a call may cost under the dearest override."""
+    def peak_prices(self, prompt_tokens: int) -> tuple[float, float]:
+        """The highest prompt and completion prices a call of up to `prompt_tokens` prompt tokens
+        may pay. Time-based overrides always count, since a run may fall in their window;
+        size-based ones only if the call can reach their threshold."""
+        reachable = [o for o in self.overrides if o.min_prompt_tokens <= prompt_tokens]
+        return (
+            max([self.prompt_price_usd, *(o.prompt_price_usd for o in reachable)]),
+            max([self.completion_price_usd, *(o.completion_price_usd for o in reachable)]),
+        )
+
+    def peak_factor(self, prompt_tokens: int) -> float:
+        """How many times the base price such a call may cost under the dearest override."""
+        bases = (self.prompt_price_usd, self.completion_price_usd)
         ratios = [
             peak / base
-            for peak, base in (
-                (self.peak_prompt_price_usd, self.prompt_price_usd),
-                (self.peak_completion_price_usd, self.completion_price_usd),
-            )
+            for peak, base in zip(self.peak_prices(prompt_tokens), bases, strict=True)
             if base > 0
         ]
         return max(ratios, default=1.0)
@@ -170,9 +185,13 @@ def _model_info(model: dict[str, Any]) -> ModelInfo:
         prompt_price_usd=prompt,
         completion_price_usd=completion,
         supported_parameters=frozenset(model.get("supported_parameters") or ()),
-        peak_prompt_price_usd=max([prompt, *(float(o.get("prompt", prompt)) for o in overrides)]),
-        peak_completion_price_usd=max(
-            [completion, *(float(o.get("completion", completion)) for o in overrides)]
+        overrides=tuple(
+            PriceOverride(
+                prompt_price_usd=float(o.get("prompt", prompt)),
+                completion_price_usd=float(o.get("completion", completion)),
+                min_prompt_tokens=int(o.get("min_prompt_tokens", 0)),
+            )
+            for o in overrides
         ),
     )
 
