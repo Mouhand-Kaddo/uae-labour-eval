@@ -4,6 +4,12 @@ title = "Federal Decree-Law No. 33 of 2021 Regulating Labour Relations (consolid
 [instruments.executive-regulations]
 title = "Cabinet Resolution No. 1 of 2022, Executive Regulations of the Labour Law"
 
+[instruments.amending-decree-law-20-2023]
+title = "Federal Decree-Law No. 20 of 2023 Amending Certain Provisions of Federal Decree-Law No. 33 of 2021"
+
+[instruments.moj-labour-legislation-2025]
+title = "Ministry of Justice, Labour Relations Legislation (Arabic compilation, 2025 electronic edition)"
+
 [[sources]]
 id = "labour-law-en"
 instrument = "labour-law"
@@ -149,3 +155,33 @@ drop_line_pattern = 'قرار مجلس الوزراء لسنة 2022 في شأن 
 1869 = "ل"
 2153 = "ف"
 2898 = "إ"
+
+[[sources]]
+id = "amending-decree-law-20-2023-ar"
+instrument = "amending-decree-law-20-2023"
+language = "ar"
+official_url = "https://mohre.gov.ae/assets/download/95f9a7d4/%D9%85%D8%B1%D8%B3%D9%88%D9%85%20%D8%A8%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%A7%D8%AA%D8%AD%D8%A7%D8%AF%D9%8A%20%D8%B1%D9%82%D9%85%2020%20%D9%84%D8%B3%D9%86%D8%A9%202023%20%D8%A8%D8%AA%D8%B9%D8%AF%D9%8A%D9%84%20%D8%A8%D8%B9%D8%B6%20%D8%A3%D8%AD%D9%83%D8%A7%D9%85%20%D8%A7%D9%84%D9%85%D8%B1%D8%B3%D9%88%D9%85%20%D8%A8%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%A7%D8%AA%D8%AD%D8%A7%D8%AF%D9%8A%20%D8%B1%D9%82%D9%85%2033%20%D9%84%D8%B3%D9%86%D8%A9%202021%20%D8%A8%D8%B4%D8%A3%D9%86%20%D8%AA%D9%86%D8%B8%D9%8A%D9%85%20%D8%B9%D9%84%D8%A7%D9%82%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B9%D9%85%D9%84.pdf.aspx"
+wayback_url = "https://web.archive.org/web/20250909074946id_/https://mohre.gov.ae/assets/download/95f9a7d4/%D9%85%D8%B1%D8%B3%D9%88%D9%85%20%D8%A8%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%A7%D8%AA%D8%AD%D8%A7%D8%AF%D9%8A%20%D8%B1%D9%82%D9%85%2020%20%D9%84%D8%B3%D9%86%D8%A9%202023%20%D8%A8%D8%AA%D8%B9%D8%AF%D9%8A%D9%84%20%D8%A8%D8%B9%D8%B6%20%D8%A3%D8%AD%D9%83%D8%A7%D9%85%20%D8%A7%D9%84%D9%85%D8%B1%D8%B3%D9%88%D9%85%20%D8%A8%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%A7%D8%AA%D8%AD%D8%A7%D8%AF%D9%8A%20%D8%B1%D9%82%D9%85%2033%20%D9%84%D8%B3%D9%86%D8%A9%202021%20%D8%A8%D8%B4%D8%A3%D9%86%20%D8%AA%D9%86%D8%B8%D9%8A%D9%85%20%D8%B9%D9%84%D8%A7%D9%82%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B9%D9%85%D9%84.pdf.aspx"
+retrieved = 2026-10-18
+sha256 = "05a638f8547b7d0ab32f04564f57d97e74a5145c1bf7566e0691199ff6f1a766"
+indexed = false
+
+[[sources]]
+id = "amending-decree-law-20-2023-en"
+instrument = "amending-decree-law-20-2023"
+language = "en"
+official_url = "https://www.mohre.gov.ae/assets/download/20670ee7/Federal%20Decree%20Law%20No.%2020%20of%202023%20Amending%20Certain%20Provisions%20of%20Federal%20Decree%20Law%20No.%2033%20of%202021%20Regarding%20the%20Regulation%20of%20Employment%20Relationships.pdf.aspx"
+wayback_url = "https://web.archive.org/web/20250903095312id_/https://www.mohre.gov.ae/assets/download/20670ee7/Federal%20Decree%20Law%20No.%2020%20of%202023%20Amending%20Certain%20Provisions%20of%20Federal%20Decree%20Law%20No.%2033%20of%202021%20Regarding%20the%20Regulation%20of%20Employment%20Relationships.pdf.aspx"
+retrieved = 2026-10-18
+sha256 = "3dbacbe2e16ce01d85c265fb972f1ae8c198c23f82d50ff9bd57becd01ce1399"
+indexed = false
+
+[[sources]]
+id = "moj-labour-legislation-2025-ar"
+instrument = "moj-labour-legislation-2025"
+language = "ar"
+official_url = "https://www.moj.gov.ae/assets/966b93b0/%D8%AA%D8%B4%D8%B1%D9%8A%D8%B9%D8%A7%D8%AA-%D8%AA%D9%86%D8%B8%D9%8A%D9%85-%D8%B9%D9%84%D8%A7%D9%82%D8%A7%D8%AA-%D8%A7%D9%84%D8%B9%D9%85%D9%84-2025-%D8%A7%D9%84%D9%86%D8%B3%D8%AE%D8%A9-%D8%A7%D9%84%D8%A7%D9%84%D9%83%D8%AA%D8%B1%D9%88%D9%86%D9%8A%D8%A9-639015001687388768.aspx"
+wayback_url = "https://web.archive.org/web/20260105224241id_/https://www.moj.gov.ae/assets/966b93b0/%D8%AA%D8%B4%D8%B1%D9%8A%D8%B9%D8%A7%D8%AA-%D8%AA%D9%86%D8%B8%D9%8A%D9%85-%D8%B9%D9%84%D8%A7%D9%82%D8%A7%D8%AA-%D8%A7%D9%84%D8%B9%D9%85%D9%84-2025-%D8%A7%D9%84%D9%86%D8%B3%D8%AE%D8%A9-%D8%A7%D9%84%D8%A7%D9%84%D9%83%D8%AA%D8%B1%D9%88%D9%86%D9%8A%D8%A9-639015001687388768.aspx"
+retrieved = 2026-10-18
+sha256 = "6cc35b52e441fbce3f39b41cb111ac6b00dd3c3d2b175d1d4facf07f5c070302"
+indexed = false
