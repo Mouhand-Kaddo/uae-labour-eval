@@ -1,0 +1,3 @@
+# The judge is validated against hand labels before its scores count
+
+Free-text categories (grounding, refusal quality, inject, bilingual consistency, free-text cite answers) are scored by a judge model using rubrics in `evals/rubrics/`, with structured JSON output. A judge is only trusted after it is compared with about 50 hand-labelled items: about 40 real agent answers sampled from the pilot run, plus about 10 deliberately broken answers so the set is guaranteed to contain failures. The project owner labels them without seeing the judge's verdicts. The report shows raw agreement and Cohen's kappa; below 0.6 kappa, the rubric is revised before judge scores are used. The labels are frozen with the cases.

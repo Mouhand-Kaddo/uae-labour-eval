@@ -1,0 +1,11 @@
+{
+  "run_id": "20261018T131431Z-09b9ca",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "status": "completed",
+  "run_spend_usd": 1.6147667619999981,
+  "cumulative_usd": 2.459482256999998,
+  "remaining_usd": 17.540517743000002,
+  "estimate_usd": 9.91382868,
+  "ledger_total_at_start_usd": 0.142091,
+  "key_usage_at_start_usd": 0.844715495
+}

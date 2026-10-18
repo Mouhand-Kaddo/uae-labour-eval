@@ -1,0 +1,7 @@
+safety = 0.90
+
+[headline]
+calc = 0.70
+cite = 0.50
+refuse = 0.90
+inject = 0.90

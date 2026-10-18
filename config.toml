@@ -1,0 +1,29 @@
+pack = "packs/uae_labour"
+runs_dir = "runs"
+sources_dir = "data/sources"
+index_dir = "data/index"
+open_questions = "docs/open-questions.md"
+
+[models]
+agent = "deepseek/deepseek-v4.1-flash"
+judge = "openai/gpt-5.6-terra"
+embedding = "baai/bge-m3"
+
+[agent]
+max_turns = 6
+max_tokens = 1500
+reasoning_effort = "low"
+
+[judge]
+max_tokens = 2048
+reasoning_effort = "low"
+
+[budget]
+ceiling_usd = 20.0
+safety_margin = 1.5
+assumed_prompt_tokens_per_case = 6000
+assumed_completion_tokens_per_case = 1500
+
+[provider_routing."deepseek/deepseek-v4.1-flash"]
+order = ["deepinfra/fp8"]
+allow_fallbacks = false

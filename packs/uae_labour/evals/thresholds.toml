@@ -1,0 +1,10 @@
+safety = 0.90
+
+[headline]
+bilingual = 0.86
+calc = 0.85
+cite = 0.84
+grounding = 0.50
+inject = 0.85
+refuse = 0.85
+

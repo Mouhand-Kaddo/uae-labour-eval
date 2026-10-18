@@ -1,0 +1,45 @@
+[project]
+name = "uae-labour-eval"
+version = "0.1.0"
+description = "Eval harness for a bilingual UAE labour-law agent"
+requires-python = ">=3.15"
+dependencies = [
+    "bm25s>=0.3.13",
+    "httpx>=0.28.1",
+    "numpy>=2.5.4",
+    "pdfminer-six>=20260107",
+    "pyyaml>=6.0.3",
+]
+
+[project.scripts]
+eval = "eval_harness.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.11,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "eval_harness"
+
+[tool.ruff]
+line-length = 100
+target-version = "py315"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+
+[tool.ty.environment]
+python-version = "3.15"
+root = [".", "src", "packs", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["packs"]
+
+[dependency-groups]
+dev = [
+    "fonttools>=4.67.0",
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+    "ty>=0.0.89",
+]

@@ -1,0 +1,956 @@
+- id: calc-gratuity-en-001
+  category: calc
+  language: en
+  input: >-
+    I'm a foreign worker on a full-time contract in Abu Dhabi. My first day of work was
+    1 March 2024 and my last day of work was 27 February 2025. My basic wage is AED 8,000 a
+    month. How much end-of-service gratuity am I owed?
+  expected:
+    status: answered
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2024-03-01"
+        end_date: "2025-02-27"
+        monthly_basic_wage: 8000
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
+  depends_on: []
+  rationale: >-
+    1 Mar 2024 to 27 Feb 2025 inclusive: Mar–Dec 2024 = 31+30+31+30+31+31+30+31+30+31 = 306
+    days, plus 31 (Jan) + 27 (Feb) = 364 days. A year is 365 days (Art 67), so one year of
+    continuous service is not complete and Art 51(2) gives no gratuity. Expected answer: no
+    gratuity is due.
+
+- id: calc-gratuity-en-002
+  category: calc
+  language: en
+  input: >-
+    Full-time foreign worker here. I started on 1 March 2024 and my last working day was
+    28 February 2025. Basic salary AED 10,000 per month, total package AED 14,000 with
+    housing. What gratuity should I get?
+  expected:
+    status: answered
+    numbers: [6904.11]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2024-03-01"
+        end_date: "2025-02-28"
+        monthly_basic_wage: 10000
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    306 days (Mar–Dec 2024) + 31 + 28 = 365 days = exactly one year (Art 67), so the worker
+    qualifies (Art 51(2)). Gratuity on the basic wage, not the AED 14,000 package: 21 days.
+    Daily basic wage (OQ-001) = 10,000 × 12 / 365 = 328.767. 21 × 10,000 × 12 / 365 =
+    2,520,000 / 365 = AED 6,904.11. Cap 24 × 10,000 = 240,000 not reached.
+
+- id: calc-gratuity-en-003
+  category: calc
+  language: en
+  input: >-
+    I worked full time on a fixed-term contract for a Dubai company from 1 January 2019 to 30
+    December 2023 (both days included). I'm not a UAE national. My last basic wage was AED
+    15,000 a month. What is my end-of-service gratuity?
+  expected:
+    status: answered
+    numbers: [51780.82]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2019-01-01"
+        end_date: "2023-12-30"
+        monthly_basic_wage: 15000
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    2019 (365) + 2020 (366) + 2021 (365) + 2022 (365) + 2023 to 30 Dec (364) = 1,825 days =
+    exactly 5 years of 365 days, all at the 21-day rate (Art 51(2)(a)); nothing at 30 days yet.
+    5 × 21 = 105 days × (15,000 × 12 / 365) = 105 × 180,000 / 365 = 18,900,000 / 365 =
+    AED 51,780.82. Cap 24 × 15,000 = 360,000 not reached. Fixed-term contract, so Art 68(3)
+    (indefinite contracts under Federal Law No. 8 of 1980) does not arise.
+
+- id: calc-gratuity-en-004
+  category: calc
+  language: en
+  input: >-
+    I'm an expat who worked full time on a fixed-term contract for the same employer from 1
+    January 1994 until 31 December 2023. My last basic wage was AED 20,000 a month and my total
+    monthly wage with allowances was AED 30,000. How much gratuity am I entitled to?
+  expected:
+    status: answered
+    numbers: [480000]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "1994-01-01"
+        end_date: "2023-12-31"
+        monthly_basic_wage: 20000
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 51(6)"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    30 calendar years with 7 leap days (1996, 2000, 2004, 2008, 2012, 2016, 2020) =
+    30 × 365 + 7 = 10,957 days. First 1,825 days at 21 days/year = 105 days; remaining
+    9,132 days at 30 days/year = 273,960 / 365 = 750.58 days; total 855.58 days ×
+    (20,000 × 12 / 365 = 657.53) = AED 562,570.09 before the cap. Cap (Art 51(6), OQ-002):
+    two years of basic wage = 24 × 20,000 = AED 480,000, which applies. A cap on the
+    AED 30,000 wage (720,000) would not bite, so this case separates the two readings.
+    Fixed-term contract, so Art 68(3) (indefinite contracts under Federal Law No. 8 of 1980)
+    does not arise.
+
+- id: calc-gratuity-en-005
+  category: calc
+  language: en
+  input: >-
+    Foreign worker, full time, on a fixed-term contract. First day 1 January 2021, last day 31
+    December 2023. During that time I took 45 days of unpaid leave. My basic wage is AED 12,000
+    a month. What is my gratuity?
+  expected:
+    status: answered
+    numbers: [23833.36]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2021-01-01"
+        end_date: "2023-12-31"
+        monthly_basic_wage: 12000
+        unpaid_absence_days: 45
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 51(4)"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    3 × 365 = 1,095 calendar days (no leap day in 2021–2023), minus 45 unpaid days
+    (Art 51(4)) = 1,050 days. 1,050 × 21 / 365 = 22,050 / 365 = 60.411 days (part year
+    pro-rated, Art 51(3)). Daily basic wage 12,000 × 12 / 365 = 394.52. 22,050 × 144,000 /
+    365² = 3,175,200,000 / 133,225 = AED 23,833.36. Fixed-term contract, so Art 68(3)
+    (indefinite contracts under Federal Law No. 8 of 1980) does not arise.
+
+- id: calc-gratuity-en-006
+  category: calc
+  language: en
+  input: >-
+    I'm a foreign part-time worker on a fixed-term contract. My contract is for 1,040 working
+    hours a year, and a
+    full-time contract at my company is 2,080 hours a year. I worked from 1 January 2021 to
+    31 December 2023, and my own basic wage is AED 6,000 a month. What end-of-service
+    gratuity do I get?
+  expected:
+    status: answered
+    numbers: [12427.40]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2021-01-01"
+        end_date: "2023-12-31"
+        monthly_basic_wage: 6000
+        work_pattern: part_time
+        part_time_hours_ratio: 0.5
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Executive Regulations Art 30", "Labour Law Art 51(2)"]
+  depends_on: [OQ-001, OQ-002, OQ-008]
+  rationale: >-
+    1,095 days = 3 years → 63 days. ER Art 30(1): 1,040 / 2,080 = 50%. OQ-008 (decided): the
+    full-time value is computed on the full-time-equivalent basic wage, 6,000 / 50% = 12,000,
+    so the hours reduction applies once: 63 × 12,000 × 12 / 365 = 9,072,000 / 365 = 24,854.79
+    under a full-time contract; × 50% = 4,536,000 / 365 = AED 12,427.40 (the same as Art 51 on
+    the worker's own 6,000). Cap 24 × 12,000 × 50% = 144,000 not reached. Fixed-term contract,
+    so Art 68(3) (indefinite contracts under Federal Law No. 8 of 1980) does not arise.
+
+- id: calc-gratuity-en-007
+  category: calc
+  language: en
+  input: >-
+    I was hired on a full-time temporary work contract for a project, from 1 January 2023 to
+    30 June 2024. I'm a foreign worker and my basic wage was AED 9,000 a month. How much
+    end-of-service gratuity am I owed?
+  expected:
+    status: answered
+    numbers: [9312.04]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2023-01-01"
+        end_date: "2024-06-30"
+        monthly_basic_wage: 9000
+        work_pattern: temporary
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Executive Regulations Art 30(2)", "Labour Law Art 51(2)", "Labour Law Art 51(3)"]
+  depends_on: [OQ-001, OQ-002, OQ-006]
+  rationale: >-
+    The prevailing Arabic ER Art 30(2) excludes only temporary work "if its duration is less
+    than a year" (OQ-006, decided). 365 (2023) + 31 + 29 + 31 + 30 + 31 + 30 (Jan–Jun 2024) =
+    547 days, so this temporary work earns gratuity, computed under Art 51 on full-time hours
+    (no reduced hours stated). 547 × 21 / 365 = 11,487 / 365 days (part year pro-rated, Art
+    51(3)); daily basic wage 9,000 × 12 / 365; 11,487 × 108,000 / 133,225 = 1,240,596,000 /
+    133,225 = AED 9,312.04. Cap 24 × 9,000 = 216,000 not reached.
+
+- id: calc-gratuity-en-008
+  category: calc
+  language: en
+  input: >-
+    I resigned from my full-time job. I'm a foreign worker; my first day was 1 March 2022
+    and my last day 27 February 2025, on a basic wage of AED 12,000 a month. Online
+    calculators say resigning cuts my gratuity to a third. How much do I actually get?
+  expected:
+    status: answered
+    numbers: [24854.79]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2022-03-01"
+        end_date: "2025-02-27"
+        monthly_basic_wage: 12000
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    Trap: Art 51 draws no distinction between resignation and termination, so the full amount
+    is due. Service began after the Law came into force on 2 February 2022 (Art 74), so
+    Art 68(3) (indefinite contracts under Federal Law No. 8 of 1980) does not arise. 1 Mar
+    2022–28 Feb 2023 = 365 days, 1 Mar 2023–29 Feb 2024 = 366, 1 Mar 2024–27 Feb 2025 = 364:
+    1,095 days = 3 years × 21 = 63 days × 12,000 × 12 / 365 = 9,072,000 / 365 =
+    AED 24,854.79. A third (8,284.93) is wrong.
+
+- id: calc-gratuity-ar-001
+  category: calc
+  language: ar
+  input: >-
+    أنا مواطن إماراتي أعمل بدوام كامل في شركة خاصة في الشارقة. بدأت العمل في 1 يناير 2018
+    وكان آخر يوم عمل لي 31 ديسمبر 2023، وأجري الأساسي 25,000 درهم شهريًا. كم تبلغ مكافأة نهاية
+    الخدمة وفق قانون العمل؟
+  expected:
+    status: answered
+    citations:
+      - {instrument: labour-law, article: "51"}
+  scoring: [status, citations]
+  reviewed: true
+  refs: ["Labour Law Art 51(1)"]
+  depends_on: []
+  rationale: >-
+    المادة 51(1): يستحق العامل المواطن مكافأة نهاية الخدمة وفق تشريعات المعاشات والتأمينات
+    الاجتماعية، لا وفق حساب المادة 51(2). Art 51(1): the national worker's gratuity follows
+    pensions legislation, so the Labour Law calculation does not apply. Expected answer: no
+    Labour Law amount; points to the pensions regime.
+
+- id: calc-gratuity-ar-002
+  category: calc
+  language: ar
+  input: >-
+    أنا عامل أجنبي بدوام كامل. أول يوم عمل لي كان 1 يناير 2024 وآخر يوم عمل 31 ديسمبر 2024،
+    وأجري الأساسي 18,250 درهمًا في الشهر. ما مقدار مكافأة نهاية الخدمة؟
+  expected:
+    status: answered
+    numbers: [12634.52]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2024-01-01"
+        end_date: "2024-12-31"
+        monthly_basic_wage: 18250
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 67"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    2024 is a leap year: 366 days. The year is 365 days (Art 67), so this is one year and
+    one day; the extra day is pro-rated (Art 51(3)). Daily basic wage 18,250 × 12 / 365 =
+    600. 366 × 21 / 365 × 600 = 4,611,600 / 365 = AED 12,634.52.
+
+- id: calc-gratuity-ar-003
+  category: calc
+  language: ar
+  input: >-
+    عملت بدوام كامل بعقد محدد المدة لدى صاحب العمل نفسه من 1 يناير 2018 حتى 30 ديسمبر 2023
+    (شاملًا اليومين)، وأنا لست مواطنًا. آخر أجر أساسي لي 18,250 درهمًا شهريًا. احسب لي مكافأة
+    نهاية الخدمة.
+  expected:
+    status: answered
+    numbers: [81000]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2018-01-01"
+        end_date: "2023-12-30"
+        monthly_basic_wage: 18250
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 67"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    2018–2022 = 365 × 5 + 1 (2020) = 1,826 days, plus 364 days of 2023 = 2,190 days = 6
+    years. First 5 years × 21 = 105 days (Art 51(2)(a)); sixth year × 30 = 30 days
+    (Art 51(2)(b)); 135 days × 600 (18,250 × 12 / 365) = AED 81,000. Fixed-term contract, so
+    Art 68(3) (indefinite contracts under Federal Law No. 8 of 1980) does not arise.
+
+- id: calc-gratuity-ar-004
+  category: calc
+  language: ar
+  input: >-
+    عامل أجنبي بدوام كامل، بدأت في 1 مارس 2022 وانتهت خدمتي في 29 أغسطس 2023 (آخر يوم عمل)،
+    وأجري الأساسي 18,250 درهمًا شهريًا. كم مكافأتي؟
+  expected:
+    status: answered
+    numbers: [18882.74]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2022-03-01"
+        end_date: "2023-08-29"
+        monthly_basic_wage: 18250
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    Service began after the Law came into force on 2 February 2022 (Art 74), so Art 68(3)
+    does not arise. 1 Mar 2022–28 Feb 2023 = 365 days + 31+30+31+30+31+29 = 182 days to
+    29 Aug 2023 = 547 days: one full year plus a part year, pro-rated once a year is complete
+    (Art 51(3)). 547 × 21 / 365 ×
+    600 = 6,892,200 / 365 = AED 18,882.74.
+
+- id: calc-gratuity-ar-005
+  category: calc
+  language: ar
+  input: >-
+    أنا عامل أجنبي بدوام كامل. أول يوم عمل 1 يناير 2023 وآخر يوم عمل 10 يناير 2024، وأخذت خلال
+    هذه المدة 11 يومًا إجازة بدون أجر. أجري الأساسي 9,000 درهم شهريًا. هل أستحق مكافأة نهاية
+    الخدمة؟
+  expected:
+    status: answered
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2023-01-01"
+        end_date: "2024-01-10"
+        monthly_basic_wage: 9000
+        unpaid_absence_days: 11
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)", "Labour Law Art 51(4)"]
+  depends_on: []
+  rationale: >-
+    365 + 10 = 375 calendar days, minus 11 unpaid days (Art 51(4)) = 364 days < 365
+    (Art 67), so one year of continuous service is not complete (Art 51(2)). Expected
+    answer: no gratuity is due.
+
+- id: calc-gratuity-ar-006
+  category: calc
+  language: ar
+  input: >-
+    قدمت استقالتي من عملي بدوام كامل بعد أن عملت من 1 مارس 2022 حتى 27 فبراير 2025، وأنا
+    عامل أجنبي وأجري الأساسي ١٨٬٢٥٠ درهمًا شهريًا. قيل لي إن الاستقالة تنقص المكافأة. كم أستحق؟
+  expected:
+    status: answered
+    numbers: [37800]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2022-03-01"
+        end_date: "2025-02-27"
+        monthly_basic_wage: 18250
+        work_pattern: full_time
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 51(2)"]
+  depends_on: [OQ-001, OQ-002]
+  rationale: >-
+    Trap: Art 51 does not reduce the gratuity for resignation. Service began after the Law
+    came into force on 2 February 2022 (Art 74), so Art 68(3) (indefinite contracts under
+    Federal Law No. 8 of 1980) does not arise. 365 + 366 + 364 = 1,095 days = 3 years × 21 =
+    63 days × 600 (18,250 × 12 / 365) = AED 37,800, the same as on termination.
+
+- id: calc-gratuity-ar-007
+  category: calc
+  language: ar
+  input: >-
+    أعمل بعقد محدد المدة بدوام جزئي 24 ساعة أسبوعيًا، بينما الدوام الكامل في الشركة 40 ساعة
+    أسبوعيًا. عملت من 1 يناير 2020 حتى 31 ديسمبر 2022، وأنا عامل أجنبي وأجري الأساسي 7,300 درهم
+    شهريًا. ما مكافأة نهاية الخدمة؟
+  expected:
+    status: answered
+    numbers: [15133.81]
+    tolerance: 1
+    tool_call:
+      name: calculate_gratuity
+      arguments:
+        start_date: "2020-01-01"
+        end_date: "2022-12-31"
+        monthly_basic_wage: 7300
+        work_pattern: part_time
+        part_time_hours_ratio: 0.6
+        nationality: foreign
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Executive Regulations Art 30", "Labour Law Art 51(2)", "Labour Law Art 51(3)"]
+  depends_on: [OQ-001, OQ-002, OQ-008]
+  rationale: >-
+    366 + 365 + 365 = 1,096 days. ER Art 30(1): 24 / 40 = 60% of the hours (the same ratio
+    per year). OQ-008 (decided): the full-time value uses the full-time-equivalent basic wage
+    7,300 / 60% = 12,166.67, daily 400, so 1,096 × 21 / 365 × 400 = 9,206,400 / 365 = 25,223.01;
+    × 60% = 5,523,840 / 365 = AED 15,133.81, which equals Art 51 on the worker's own 7,300
+    (daily 240). Cap not reached. Fixed-term contract, so Art 68(3) (indefinite contracts
+    under Federal Law No. 8 of 1980) does not arise.
+
+- id: calc-leave-en-001
+  category: calc
+  language: en
+  input: >-
+    I work full time in Dubai. My first day was 1 March 2021 and today, 28 February 2024, is my
+    last day. I never took any annual leave. How many days of annual leave have I earned over
+    my whole service?
+  expected:
+    status: answered
+    numbers: [90]
+    tool_call:
+      name: calculate_annual_leave
+      arguments:
+        start_date: "2021-03-01"
+        end_date: "2024-02-28"
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 29(1)", "Labour Law Art 67"]
+  depends_on: []
+  rationale: >-
+    1 Mar 2021–28 Feb 2022 = 365 days, 1 Mar 2022–28 Feb 2023 = 365, 1 Mar 2023–28 Feb 2024 =
+    365 (29 Feb 2024 falls after the last day), total 1,095 days = exactly 3 years of 365 days
+    (Art 67). Art 29(1)(a): 30 days for each year = 3 × 30 = 90 days. No part year, so OQ-005
+    does not arise.
+
+- id: calc-leave-en-002
+  category: calc
+  language: en
+  input: >-
+    I joined my employer full time on 1 January 2025 and my contract ended on 28 August 2025
+    (my last working day). How many days of annual leave am I entitled to for that period?
+  expected:
+    status: answered
+    numbers: [16]
+    tool_call:
+      name: calculate_annual_leave
+      arguments:
+        start_date: "2025-01-01"
+        end_date: "2025-08-28"
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 29(1)", "Labour Law Art 67"]
+  depends_on: []
+  rationale: >-
+    Jan–Jul 2025 = 31+28+31+30+31+30+31 = 212 days, plus 28 days of August = 240 days = 8 months
+    of 30 days (Art 67). More than six months and less than one year, so Art 29(1)(b): 2 days
+    for each month = 8 × 2 = 16 days. Whole months only, so OQ-005 does not arise.
+
+- id: calc-leave-en-003
+  category: calc
+  language: en
+  input: >-
+    My full-time service ran from 1 January 2025 to 29 June 2025, both days included, and then I
+    resigned.
+    Do I have any annual leave entitlement for that time?
+  expected:
+    status: answered
+    tool_call:
+      name: calculate_annual_leave
+      arguments:
+        start_date: "2025-01-01"
+        end_date: "2025-06-29"
+  scoring: [status, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 29(1)", "Labour Law Art 67"]
+  depends_on: [OQ-005, OQ-011]
+  rationale: >-
+    Jan–May 2025 = 31+28+31+30+31 = 151 days, plus 29 days of June = 180 days = exactly six
+    months of 30 days (Art 67). Art 29(1)(b) needs a service period "more than six months", so
+    read literally there is no entitlement. OQ-005(1) and OQ-011 decided: no annual leave.
+    Expected answer: no annual leave.
+
+- id: calc-leave-en-004
+  category: calc
+  language: en
+  input: >-
+    I'm leaving my company. I worked full time from 1 March 2024 to 28 February 2025 and took
+    18 days of annual leave during that year. My basic salary is AED 9,125 a month and my total
+    salary with allowances is AED 12,000. How much should I be paid for my unused leave?
+  expected:
+    status: answered
+    numbers: [3600]
+    tolerance: 1
+    tool_call:
+      name: calculate_annual_leave
+      arguments:
+        start_date: "2024-03-01"
+        end_date: "2025-02-28"
+        leave_days_taken: 18
+        monthly_basic_wage: 9125
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 29(1)", "Executive Regulations Art 19"]
+  depends_on: [OQ-001, OQ-003]
+  rationale: >-
+    Mar–Dec 2024 = 306 days + 31 + 28 = 365 days = one year: 30 days (Art 29(1)(a)). Balance
+    30 − 18 = 12 days. Cash-out on termination is on the basic wage (ER Art 19(2), OQ-003), not
+    the AED 12,000: daily basic wage (OQ-001) = 9,125 × 12 / 365 = 300. 12 × 300 = AED 3,600.
+
+- id: calc-leave-en-005
+  category: calc
+  language: en
+  input: >-
+    I'm on a part-time contract of 1,248 hours a year; full-time staff in my company work 2,080
+    hours a year. I worked from 1 March 2024 to 28 February 2025. How many days of annual leave
+    did I earn for that year?
+  expected:
+    status: answered
+    numbers: [18]
+    tool_call:
+      name: calculate_annual_leave
+      arguments:
+        start_date: "2024-03-01"
+        end_date: "2025-02-28"
+        work_pattern: part_time
+        part_time_hours_ratio: 0.6
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 29(2)", "Executive Regulations Art 18"]
+  depends_on: [OQ-010]
+  rationale: >-
+    365 days = one year, so a full-time worker gets 30 days (Art 29(1)(a)). ER Art 18(4):
+    1,248 / 2,080 × 100 = 60%. 30 × 60% = 18 days: a whole number, above the five-day
+    minimum, so neither the rounding nor the minimum question in OQ-010 changes the figure,
+    but the case still rests on the provisional part-time reading.
+
+- id: calc-leave-ar-001
+  category: calc
+  language: ar
+  input: >-
+    عملت بدوام كامل من 1 يناير 2022 حتى 1 يوليو 2023 (آخر يوم عمل)، وأخذت 30 يومًا من الإجازة
+    السنوية خلال تلك المدة. أجري الأساسي 18,250 درهمًا شهريًا. كم أستحق بدلًا نقديًا عن رصيد
+    إجازتي عند انتهاء خدمتي؟
+  expected:
+    status: answered
+    numbers: [8975.34]
+    tolerance: 1
+    tool_call:
+      name: calculate_annual_leave
+      arguments:
+        start_date: "2022-01-01"
+        end_date: "2023-07-01"
+        leave_days_taken: 30
+        monthly_basic_wage: 18250
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 29(1)", "Executive Regulations Art 19"]
+  depends_on: [OQ-001, OQ-003, OQ-005]
+  rationale: >-
+    2022 = 365 days; 1 Jan–1 Jul 2023 = 31+28+31+30+31+30+1 = 182 days; total 547 days = one
+    year + 182 days. Art 29(1)(a) gives 30 days for the year; the 182 days are part of the last
+    year (29(1)(c)), counted pro rata (OQ-005): 182 × 30 / 365 = 14.959 days. Total 44.959
+    days − 30 taken = 14.959 days. Daily basic wage (OQ-001, OQ-003) = 18,250 × 12 / 365 =
+    600. 182 × 30 / 365 × 600 = 3,276,000 / 365 = AED 8,975.34.
+
+- id: calc-leave-ar-002
+  category: calc
+  language: ar
+  input: >-
+    بدأت العمل بدوام كامل في 1 يناير 2025 وانتهت خدمتي في 27 أكتوبر 2025 (آخر يوم عمل). كم
+    يومًا من الإجازة السنوية أستحق عن هذه المدة؟
+  expected:
+    status: answered
+    numbers: [20]
+    tool_call:
+      name: calculate_annual_leave
+      arguments:
+        start_date: "2025-01-01"
+        end_date: "2025-10-27"
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 29(1)", "Labour Law Art 67"]
+  depends_on: []
+  rationale: >-
+    Jan–Sep 2025 = 31+28+31+30+31+30+31+31+30 = 273 days, plus 27 days of October = 300 days =
+    10 months of 30 days (Art 67). More than six months and less than a year: Art 29(1)(b),
+    2 days a month = 20 days. Whole months, so OQ-005 does not arise.
+
+- id: calc-leave-ar-003
+  category: calc
+  language: ar
+  input: >-
+    عملت لدى شركة خاصة من 1 يناير 2025 حتى 31 مايو 2025 ثم استقلت. هل أستحق أي إجازة سنوية عن
+    هذه المدة؟
+  expected:
+    status: answered
+    tool_call:
+      name: calculate_annual_leave
+      arguments:
+        start_date: "2025-01-01"
+        end_date: "2025-05-31"
+  scoring: [status, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 29(1)", "Labour Law Art 67"]
+  depends_on: [OQ-011]
+  rationale: >-
+    Jan–May 2025 = 31+28+31+30+31 = 151 days, under six months of 30 days (180, Art 67).
+    Art 29(1)(b) starts only after more than six months, so read alone it gives nothing;
+    whether Art 29(1)(c) or the Arabic Art 29(9) gives pro-rata leave pay is OQ-011, decided:
+    no annual leave. Expected answer: no annual leave.
+
+- id: calc-leave-ar-004
+  category: calc
+  language: ar
+  input: >-
+    عملت بدوام كامل من 1 مارس 2024 حتى 27 فبراير 2025 ولم آخذ أي إجازة سنوية. أجري الأساسي
+    9,125 درهمًا في الشهر. ما المبلغ الذي أستحقه عن الإجازة غير المستخدمة عند انتهاء خدمتي؟
+  expected:
+    status: answered
+    numbers: [7280]
+    tolerance: 1
+    tool_call:
+      name: calculate_annual_leave
+      arguments:
+        start_date: "2024-03-01"
+        end_date: "2025-02-27"
+        monthly_basic_wage: 9125
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 29(1)", "Executive Regulations Art 19"]
+  depends_on: [OQ-001, OQ-003, OQ-005]
+  rationale: >-
+    Mar–Dec 2024 = 306 days + 31 + 27 = 364 days: one day short of a year (Art 67), so
+    Art 29(1)(b) applies, 2 days a month with the part month pro rata (OQ-005): 364 × 2 / 30 =
+    24.267 days. Daily basic wage (OQ-001, OQ-003) = 9,125 × 12 / 365 = 300. 728 / 30 × 300 =
+    AED 7,280. (One more day would give 30 days and AED 9,000.)
+
+- id: calc-leave-ar-005
+  category: calc
+  language: ar
+  input: >-
+    خدمت بدوام كامل من 1 يناير 2019 حتى 30 ديسمبر 2023 (شاملًا اليومين) وأخذت خلالها 100 يوم
+    إجازة سنوية فقط. أجري الأساسي 7,300 درهم شهريًا. كم بدل الإجازة المستحق لي عند نهاية
+    الخدمة؟
+  expected:
+    status: answered
+    numbers: [12000]
+    tolerance: 1
+    tool_call:
+      name: calculate_annual_leave
+      arguments:
+        start_date: "2019-01-01"
+        end_date: "2023-12-30"
+        leave_days_taken: 100
+        monthly_basic_wage: 7300
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 29(1)", "Labour Law Art 29(9)", "Executive Regulations Art 19"]
+  depends_on: [OQ-001, OQ-003]
+  rationale: >-
+    365+366+365+365+364 = 1,825 days = exactly 5 years (Art 67): 5 × 30 = 150 days
+    (Art 29(1)(a)). Balance 150 − 100 = 50 days, paid whatever its length (Art 29(9)). Daily
+    basic wage (OQ-001, OQ-003) = 7,300 × 12 / 365 = 240. 50 × 240 = AED 12,000.
+
+- id: calc-notice-en-001
+  category: calc
+  language: en
+  input: >-
+    My contract says either side must give 60 days' notice. My employer ended my contract
+    today with immediate effect and no notice. My basic salary is AED 12,000 and my total
+    monthly wage with allowances is AED 18,250. How much pay in lieu of notice am I owed?
+  expected:
+    status: answered
+    numbers: [36000]
+    tolerance: 1
+    tool_call:
+      name: check_notice_period
+      arguments:
+        notice_days: 60
+        monthly_wage: 18250
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 43"]
+  depends_on: [OQ-001]
+  rationale: >-
+    60 days is within 30–90 (Art 43(1)). No notice worked, so pay in lieu covers the entire
+    period (Art 43(3)) at the last wage, allowances included, not the basic wage (Art 43(4),
+    Art 1). Daily wage (OQ-001) = 18,250 × 12 / 365 = 600. 60 × 600 = AED 36,000.
+
+- id: calc-notice-en-002
+  category: calc
+  language: en
+  input: >-
+    My new employment contract in Abu Dhabi sets a notice period of 14 days for both sides.
+    Is that allowed under the UAE Labour Law?
+  expected:
+    status: answered
+    numbers: [30]
+    tool_call:
+      name: check_notice_period
+      arguments:
+        notice_days: 14
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 43(1)", "Labour Law Art 65(3)"]
+  depends_on: [OQ-012]
+  rationale: >-
+    Art 43(1): the agreed notice period must be not less than 30 days and not more than 90.
+    14 < 30, so the clause is below the legal minimum. OQ-012 (decided): a term that hurts the
+    worker gives way to the nearest limit and one that helps the worker stands (Art 65(3)).
+    Expected answer: not allowed as a term; if the employer ends the contract, 30 days' notice
+    apply; if the worker resigns, the 14 days stand.
+
+- id: calc-notice-en-003
+  category: calc
+  language: en
+  input: >-
+    I resigned with a 90-day notice period in my contract, but I only worked 30 days of it
+    before leaving for a new job. My monthly wage is AED 9,125 in total. How much pay in lieu
+    of notice do I owe my employer?
+  expected:
+    status: answered
+    numbers: [18000]
+    tolerance: 1
+    tool_call:
+      name: check_notice_period
+      arguments:
+        notice_days: 90
+        notice_days_worked: 30
+        monthly_wage: 9125
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 43"]
+  depends_on: [OQ-001]
+  rationale: >-
+    90 days is within 30–90 (Art 43(1)). The party not honouring the notice pays the wage for
+    the remaining part (Art 43(3)): 90 − 30 = 60 days. Daily wage (OQ-001) = 9,125 × 12 / 365 =
+    300. 60 × 300 = AED 18,000.
+
+- id: calc-notice-ar-001
+  category: calc
+  language: ar
+  input: >-
+    مدة الإنذار في عقدي 30 يومًا. أنهى صاحب العمل عقدي وعملت 10 أيام فقط من مدة الإنذار ثم طلب
+    مني المغادرة فورًا. أجري الشهري الكامل 7,300 درهم. كم بدل الإنذار المستحق لي؟
+  expected:
+    status: answered
+    numbers: [4800]
+    tolerance: 1
+    tool_call:
+      name: check_notice_period
+      arguments:
+        notice_days: 30
+        notice_days_worked: 10
+        monthly_wage: 7300
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 43"]
+  depends_on: [OQ-001]
+  rationale: >-
+    30 days is within 30–90 (Art 43(1)). Remaining part 30 − 10 = 20 days (Art 43(3)) at the
+    last wage (Art 43(4)): daily wage (OQ-001) = 7,300 × 12 / 365 = 240. 20 × 240 = AED 4,800.
+
+- id: calc-notice-ar-002
+  category: calc
+  language: ar
+  input: >-
+    ينص عقد عملي على مدة إنذار 120 يومًا عند الاستقالة. هل هذه المدة جائزة وفق قانون العمل؟
+  expected:
+    status: answered
+    tool_call:
+      name: check_notice_period
+      arguments:
+        notice_days: 120
+        terminated_by: worker
+    numbers: [90]
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 43(1)", "Labour Law Art 65(3)"]
+  depends_on: [OQ-012]
+  rationale: >-
+    Art 43(1): the notice period may not be more than 90 days. 120 > 90, so it exceeds the
+    maximum. OQ-012 (decided): on resignation a longer notice hurts the worker, so the term
+    gives way to the 90-day limit (Art 65(3)). Expected answer: not allowed; on resignation
+    the worker owes at most 90 days' notice.
+
+- id: calc-probation-en-001
+  category: calc
+  language: en
+  input: >-
+    I started work on 1 February 2025 and my offer letter says my probation period runs until
+    30 September 2025. If my employer decides to let me go during probation, how much written
+    notice must they give me, and is a probation that long allowed?
+  expected:
+    status: answered
+    numbers: [14]
+    tool_call:
+      name: check_probation
+      arguments:
+        start_date: "2025-02-01"
+        probation_end_date: "2025-09-30"
+        ended_by: employer
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 9", "Labour Law Art 67"]
+  depends_on: []
+  rationale: >-
+    Art 9(1): probation may not exceed six months from the start of work; a month is 30 days
+    (Art 67), so at most 180 days. 1 Feb to 30 Sep 2025 inclusive = 28 + 31 + 30 + 31 + 30 + 31
+    + 31 + 30 = 242 days, which exceeds the maximum (and six calendar months, so OQ-013 does
+    not arise). The employer may end the contract during
+    probation with at least 14 days' written notice. Expected answer: 14 days' notice; probation
+    may be at most 180 days (six 30-day months).
+
+- id: calc-probation-en-002
+  category: calc
+  language: en
+  input: >-
+    I started work on 1 March 2025 on a 6-month probation and have a job offer from another
+    company in Dubai. I gave written notice on 1 May 2025 that my contract will end on
+    15 May 2025. My monthly wage is AED 9,125. Is that enough notice, and if not, how much
+    compensation would I owe?
+  expected:
+    status: answered
+    numbers: [4800]
+    tolerance: 1
+    tool_call:
+      name: check_probation
+      arguments:
+        start_date: "2025-03-01"
+        ended_by: worker_moving_in_uae
+        notice_date: "2025-05-01"
+        termination_date: "2025-05-15"
+        monthly_wage: 9125
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 9", "Labour Law Art 67"]
+  depends_on: [OQ-001]
+  rationale: >-
+    1 Mar to 15 May 2025 = 76 days, within the 180-day probation maximum (Art 9(1), Art 67).
+    Moving to another UAE employer during probation needs at least one month's written notice
+    (Art 9(3)); a month is 30 days (Art 67). Notice given = termination date − notice date:
+    15 May − 1 May = 14 days, so 16 days short.
+    Art 9(5): compensation = the wage for the remaining notice period. Daily wage (OQ-001) =
+    9,125 × 12 / 365 = 300. 16 × 300 = AED 4,800.
+
+- id: calc-probation-ar-001
+  category: calc
+  language: ar
+  input: >-
+    بدأت العمل في 1 ديسمبر 2024 وأنا في فترة التجربة (6 أشهر). أخطرني صاحب العمل كتابيًا في 10
+    فبراير 2025 بإنهاء خدمتي في
+    17 فبراير 2025. أجري الشهري 18,250 درهمًا. هل الإخطار كافٍ؟ وإن لم يكن، فكم التعويض المستحق
+    لي؟
+  expected:
+    status: answered
+    numbers: [4200]
+    tolerance: 1
+    tool_call:
+      name: check_probation
+      arguments:
+        start_date: "2024-12-01"
+        ended_by: employer
+        notice_date: "2025-02-10"
+        termination_date: "2025-02-17"
+        monthly_wage: 18250
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 9", "Labour Law Art 67"]
+  depends_on: [OQ-001]
+  rationale: >-
+    1 Dec 2024 to 17 Feb 2025 = 79 days, within the 180-day probation maximum (Art 9(1),
+    Art 67). Art 9(1): the employer must give at least 14 days' written notice. 10 Feb to 17 Feb = 7
+    days, so 7 days short. Art 9(5): compensation = the wage for the remaining notice period.
+    Daily wage (OQ-001) = 18,250 × 12 / 365 = 600. 7 × 600 = AED 4,200.
+
+- id: calc-probation-ar-002
+  category: calc
+  language: ar
+  input: >-
+    أنا عامل أجنبي بدأت العمل في 1 يونيو 2025 بفترة تجربة تنتهي في 31 أغسطس 2025، وأرغب في إنهاء
+    العقد ومغادرة الدولة نهائيًا. كم يومًا يجب أن أخطر صاحب العمل مسبقًا؟
+  expected:
+    status: answered
+    numbers: [14]
+    tool_call:
+      name: check_probation
+      arguments:
+        start_date: "2025-06-01"
+        probation_end_date: "2025-08-31"
+        ended_by: worker_leaving_uae
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 9", "Labour Law Art 67"]
+  depends_on: []
+  rationale: >-
+    1 Jun to 31 Aug 2025 = 30 + 31 + 31 = 92 days, within the six-month maximum of 180 days
+    (Art 9(1), Art 67). A foreign worker ending the contract
+    during probation to leave the State must give written notice at least 14 days before the
+    termination date (Art 9(4)). Expected answer: 14 days.
+
+- id: calc-probation-ar-003
+  category: calc
+  language: ar
+  input: >-
+    بدأت العمل في 1 يناير 2025 وأنا في فترة التجربة (6 أشهر)، وحصلت على عرض عمل من شركة أخرى في
+    الإمارات. أخطرت صاحب العمل كتابيًا في 1 مارس 2025 بأن آخر يوم لي سيكون 31 مارس 2025. هل التزمت
+    بمدة الإخطار المطلوبة؟
+  expected:
+    status: answered
+    numbers: [30]
+    tool_call:
+      name: check_probation
+      arguments:
+        start_date: "2025-01-01"
+        ended_by: worker_moving_in_uae
+        notice_date: "2025-03-01"
+        termination_date: "2025-03-31"
+  scoring: [status, numeric, tool_call]
+  reviewed: true
+  refs: ["Labour Law Art 9", "Labour Law Art 67"]
+  depends_on: []
+  rationale: >-
+    1 Jan to 31 Mar 2025 = 90 days, within the 180-day probation maximum (Art 9(1), Art 67).
+    Moving to another UAE employer needs at least one month's notice (Art 9(3)) = 30 days
+    (Art 67). 1 March to 31 March = 30 days, so the notice is enough and no compensation is
+    owed under Art 9(5). Expected answer: yes, the notice meets the minimum.
