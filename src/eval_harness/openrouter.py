@@ -113,6 +113,15 @@ class OpenRouterClient:
         """Live prices and capabilities for every chat model, keyed by model ID."""
         return self._model_list("/models")
 
+    def endpoints(self, model_id: str) -> dict[str, ModelInfo]:
+        """Live prices and capabilities of each provider endpoint serving `model_id`, keyed by
+        the endpoint's routing tag (e.g. `deepinfra/fp8`)."""
+        body = self._request("GET", f"/models/{model_id}/endpoints")
+        try:
+            return {e["tag"]: _model_info({**e, "id": model_id}) for e in body["data"]["endpoints"]}
+        except (AttributeError, KeyError, TypeError, ValueError) as exc:
+            raise OpenRouterError(f"unexpected endpoints response: {exc!r}") from exc
+
     def embedding_models(self) -> dict[str, ModelInfo]:
         """Live prices for every embedding model, keyed by model ID."""
         return self._model_list("/embeddings/models")

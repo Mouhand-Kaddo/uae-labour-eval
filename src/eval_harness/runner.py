@@ -243,6 +243,8 @@ def _plan(
         judge = resolve_judge(config.judge_model, models) if judged_per_repeat else None
     except JudgeUnavailable as exc:
         raise RunRefused(str(exc)) from exc
+    if judge is not None:
+        judge = _as_routed(client, judge, config.provider_for(judge.id))
     manifest, index = _load_corpus(config)
     _check_planted_chunks(cases, index)
     try:
@@ -252,7 +254,7 @@ def _plan(
     if pack_cases.open_questions is not None:
         tools = mark_open_questions(tools, pack_cases.open_questions)
     return _Plan(
-        model=models[model_id],
+        model=_as_routed(client, models[model_id], config.provider_for(model_id)),
         embedding=embedding_models[config.embedding_model],
         cases=cases,
         rubrics=rubrics,
@@ -517,6 +519,37 @@ class _Run:
             self.spend.case_usd,
             round(latency, 3),
         )
+
+
+def _as_routed(client: OpenRouterClient, model: ModelInfo, provider: dict[str, Any]) -> ModelInfo:
+    """A model held to specific endpoints (`only`, or `order` without fallbacks) is priced at the
+    dearest of them and offered only the parameters they all support; the models list prices
+    a model at its cheapest endpoint. A pin that matches no endpoint refuses the run."""
+    slugs = provider.get("only") or (
+        provider.get("order") if provider.get("allow_fallbacks") is False else None
+    )
+    if not slugs:
+        return model
+    endpoints = client.endpoints(model.id)
+    pinned: list[ModelInfo] = []
+    for slug in slugs:
+        exact = [info for tag, info in endpoints.items() if tag == slug]
+        pinned += exact or [info for tag, info in endpoints.items() if tag.startswith(f"{slug}/")]
+    if not pinned:
+        raise RunRefused(
+            f"no endpoint of {model.id!r} matches the pinned providers {slugs}; "
+            f"its endpoints are {sorted(endpoints)}"
+        )
+    return ModelInfo(
+        id=model.id,
+        prompt_price_usd=max(e.prompt_price_usd for e in pinned),
+        completion_price_usd=max(e.completion_price_usd for e in pinned),
+        supported_parameters=model.supported_parameters.intersection(
+            *(e.supported_parameters for e in pinned)
+        ),
+        peak_prompt_price_usd=max(e.peak_prompt_price_usd for e in pinned),
+        peak_completion_price_usd=max(e.peak_completion_price_usd for e in pinned),
+    )
 
 
 def _load_corpus(config: Config) -> tuple[Manifest, SearchIndex]:

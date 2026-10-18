@@ -49,6 +49,26 @@ MODELS = [
     },
 ]
 
+ENDPOINTS = {
+    "deepseek/deepseek-v4.1-flash": [
+        {
+            "tag": "deepseek",
+            "pricing": MODELS[2]["pricing"],
+            "supported_parameters": MODELS[2]["supported_parameters"],
+        },
+        {
+            "tag": "deepinfra/fp8",
+            "pricing": {"prompt": "0.000001", "completion": "0.000004"},
+            "supported_parameters": ["max_tokens", "reasoning", "tools"],
+        },
+        {
+            "tag": "deepinfra/fp8/priority",
+            "pricing": {"prompt": "0.00001", "completion": "0.00004"},
+            "supported_parameters": ["max_tokens", "reasoning", "tools"],
+        },
+    ]
+}
+
 EMBEDDING_PRICE = "0.00000001"
 
 CONCEPTS = {
@@ -162,6 +182,7 @@ class FakeOpenRouter:
         self.embedding_cost = embedding_cost
         self.chat_requests = []
         self.chat_headers = []
+        self.endpoint_requests = []
         self.embedding_requests = []
         self.transport = httpx.MockTransport(self.handle)
 
@@ -170,6 +191,11 @@ class FakeOpenRouter:
         path = request.url.path
         if path == "/api/v1/models":
             return httpx.Response(200, json={"data": self.models})
+        if path.startswith("/api/v1/models/") and path.endswith("/endpoints"):
+            model_id = path.removeprefix("/api/v1/models/").removesuffix("/endpoints")
+            self.endpoint_requests.append(model_id)
+            endpoints = ENDPOINTS.get(model_id, [])
+            return httpx.Response(200, json={"data": {"id": model_id, "endpoints": endpoints}})
         if path == "/api/v1/key":
             if self.key_status != 200:
                 return httpx.Response(self.key_status, json={"error": {"message": "down"}})

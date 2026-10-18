@@ -161,6 +161,46 @@ def test_the_estimate_prices_the_judge_at_its_highest_override(project, capsys):
     assert "over budget: estimate USD 0.0785" in capsys.readouterr().err
 
 
+def test_a_pinned_model_is_priced_at_its_pinned_endpoint_not_the_cheapest_one(project, capsys):
+    add_routing(project, DEEPSEEK, 'order = ["deepinfra/fp8"]\nallow_fallbacks = false')
+    fake = FakeOpenRouter([], key_usage=19.99)
+
+    assert deepseek_run(project, fake) == 2
+
+    assert "over budget: estimate USD 0.0180" in capsys.readouterr().err
+    assert fake.endpoint_requests == [DEEPSEEK]
+
+
+def test_a_pinned_endpoint_decides_which_parameters_are_sent(project):
+    add_routing(project, DEEPSEEK, 'order = ["deepinfra/fp8"]\nallow_fallbacks = false')
+    fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
+
+    assert deepseek_run(project, fake) == 0
+
+    [request] = fake.chat_requests
+    assert "temperature" not in request
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert summary["pricing"]["prompt_price_usd"] == 0.000001
+
+
+def test_a_pin_that_matches_no_endpoint_is_refused_before_any_call(project, capsys):
+    add_routing(project, DEEPSEEK, 'order = ["deepinfra/bf16"]\nallow_fallbacks = false')
+    fake = FakeOpenRouter([])
+
+    assert deepseek_run(project, fake) == 2
+
+    assert "no endpoint of 'deepseek/deepseek-v4.1-flash' matches" in capsys.readouterr().err
+    assert fake.chat_requests == []
+
+
+def test_a_model_without_a_strict_pin_is_priced_from_the_models_list(project):
+    fake = FakeOpenRouter([final_answer_response("refused", "legal_advice")])
+
+    assert deepseek_run(project, fake) == 0
+
+    assert fake.endpoint_requests == []
+
+
 def test_the_repo_config_pins_the_owners_agent_model_to_deepinfra_fp8():
     config = load_config(Path(__file__).parents[1] / "config.toml")
 
