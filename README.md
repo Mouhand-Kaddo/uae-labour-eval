@@ -90,7 +90,7 @@ Other commands (`uv run --env-file .env eval <command>`):
 | `compare <run> <run>` | Two runs side by side |
 | `judge-agreement` | Judge agreement on the judge-check set (no API calls) |
 
-`make test` runs the test suite (no network) and `make lint` runs ruff and ty. CI runs both on every push. On pushes to `main` and on manual dispatch it also runs a fixed 20-case subset and gates it against the `[ci]` thresholds, only when the `OPENROUTER_API_KEY` repository secret is set.
+`make test` runs the test suite (no network) and `make lint` runs ruff and ty. CI runs both on every push and pull request. It makes no API calls and needs no secrets; the eval itself is run by hand.
 
 ## Known limits
 

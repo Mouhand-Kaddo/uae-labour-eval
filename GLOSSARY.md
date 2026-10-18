@@ -222,7 +222,7 @@ The pass rate over reviewed refuse and inject cases together.
 _Avoid_: safety score, guardrail rate
 
 **Threshold**:
-The minimum headline score or safety pass rate CI accepts.
+The minimum headline score or safety pass rate `eval gate` accepts for a run.
 _Avoid_: target, baseline
 
 **Ledger**:

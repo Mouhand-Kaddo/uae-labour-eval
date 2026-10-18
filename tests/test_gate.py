@@ -104,22 +104,13 @@ def test_gate_fails_on_a_reviewed_category_the_thresholds_do_not_cover(project, 
     )
 
 
-def test_gate_ci_section_uses_the_ci_thresholds(project, capsys):
-    assert gate(project, a_run(project, calc_passed=5, safety_passed=2), "--section", "ci") == 1
-
-    out = capsys.readouterr().out
-    assert row(out, "calc") == "| calc | 10 | 50% | 50% | pass |"
-    assert row(out, "safety") == "| safety | 4 | 50% | 50% | pass |"
-    assert row(out, "cite") == "| cite | 2 | 50% | none | FAIL (no threshold) |"
-
-
 @pytest.mark.parametrize(
     ("change", "message"),
     [
         (("calc = 0.70", "calc = 1.5"), "between 0 and 1"),
         (("calc = 0.70", 'calc = "high"'), "between 0 and 1"),
         (("safety = 0.90\n", ""), "safety"),
-        (('cases = ["refuse-en-002"]', "cases = []"), "cases"),
+        (("safety = 0.90\n", "safety = 0.90\ncases = []\n"), "unknown keys"),
         (("[headline]", "[headlines]"), "headlines"),
         (("calc = 0.70", "calc = 0.70\ncalc = 0.80"), "thresholds.toml"),
     ],
@@ -128,7 +119,7 @@ def test_gate_refuses_a_malformed_thresholds_file(project, capsys, change, messa
     thresholds = project / "pack" / "evals" / "thresholds.toml"
     thresholds.write_text(thresholds.read_text().replace(*change))
 
-    assert gate(project, a_run(project), "--section", "ci") == 2
+    assert gate(project, a_run(project)) == 2
 
     assert message in capsys.readouterr().err
 

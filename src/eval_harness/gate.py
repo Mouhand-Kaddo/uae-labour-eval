@@ -2,8 +2,7 @@
 pass rate meet the pack's `evals/thresholds.toml`.
 
 The file's top level holds the thresholds for a full run: `safety = <rate>` and a `[headline]`
-table of `<category> = <rate>`. The `[ci]` table holds the fixed CI subset in the same shape plus
-`cases = [<case IDs>]`. Rates are fractions between 0 and 1.
+table of `<category> = <rate>`. Rates are fractions between 0 and 1.
 """
 
 import tomllib
@@ -13,8 +12,7 @@ from typing import Any
 
 from eval_harness.report_stats import ReportNumbers, Score
 
-CI = "ci"
-SECTION_KEYS = {"safety", "headline"}
+KEYS = {"safety", "headline"}
 FLOAT_NOISE = 1e-9
 
 
@@ -26,7 +24,6 @@ class ThresholdsError(Exception):
 class Thresholds:
     safety: float
     headline: dict[str, float]
-    cases: list[str] | None = None
 
 
 @dataclass(frozen=True)
@@ -50,47 +47,26 @@ def thresholds_path(pack: Path) -> Path:
     return pack / "evals" / "thresholds.toml"
 
 
-def load_thresholds(pack: Path, section: str | None = None) -> Thresholds:
-    """The full-run thresholds, or the `[ci]` ones when `section` is "ci". The whole file is
-    validated either way; raises ThresholdsError naming the problem."""
+def load_thresholds(pack: Path) -> Thresholds:
+    """The pack's thresholds; raises ThresholdsError naming the problem."""
     path = thresholds_path(pack)
+    label = path.name
     try:
         raw = tomllib.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:
         raise ThresholdsError(f"cannot read {path}: {exc}") from exc
-    full = _section(path.name, {k: v for k, v in raw.items() if k != CI}, SECTION_KEYS)
-    if CI not in raw:
-        if section == CI:
-            raise ThresholdsError(f"{path.name} has no [{CI}] section")
-        return full
-    ci = _section(f"{path.name} [{CI}]", raw[CI], SECTION_KEYS | {"cases"})
-    return ci if section == CI else full
-
-
-def _section(label: str, raw: Any, allowed: set[str]) -> Thresholds:
-    if not isinstance(raw, dict):
-        raise ThresholdsError(f"{label} must be a table")
-    unknown = sorted(raw.keys() - allowed)
+    unknown = sorted(raw.keys() - KEYS)
     if unknown:
         raise ThresholdsError(f"{label}: unknown keys {unknown}")
-    missing = sorted(allowed - raw.keys())
+    missing = sorted(KEYS - raw.keys())
     if missing:
         raise ThresholdsError(f"{label}: missing {missing}")
     headline = raw["headline"]
     if not isinstance(headline, dict) or not headline:
         raise ThresholdsError(f"{label}: headline must be a table of category = rate")
-    cases = raw.get("cases")
-    if cases is not None and not (
-        isinstance(cases, list)
-        and cases
-        and all(isinstance(c, str) and c.strip() for c in cases)
-        and len(set(cases)) == len(cases)
-    ):
-        raise ThresholdsError(f"{label}: cases must be a non-empty list of distinct case IDs")
     return Thresholds(
         safety=_rate(f"{label}: safety", raw["safety"]),
         headline={name: _rate(f"{label}: {name}", rate) for name, rate in headline.items()},
-        cases=cases,
     )
 
 
