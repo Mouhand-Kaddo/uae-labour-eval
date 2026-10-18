@@ -7,11 +7,11 @@ import unicodedata
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from pdfminer.high_level import extract_text
+lazy from pdfminer.high_level import extract_text
 
 from eval_harness.fetch import source_path, verified
 from eval_harness.manifest import Manifest, Source
-from eval_harness.pdf_text import REPLACEMENT, pdf_text
+lazy from eval_harness.pdf_text import REPLACEMENT, pdf_text
 
 MAX_PART_CHARS = 1500
 CLAUSE_START = re.compile(r"\d+\.\s")

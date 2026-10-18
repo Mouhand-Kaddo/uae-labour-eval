@@ -5,27 +5,27 @@ import os
 import sys
 from pathlib import Path
 
-import httpx
+lazy import httpx
 
-from eval_harness.budget import remaining_budget
-from eval_harness.compare import compare_runs
 from eval_harness.config import Config, ConfigError, load_config
-from eval_harness.embeddings import EmbedAborted, EmbedRefused, embed_corpus
-from eval_harness.fetch import FetchError, fetch_sources
-from eval_harness.gate import CI, ThresholdsError, gate, gate_table, load_thresholds
-from eval_harness.ingest import IngestError, ingest
-from eval_harness.judge_check import (
+lazy from eval_harness.budget import remaining_budget
+lazy from eval_harness.compare import compare_runs
+lazy from eval_harness.embeddings import EmbedAborted, EmbedRefused, embed_corpus
+lazy from eval_harness.fetch import FetchError, fetch_sources
+lazy from eval_harness.gate import CI, ThresholdsError, gate, gate_table, load_thresholds
+lazy from eval_harness.ingest import IngestError, ingest
+lazy from eval_harness.judge_check import (
     JudgeCheckError,
     judge_agreement,
     judge_pending,
     sample_check_set,
 )
-from eval_harness.ledger import Ledger
-from eval_harness.manifest import ManifestError, load_manifest
-from eval_harness.openrouter import OpenRouterClient, OpenRouterError
-from eval_harness.report import ReportError, read_run, write_report
-from eval_harness.report_stats import report_numbers
-from eval_harness.runner import RunRefused, run_eval
+lazy from eval_harness.ledger import Ledger
+lazy from eval_harness.manifest import ManifestError, load_manifest
+lazy from eval_harness.openrouter import OpenRouterClient, OpenRouterError
+lazy from eval_harness.report import ReportError, read_run, write_report
+lazy from eval_harness.report_stats import report_numbers
+lazy from eval_harness.runner import RunRefused, run_eval
 
 EXIT_GATE_FAILED = 1
 EXIT_REFUSED = 2

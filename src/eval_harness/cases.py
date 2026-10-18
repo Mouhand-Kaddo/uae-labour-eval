@@ -7,7 +7,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
-import yaml
+lazy import yaml
 
 from eval_harness.ingest import Chunk
 

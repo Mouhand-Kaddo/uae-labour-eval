@@ -6,8 +6,8 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-import bm25s
-import numpy as np
+lazy import bm25s
+lazy import numpy as np
 
 from eval_harness.agent import Tool
 from eval_harness.embeddings import cached_vectors

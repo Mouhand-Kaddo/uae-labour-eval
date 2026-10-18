@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-import httpx
+lazy import httpx
 
 BASE_URL = "https://openrouter.ai/api/v1"
 

@@ -4,7 +4,7 @@ import hashlib
 from collections.abc import Callable
 from pathlib import Path
 
-import httpx
+lazy import httpx
 
 from eval_harness.manifest import Manifest, Source
 
