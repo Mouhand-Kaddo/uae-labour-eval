@@ -14,7 +14,9 @@ yes or no, the same figure, and the same entitlement or obligation. Fail if a pe
 one of the answers would come away with a different result than a person reading only the other.
 
 ## same_details
-Every substantive point in one answer is also in the other with the same value: each period,
-amount, rate, condition, exception and next step it gives. Fail if one answer adds, omits or
-changes such a point. Restating the question, a disclaimer, or a courtesy phrase is not a
-substantive point.
+Each point the question asks about has the same value in both answers: every period, amount, rate,
+condition or exception that answers it. Fail if the answers give different values for such a
+point, if one answer leaves out a point the question asks about that the other gives, or if
+anything one answer adds contradicts the other. Related rules the question did not ask about,
+background, worked arithmetic, notices (not legal advice, open questions), next steps and offers
+of help that appear in only one answer are not disagreements.
