@@ -9,7 +9,8 @@ from typing import Any
 from eval_harness.config import AgentSettings
 from eval_harness.final_answer import FINAL_ANSWER_TOOL, FinalAnswer, parse_final_answer
 from eval_harness.openrouter import ChatResponse, ModelInfo, OpenRouterClient
-from eval_harness.trace import Trace
+from eval_harness.refs import article_key
+from eval_harness.trace import Trace, retrieved_articles
 
 PROVIDERS_NEEDING_CACHE_CONTROL = ("anthropic/", "qwen/")
 FINISH_REMINDER = "Finish by calling the final_answer tool."
@@ -83,6 +84,7 @@ def run_agent(
                 arguments = json.loads(arguments or "{}")
                 if name == "final_answer":
                     final = parse_final_answer(arguments)
+                    _refuse_unread_citations(final, trace)
                     trace.add("final_answer", turn=turn, **asdict(final))
                     return final
                 if name not in tools_by_name:
@@ -103,6 +105,17 @@ def run_agent(
 
     trace.add("limit", reason="max_turns", turn=settings.max_turns)
     return FinalAnswer.limit()
+
+
+def _refuse_unread_citations(final: FinalAnswer, trace: Trace) -> None:
+    cited = {article_key(c.instrument, c.article) for c in final.citations}
+    unread = sorted(cited - retrieved_articles(trace.steps))
+    if unread:
+        raise ValueError(
+            f"you cited articles you have not read in this conversation: {', '.join(unread)}. "
+            "Read them with your tools or remove them from the citations, then call "
+            "final_answer again."
+        )
 
 
 def _stable_prefix(

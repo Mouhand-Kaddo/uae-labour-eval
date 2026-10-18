@@ -419,16 +419,44 @@ def test_cite_case_searches_the_corpus_and_passes_with_a_retrieved_citation(proj
     assert verdict["details"]["citations"]["cited"] == ["statute 9"]
 
 
-def test_cite_case_fails_a_made_up_citation(project, capsys):
+def test_a_citation_of_an_unread_article_is_sent_back_before_the_answer_is_accepted(
+    project, capsys
+):
     fake = FakeOpenRouter(
-        [tool_call_response("search_sources", {"query": "probation"}), cite_answer("9", "120")]
+        [
+            tool_call_response("search_sources", {"query": "probation"}),
+            cite_answer("9", "120"),
+            cite_answer("9", call_id="c3"),
+        ]
+    )
+
+    cite_run(project, fake)
+
+    assert "PASS cite-en-001" in capsys.readouterr().out
+    rejection = fake.chat_requests[2]["messages"][-1]
+    assert rejection["role"] == "tool"
+    assert "statute 120" in rejection["content"]
+    steps = read_jsonl(only_run_dir(project) / "traces" / "cite-en-001.1.jsonl")
+    [rejected] = [s for s in steps if s["type"] == "tool_call" and s["name"] == "final_answer"]
+    assert "statute 120" in rejected["error"]
+    [final] = [s for s in steps if s["type"] == "final_answer"]
+    assert final["citations"] == [{"instrument": "statute", "article": "9"}]
+
+
+def test_cite_case_fails_when_the_agent_keeps_citing_an_unread_article(project, capsys):
+    fake = FakeOpenRouter(
+        [
+            tool_call_response("search_sources", {"query": "probation"}),
+            *(cite_answer("9", "120", call_id=f"c{turn}") for turn in range(2, 7)),
+        ]
     )
 
     cite_run(project, fake)
 
     assert "FAIL cite-en-001" in capsys.readouterr().out
     steps = read_jsonl(only_run_dir(project) / "traces" / "cite-en-001.1.jsonl")
-    assert steps[-1]["details"]["citations"]["not_retrieved"] == ["statute 120"]
+    assert not [s for s in steps if s["type"] == "final_answer"]
+    assert [s["reason"] for s in steps if s["type"] == "limit"] == ["max_turns"]
 
 
 def test_get_section_reads_an_article_and_records_the_retrieval(project):
@@ -654,7 +682,7 @@ def answer_response(text):
         "final_answer",
         {
             "answer": text,
-            "citations": [{"instrument": "Labour Law", "article": "51"}],
+            "citations": [],
             "status": "answered",
             "refusal_reason": None,
         },

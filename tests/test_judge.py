@@ -296,7 +296,7 @@ def test_judge_spend_that_crosses_the_remaining_budget_aborts_the_run(project, c
 
 
 def test_the_judge_is_skipped_when_a_deterministic_scorer_already_failed(project, capsys):
-    fake = FakeOpenRouter([search("probation"), grounded_answer("51")])
+    fake = FakeOpenRouter([search("probation"), grounded_answer()])
 
     assert grounding_run(project, fake) == 0
 

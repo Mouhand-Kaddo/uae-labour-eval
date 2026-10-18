@@ -8,6 +8,7 @@ from typing import Any
 from eval_harness.cases import Case
 from eval_harness.final_answer import LIMIT, FinalAnswer
 from eval_harness.refs import article_key
+from eval_harness.trace import retrieved_articles
 
 Steps = list[dict[str, Any]]
 """The steps of one trace (or one half of a pair), as scorers read them."""
@@ -34,14 +35,8 @@ def score_citations(case: Case, final: FinalAnswer, trace: Steps) -> Verdict:
     during this case (ADR-0007). Articles are compared at article level, not clause level."""
     required = {article_key(c["instrument"], c["article"]) for c in case.expected["citations"]}
     cited = {article_key(c.instrument, c.article) for c in final.citations}
-    retrieved = {
-        article_key(chunk["instrument"], chunk["article"])
-        for step in trace
-        if step["type"] == "retrieval"
-        for chunk in step["chunks"]
-    }
     missing = sorted(required - cited)
-    not_retrieved = sorted(cited - retrieved)
+    not_retrieved = sorted(cited - retrieved_articles(trace))
     return Verdict(
         not missing and not not_retrieved,
         {
