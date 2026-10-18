@@ -90,7 +90,7 @@ def run_agent(
                 arguments = json.loads(arguments or "{}")
                 if name == "final_answer":
                     final = parse_final_answer(arguments)
-                    unread = unread_citations(final, trace.steps[first_step:])
+                    unread = _unread_citations(final, trace.steps[first_step:])
                     if not unread:
                         trace.add("final_answer", turn=turn, **asdict(final))
                         return final
@@ -116,7 +116,7 @@ def run_agent(
     return FinalAnswer.limit()
 
 
-def unread_citations(final: FinalAnswer, steps: list[dict[str, Any]]) -> list[str]:
+def _unread_citations(final: FinalAnswer, steps: list[dict[str, Any]]) -> list[str]:
     """The answer's citations of articles no tool returned in these steps, as article labels."""
     retrieved = retrieved_articles(steps)
     return list(

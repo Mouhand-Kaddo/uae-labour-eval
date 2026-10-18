@@ -258,6 +258,7 @@ def _cost_section(summary: dict[str, Any], numbers: ReportNumbers) -> str:
         ("Latency p95", seconds(numbers.latency_p95), "per case"),
         ("Cost p50", usd(numbers.cost_p50), "per case"),
         ("Cost p95", usd(numbers.cost_p95), "per case"),
+        ("Answers sent back", count(numbers.sent_back), "cited an article not read"),
         ("Run spend", usd(summary.get("run_spend_usd")), "this run"),
         ("Cumulative spend", usd(summary.get("cumulative_usd")), "all runs so far"),
     ]
@@ -480,6 +481,10 @@ def pct(value: Any) -> str:
 
 def seconds(value: Any) -> str:
     return f"{value:.2f} s" if isinstance(value, int | float) else "–"
+
+
+def count(value: Any) -> str:
+    return str(value) if isinstance(value, int) else "–"
 
 
 def usd(value: Any) -> str:

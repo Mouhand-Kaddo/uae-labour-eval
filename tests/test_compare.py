@@ -124,6 +124,15 @@ def test_compare_shows_latency_and_cost_percentiles_and_run_spend(project, capsy
     assert row(out, "run spend") == ["run spend", "USD 0.004000", "USD 0.009000", "+USD 0.005000"]
 
 
+def test_compare_shows_answers_sent_back_and_a_dash_for_runs_from_before_the_count(project, capsys):
+    write_run(project / "runs" / "run-a", [fixture_case("c-1", "cite", True)])
+    write_run(project / "runs" / "run-b", [fixture_case("c-1", "cite", True, sent_back=2)])
+
+    compare(project, "run-a", "run-b")
+
+    assert row(capsys.readouterr().out, "answers sent back") == ["answers sent back", "–", "2", "–"]
+
+
 def test_compare_refuses_a_missing_run(project, capsys):
     write_run(project / "runs" / "run-a", [fixture_case("c-1", "calc", True)])
 

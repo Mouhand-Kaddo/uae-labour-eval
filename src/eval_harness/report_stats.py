@@ -60,6 +60,7 @@ class ReportNumbers:
     latency_p95: float | None
     cost_p50: float | None
     cost_p95: float | None
+    sent_back: int | None
     failures: list[dict[str, Any]]
     flaky: list[Flaky]
 
@@ -93,6 +94,9 @@ def report_numbers(results: list[dict[str, Any]]) -> ReportNumbers:
         latency_p95=percentile(latencies, 95),
         cost_p50=percentile(costs, 50),
         cost_p95=percentile(costs, 95),
+        sent_back=sum(r["sent_back"] for r in results)
+        if all("sent_back" in r for r in results)
+        else None,
         failures=sorted((r for r in results if not r["passed"]), key=_failure_rank),
         flaky=_flaky(results),
     )

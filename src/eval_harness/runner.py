@@ -76,7 +76,7 @@ class CaseResult:
     passed: bool
     cost_usd: float
     latency_s: float
-    sent_back: int = 0
+    sent_back: int
     """Final answers the agent loop sent back for citing articles no tool returned."""
 
 
@@ -449,7 +449,7 @@ class _Run:
             passed,
             self.spend.case_usd,
             latency,
-            sum(1 for step in trace.steps if step["type"] == "tool_call" and "unread" in step),
+            _sent_back(trace),
         )
         return result, False
 
@@ -527,7 +527,12 @@ class _Run:
             False,
             self.spend.case_usd,
             round(latency, 3),
+            _sent_back(trace),
         )
+
+
+def _sent_back(trace: Trace) -> int:
+    return sum(1 for step in trace.steps if step["type"] == "tool_call" and "unread" in step)
 
 
 def _as_routed(client: OpenRouterClient, model: ModelInfo, provider: dict[str, Any]) -> ModelInfo:
