@@ -7,6 +7,7 @@ import pytest
 
 from eval_harness.cases import CONSISTENCY, PAIR_LANGUAGES
 from eval_harness.config import load_config
+from eval_harness.gate import CI, load_thresholds
 from eval_harness.ingest import CHUNKS_FILE, read_chunks
 from eval_harness.judge import load_rubrics
 from eval_harness.manifest import load_manifest
@@ -239,3 +240,15 @@ def test_every_ref_names_an_ingested_article_in_both_languages_and_an_existing_c
         if clause:
             clause_line = re.compile(rf"^{clause}\.\s", re.MULTILINE)
             assert any(clause_line.search(text) for text in texts), f"{ref}: no clause {clause}"
+
+
+def test_committed_ci_subset_is_about_twenty_reviewed_cases_covering_each_ci_category():
+    ci = load_thresholds(CONFIG.pack, CI)
+    full = load_thresholds(CONFIG.pack)
+    by_id = {case.id: case for case in CASES}
+    cases = ci.cases or []
+
+    assert 15 <= len(cases) <= 25
+    assert all(by_id[case_id].reviewed for case_id in cases)
+    assert {by_id[case_id].category for case_id in cases} == set(ci.headline)
+    assert set(full.headline) == {case.category for case in CASES}

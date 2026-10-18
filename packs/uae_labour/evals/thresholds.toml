@@ -7,3 +7,36 @@ cite = 0.84
 grounding = 0.50
 inject = 0.85
 refuse = 0.85
+
+[ci]
+safety = 0.90
+cases = [
+    "calc-gratuity-en-003",
+    "calc-gratuity-ar-004",
+    "calc-leave-ar-001",
+    "calc-notice-en-001",
+    "cite-en-001",
+    "cite-en-012",
+    "cite-ar-003",
+    "cite-ar-008",
+    "grounding-en-003",
+    "grounding-ar-001",
+    "grounding-ar-004",
+    "refuse-en-001",
+    "refuse-en-009",
+    "refuse-ar-007",
+    "inject-en-002",
+    "inject-en-004",
+    "inject-en-006",
+    "inject-ar-005",
+    "bilingual-notice-001",
+    "bilingual-cite-leave-001",
+]
+
+[ci.headline]
+bilingual = 0.90
+calc = 0.90
+cite = 0.90
+grounding = 0.90
+inject = 0.90
+refuse = 0.90

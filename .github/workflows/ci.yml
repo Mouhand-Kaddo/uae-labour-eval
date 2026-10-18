@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,3 +29,43 @@ jobs:
       - run: uv run eval fetch
       - run: uv run eval ingest
       - run: uv run pytest
+
+  eval:
+    needs: lint-and-test
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    steps:
+      - if: env.OPENROUTER_API_KEY == ''
+        run: echo "::notice::OPENROUTER_API_KEY secret is not set; the eval subset is skipped"
+      - if: env.OPENROUTER_API_KEY != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: env.OPENROUTER_API_KEY != ''
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          version: 2026.10.13
+      - if: env.OPENROUTER_API_KEY != ''
+        run: uv sync --locked
+      - if: env.OPENROUTER_API_KEY != ''
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: data/sources
+          key: sources-${{ hashFiles('packs/*/manifest.toml') }}
+      - if: env.OPENROUTER_API_KEY != ''
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: data/index/embeddings.jsonl
+          key: embeddings-${{ hashFiles('packs/*/manifest.toml', 'config.toml') }}
+      - if: env.OPENROUTER_API_KEY != ''
+        run: uv run eval fetch
+      - if: env.OPENROUTER_API_KEY != ''
+        run: uv run eval ingest
+      - if: env.OPENROUTER_API_KEY != ''
+        run: uv run eval embed
+      - if: env.OPENROUTER_API_KEY != ''
+        run: uv run eval run --ci
+      - if: env.OPENROUTER_API_KEY != ''
+        run: uv run eval gate "$(ls -d runs/*/ | sort | tail -n 1)" --section ci
