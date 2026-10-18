@@ -190,6 +190,14 @@ def test_citation_scorer_matches_an_article_number_written_in_arabic_indic_digit
     assert verdict.passed
 
 
+def test_citation_scorer_fails_an_absurdly_long_article_number_without_raising():
+    trace = [retrieval(("labour-law", "9"))]
+
+    verdict = score_case(cite_case(ART_9), cited(("labour-law", "9" * 5000)), trace)
+
+    assert not verdict.passed
+
+
 def test_citation_scorer_fails_when_a_required_article_is_not_cited():
     trace = [retrieval(("labour-law", "9"), ("labour-law", "43"))]
 

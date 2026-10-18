@@ -3,7 +3,7 @@
 import re
 from dataclasses import dataclass
 
-ARTICLE_NUMBER = re.compile(r"\d{1,9}")
+ARTICLE_NUMBER = re.compile(r"(?<!\d)\d{1,9}(?!\d)")
 
 
 def article_label(instrument: str, article: str) -> str:

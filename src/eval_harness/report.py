@@ -269,7 +269,7 @@ def _cost_section(summary: dict[str, Any], numbers: ReportNumbers) -> str:
     )
     return f"""<section id="cost">
 <h2>Latency and cost</h2>
-<p class="note">Percentiles over every case result in the run, reviewed or not.
+<p class="note">Percentiles and counts over every case result in the run, reviewed or not.
 Spend summary: <a href="{SPEND_FILE}">{SPEND_FILE}</a>.</p>
 <div class="tiles">{html}</div>
 </section>"""

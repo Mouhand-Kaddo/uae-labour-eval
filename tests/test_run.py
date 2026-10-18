@@ -357,6 +357,28 @@ def test_run_aborts_when_its_spend_crosses_the_remaining_budget(project, capsys)
     assert len(read_jsonl(project / "runs" / "ledger.jsonl")) == 1
 
 
+def test_an_aborted_case_keeps_its_count_of_answers_sent_back(project):
+    unread_citation = tool_call_response(
+        "final_answer",
+        {
+            "answer": "I can't advise on that.",
+            "citations": [{"instrument": "statute", "article": "9"}],
+            "status": "refused",
+            "refusal_reason": "legal_advice",
+        },
+        cost=0.001,
+    )
+    fake = FakeOpenRouter(
+        [unread_citation, final_answer_response("refused", "legal_advice", cost=0.006)],
+        key_usage=19.995,
+    )
+
+    assert eval_run(project, fake) == 3
+
+    summary = json.loads((only_run_dir(project) / "summary.json").read_text())
+    assert [(c["status"], c["sent_back"]) for c in summary["cases"]] == [("aborted", 1)]
+
+
 def test_estimate_counts_the_query_embeddings_a_run_may_make(project, capsys):
     fake = FakeOpenRouter([], embedding_price="1")
 
