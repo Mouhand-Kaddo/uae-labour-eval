@@ -215,12 +215,13 @@
   scoring: [status, citations]
   reviewed: false
   refs: ["Labour Law Art 60(1)"]
-  depends_on: [OQ-007]
+  depends_on: []
   rationale: >-
     Art 60(1)(a) "Employs a Worker with no permit to work for him." The English gives the fine as
     "not less than on hundred thousand AED (100,000) and not exceeding two million AED
     (1,000,000)"; the Arabic says "لا تقل عن (100,000) مائة ألف درهم ولا تزيد على (1,000,000)
-    مليون درهم". The expected maximum is AED 1,000,000 per the Arabic, which rests on OQ-007.
+    مليون درهم". Expected answer: AED 100,000 to AED 1,000,000 (OQ-007, decided with high
+    confidence from the Arabic, the English numeral and Art 60(2)); "one million" is correct.
 - id: cite-en-011
   category: cite
   language: en
@@ -397,8 +398,8 @@
     Arabic Art 29(9): "يحق للعامل الحصو ل على أجرة أيام الإجازة المستحقة إذا ترك العمل قبل استعماله
     لها، أيًّا كانت مدتها ... كما يستحق أجرة الإجازة عن أجزاء السنة بنسبة ما قضاه منها في العمل،
     وتحسب وفق الأجر الأساسي." (the ingested text splits "الحصو ل"). The pro-rata sentence and the
-    basic-wage basis are missing from the English 29(9) (OQ-004). ER Art 19(2) also puts the
-    cash-out on the basic wage.
+    basic-wage basis are missing from the English 29(9); OQ-004 decides the Arabic sentence is
+    the law in both languages. ER Art 19(2) also puts the cash-out on the basic wage.
 - id: cite-ar-010
   category: cite
   language: ar

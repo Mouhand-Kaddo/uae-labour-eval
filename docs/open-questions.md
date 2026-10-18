@@ -71,7 +71,7 @@ Questions:
 2. Under (b), are part months counted pro rata, rounded down, or ignored?
 3. Does (a) mean 30 days per completed year only, with part years falling under (c) "parts of the last year"?
 
-Until this is decided, the annual-leave tool gives nothing for exactly 180 days of service, counts part months under (b) pro rata (service days × 2 ÷ 30), gives 30 days per completed 365-day year plus part years pro rata (days × 30 ÷ 365), and returns OQ-005 with every result that rests on one of these readings.
+The annual-leave tool gives nothing for exactly 180 days of service, counts part months under (b) pro rata (service days × 2 ÷ 30), gives 30 days per completed 365-day year plus part years pro rata (days × 30 ÷ 365), and returns OQ-005 with every result that rests on one of these readings.
 
 **Decision:** Keep the annual-leave tool's reading: nothing at exactly six months ("more than six months"); part months pro rata; 30 days per completed year, with part years at 30/365. Provisional (research confidence low–medium; no official worked example). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
 
@@ -137,7 +137,7 @@ Questions:
 2. Is a part day rounded up on the total leave, or on each year's leave?
 3. ER Art 18 counts "working days" while Art 29(1) counts "days": are part-time leave days working days and full-time leave days calendar days?
 
-Until this is decided, the annual-leave tool takes the full-time entitlement for the same service, multiplies it by the hours percentage (but not less than 5 ÷ 30, the five-day minimum as a share of a 30-day year), rounds the total up to a whole day, and returns OQ-010 with every part-time result.
+The annual-leave tool takes the full-time entitlement for the same service, multiplies it by the hours percentage (but not less than 5 ÷ 30, the five-day minimum as a share of a 30-day year), rounds the total up to a whole day, and returns OQ-010 with every part-time result.
 
 **Decision:** Keep the tool's reading: full-time entitlement × hours ratio, the five-day floor pro-rated for part years, total rounded up. Provisional (research confidence low). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
 
@@ -149,7 +149,7 @@ Until this is decided, the annual-leave tool takes the full-time entitlement for
 
 Read alone, (b) gives a worker with six months' service or less no leave. (c) and the Arabic 29(9) could give a pro-rata leave for any part of a year, including a first and only year. Does a worker whose service ends within six months earn any annual leave or leave pay?
 
-Until this is decided, the annual-leave tool gives no leave for fewer than 180 days of service and returns OQ-011 with that result (exactly 180 days is OQ-005).
+The annual-leave tool gives no leave for fewer than 180 days of service and returns OQ-011 with that result (exactly 180 days is OQ-005).
 
 **Decision:** Keep "no annual leave or leave pay for six months' service or less" as the default. Provisional and weakest of the decisions (research confidence low): Art 29(3) and the Arabic Art 29(9) arguably point the other way. Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
 
@@ -180,9 +180,21 @@ The probation tool uses A and returns OQ-013 only for probations of 181–184 da
 
 ## Facts still to verify (agent work, not owner decisions)
 
-- Effective dates of Decree-Laws 14/2022, 20/2023 and 9/2024: still not checked against the official gazette. Checked on 2026-10-17 (#5):
-  - The portal (uaelegislation.gov.ae) answers scripts with 403 and a headless browser with a Cloudflare challenge; the MOHRE copy of the consolidated law refused connections. The Wayback Machine has no capture of any of the three decree-laws' portal pages or PDFs (legislation 1637 = 14/2022 has none; the portal IDs of 20/2023 and 9/2024 were not found), so they are not in the corpus manifest yet.
-  - The portal's own page for the Labour Law ([Wayback 2026-10-04](https://web.archive.org/web/20261004194241id_/https://uaelegislation.gov.ae/en/legislations/1541)) gives: issued 20 Sep 2021, effective 02 Feb 2022, Official Gazette No 712 (ملحق) of 26 Sep 2021, "Legislation Amendments 3", "The last update on this law was listed on 29 Jul 2024". The amendment count was 2 on [2024-05-24](https://web.archive.org/web/20240524080227id_/https://uaelegislation.gov.ae/en/legislations/1541) and 3 by [2024-11-13](https://web.archive.org/web/20241113040436id_/https://uaelegislation.gov.ae/en/legislations/1541?keyword=).
-  - Secondary sources only: 14/2022 dated 15 Sep 2022 ([Lexis Middle East](https://www.lexismiddleeast.com/law/UnitedArabEmirates/DecreeLaw_33_2021/en)); 20/2023 replaces Art 54 and takes effect 1 Jan 2024 ([BSA](https://bsalaw.com/insight/an-overview-of-federal-decree-law-no-20-of-2023-concerning-jurisdictional-rules-regarding-labour-disputes/)); 9/2024 issued 29 Jul 2024, replaces Arts 54 and 60, effective date reported differently (31 Aug 2024 by [Gulf News](https://gulfnews.com/living-in-uae/ask-us/3-major-changes-to-uae-labour-law--all-you-need-to-know-1.1724235733163) and [Fichte](https://fichtelegal.com/new-amendments-to-uae-federal-decree-law-no-33-2021-on-labour-relations/), 28 Aug 2024 by another firm). A government copy of 20/2023 was listed at u.ae but returned 404.
-- Whether the Minister extended the Art 68(2) deadline for converting unlimited contracts. Art 68(3) lets employers calculate gratuity for those contracts under the 1980 law, which is outside the corpus, so the agent answers "not found" for it either way.
-- Whether any amendment to the Labour Law or the Executive Regulations was issued after 29 July 2024 (none found on 2026-10-17). The portal's Labour Law page still listed 3 amendments and a last update of 29 Jul 2024 on 2026-10-04 (link above); the Executive Regulations' own amendment list was not checked.
+Verified on 2026-10-18 by the research report `reports/UAE labour law open questions.md` (archived official copies; the live portal and MOHRE still refuse scripts):
+
+- **Three amending decree-laws, no more.** The Ministry of Justice's consolidated Arabic compilation of the labour legislation, current to December 2025, marks every changed provision and attributes changes only to 14/2022, 20/2023 and 9/2024 ([MOJ 2025 compilation](https://www.moj.gov.ae/assets/966b93b0/تشريعات-تنظيم-علاقات-العمل-2025-النسخة-الالكترونية-639015001687388768.aspx)).
+  - **14/2022:** changed Art 8(3) (removed the three-year cap on fixed-term contracts). Issued 15 Sep 2022, Official Gazette No. 736 of 28 Sep 2022, in force 29 Sep 2022; the dates are from secondary sources only (Eastlaws index title, Lexis).
+  - **20/2023:** replaced Art 54 (disputes; one-year limitation). Signed **13 Sep 2023** (27 Safar 1445), not 15 Sep as Lexis gives; in force **1 Jan 2024** by its own Art 2 ([MOHRE AR copy](https://web.archive.org/web/20250909074946id_/https://mohre.gov.ae/assets/download/95f9a7d4/%D9%85%D8%B1%D8%B3%D9%88%D9%85%20%D8%A8%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%A7%D8%AA%D8%AD%D8%A7%D8%AF%D9%8A%20%D8%B1%D9%82%D9%85%2020%20%D9%84%D8%B3%D9%86%D8%A9%202023%20%D8%A8%D8%AA%D8%B9%D8%AF%D9%8A%D9%84%20%D8%A8%D8%B9%D8%B6%20%D8%A3%D8%AD%D9%83%D8%A7%D9%85%20%D8%A7%D9%84%D9%85%D8%B1%D8%B3%D9%88%D9%85%20%D8%A8%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%A7%D8%AA%D8%AD%D8%A7%D8%AF%D9%8A%20%D8%B1%D9%82%D9%85%2033%20%D9%84%D8%B3%D9%86%D8%A9%202021%20%D8%A8%D8%B4%D8%A3%D9%86%20%D8%AA%D9%86%D8%B8%D9%8A%D9%85%20%D8%B9%D9%84%D8%A7%D9%82%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B9%D9%85%D9%84.pdf.aspx); [MOHRE EN copy](https://web.archive.org/web/20250903095312id_/https://www.mohre.gov.ae/assets/download/20670ee7/Federal%20Decree%20Law%20No.%2020%20of%202023%20Amending%20Certain%20Provisions%20of%20Federal%20Decree%20Law%20No.%2033%20of%202021%20Regarding%20the%20Regulation%20of%20Employment%20Relationships.pdf.aspx), third-party translation). Gazette number not found.
+  - **9/2024:** replaced Arts 54 and 60, with a transitional Art 2 sending pending appeals to first-instance courts. Issued 29 Jul 2024, Official Gazette No. 780 (supplement) of **31 Jul 2024**, in force **30 days after publication**; sources name 29, 30 or 31 Aug 2024 and none 28 Aug, so state it as "30 days after publication on 31 July 2024". Article changes primary (MOJ); dates secondary.
+  - Current Art 54(9) bars claims two years after the employment ends; 20/2023's one-year rule applied only from 1 Jan 2024 until 9/2024 took effect.
+- **No amendment after 29 July 2024.** The portal's Labour Law page showed 3 amendments and a last update of 29 Jul 2024 in every capture through [2026-10-04](https://web.archive.org/web/20261004194241id_/https://uaelegislation.gov.ae/en/legislations/1541) (issued 20 Sep 2021, effective 02 Feb 2022, Official Gazette No. 712 (supplement) of 26 Sep 2021).
+- **The Executive Regulations were never amended.** Their portal page shows a last update of 3 Feb 2022 and no amendments field ([ER portal page, 2026-10-04](https://web.archive.org/web/20261004194241id_/https://uaelegislation.gov.ae/en/legislations/1547)), and the MOJ compilation has no amendment notes on them.
+- **Art 68(2) deadline extended once.** Art 68 itself is unamended. Ministerial Resolution No. 27 of 2023 extended the deadline for converting unlimited contracts once, to **31 Dec 2023** (MOHRE news headline, known from search snippets, and law-firm reports); no second extension found. Art 68(3) gratuity under the 1980 law stays outside the corpus, so the agent answers "not found" for it.
+- **Fetchable official copies:** the MOJ 2025 compilation (Arabic, consolidated through 9/2024, includes the ER, live HTTP 200) at the URL above; MOHRE's PDFs of 20/2023 in both languages via Wayback; MOHRE's consolidated PDFs of January 2024 via Wayback (before 9/2024, so not for Arts 54 and 60). None is in the corpus manifest yet.
+
+Still unverified:
+
+- The official-gazette record of 14/2022's dates, the gazette number of 20/2023, and the exact day 9/2024 took effect (its Art 4 was not reached).
+- Ministerial Resolution 27/2023 itself, and what happens to unlimited contracts never converted (no official source).
+- Any amendment after 4 Oct 2026, the last portal capture checked.
+- A standalone official copy of 14/2022 or 9/2024 in either language (none found), and the amending decree-laws' entries in the corpus manifest (still absent).
