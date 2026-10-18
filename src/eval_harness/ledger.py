@@ -21,6 +21,7 @@ class Ledger:
         case_id: str | None = None,
         category: str | None = None,
         repeat: int | None = None,
+        provider: str | None = None,
     ) -> dict[str, Any]:
         prompt_details = usage.get("prompt_tokens_details") or {}
         record = {
@@ -28,6 +29,7 @@ class Ledger:
             "run_id": run_id,
             "purpose": purpose,
             "model": model,
+            "provider": provider,
             "case_id": case_id,
             "category": category,
             "repeat": repeat,

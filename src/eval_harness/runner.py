@@ -243,6 +243,8 @@ def _plan(
         judge = resolve_judge(config.judge_model, models) if judged_per_repeat else None
     except JudgeUnavailable as exc:
         raise RunRefused(str(exc)) from exc
+    if judge is not None:
+        judge = _as_routed(client, judge, config.provider_for(judge.id))
     manifest, index = _load_corpus(config)
     _check_planted_chunks(cases, index)
     try:
@@ -252,7 +254,7 @@ def _plan(
     if pack_cases.open_questions is not None:
         tools = mark_open_questions(tools, pack_cases.open_questions)
     return _Plan(
-        model=models[model_id],
+        model=_as_routed(client, models[model_id], config.provider_for(model_id)),
         embedding=embedding_models[config.embedding_model],
         cases=cases,
         rubrics=rubrics,
@@ -271,12 +273,14 @@ def _estimate(
     config: Config, plan: _Plan, ledger: Ledger, category: str | None, repeats: int
 ) -> float:
     """The run's cost estimate: agent runs, from ledger history if any, plus judge calls, plus
-    query embeddings, assuming at most one search per agent turn."""
+    query embeddings, assuming at most one search per agent turn. Every price is the model's
+    peak (and history is scaled up to it), since a surcharge window can double the price."""
+    history = ledger.per_case_average(model=plan.model.id, category=category)
     estimate = estimate_run_cost(
         case_count=plan.agent_runs * repeats,
-        history_per_case_usd=ledger.per_case_average(model=plan.model.id, category=category),
-        prompt_price_usd=plan.model.prompt_price_usd,
-        completion_price_usd=plan.model.completion_price_usd,
+        history_per_case_usd=None if history is None else history * plan.model.peak_factor,
+        prompt_price_usd=plan.model.peak_prompt_price_usd,
+        completion_price_usd=plan.model.peak_completion_price_usd,
         assumed_prompt_tokens=config.budget.assumed_prompt_tokens_per_case,
         assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
         margin=config.budget.safety_margin,
@@ -285,8 +289,8 @@ def _estimate(
         estimate += estimate_run_cost(
             case_count=plan.judged_per_repeat * repeats,
             history_per_case_usd=None,
-            prompt_price_usd=plan.judge.prompt_price_usd,
-            completion_price_usd=plan.judge.completion_price_usd,
+            prompt_price_usd=plan.judge.peak_prompt_price_usd,
+            completion_price_usd=plan.judge.peak_completion_price_usd,
             assumed_prompt_tokens=config.budget.assumed_prompt_tokens_per_case,
             assumed_completion_tokens=config.budget.assumed_completion_tokens_per_case,
             margin=config.budget.safety_margin,
@@ -294,7 +298,7 @@ def _estimate(
     estimate += estimate_run_cost(
         case_count=plan.agent_runs * repeats * config.agent.max_turns,
         history_per_case_usd=None,
-        prompt_price_usd=plan.embedding.prompt_price_usd,
+        prompt_price_usd=plan.embedding.peak_prompt_price_usd,
         completion_price_usd=0.0,
         assumed_prompt_tokens=ASSUMED_TOKENS_PER_SEARCH_QUERY,
         assumed_completion_tokens=0,
@@ -349,6 +353,7 @@ class _Spend:
             case_id=self.case.id,
             category=self.case.category,
             repeat=self.repeat,
+            provider=response.provider if isinstance(response, ChatResponse) else None,
         )
         self.run_usd += response.cost
         self.case_usd += response.cost
@@ -378,9 +383,15 @@ class _Run:
             self.spend.record(response, "judge", judge.id)
 
         settings = self.config.judge
+        provider = self.config.provider_for(judge.id)
         self.scorers |= {
             name: judge_scorer(
-                self.client, model=judge, rubric=rubric, settings=settings, on_response=record_judge
+                self.client,
+                model=judge,
+                rubric=rubric,
+                settings=settings,
+                provider=provider,
+                on_response=record_judge,
             )
             for name, rubric in self.plan.rubrics.items()
         }
@@ -391,6 +402,7 @@ class _Run:
                     model=judge,
                     rubric=self.plan.pair_rubric,
                     settings=settings,
+                    provider=provider,
                     on_response=record_judge,
                 )
             )
@@ -485,6 +497,7 @@ class _Run:
                         *self.plan.tools,
                     ],
                     settings=self.config.agent,
+                    provider=self.config.provider_for(self.plan.model.id),
                     trace=trace,
                     on_response=record_agent,
                 )
@@ -506,6 +519,37 @@ class _Run:
             self.spend.case_usd,
             round(latency, 3),
         )
+
+
+def _as_routed(client: OpenRouterClient, model: ModelInfo, provider: dict[str, Any]) -> ModelInfo:
+    """A model held to specific endpoints (`only`, or `order` without fallbacks) is priced at the
+    dearest of them and offered only the parameters they all support; the models list prices
+    a model at its cheapest endpoint. A pin that matches no endpoint refuses the run."""
+    slugs = provider.get("only") or (
+        provider.get("order") if provider.get("allow_fallbacks") is False else None
+    )
+    if not slugs:
+        return model
+    endpoints = client.endpoints(model.id)
+    pinned: list[ModelInfo] = []
+    for slug in slugs:
+        exact = [info for tag, info in endpoints.items() if tag == slug]
+        pinned += exact or [info for tag, info in endpoints.items() if tag.startswith(f"{slug}/")]
+    if not pinned:
+        raise RunRefused(
+            f"no endpoint of {model.id!r} matches the pinned providers {slugs}; "
+            f"its endpoints are {sorted(endpoints)}"
+        )
+    return ModelInfo(
+        id=model.id,
+        prompt_price_usd=max(e.prompt_price_usd for e in pinned),
+        completion_price_usd=max(e.completion_price_usd for e in pinned),
+        supported_parameters=model.supported_parameters.intersection(
+            *(e.supported_parameters for e in pinned)
+        ),
+        peak_prompt_price_usd=max(e.peak_prompt_price_usd for e in pinned),
+        peak_completion_price_usd=max(e.peak_completion_price_usd for e in pinned),
+    )
 
 
 def _load_corpus(config: Config) -> tuple[Manifest, SearchIndex]:

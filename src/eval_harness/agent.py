@@ -41,12 +41,13 @@ def run_agent(
     user_input: str,
     tools: list[Tool],
     settings: AgentSettings,
+    provider: dict[str, Any],
     trace: Trace,
     on_response: Callable[[ChatResponse], None],
 ) -> FinalAnswer:
     """Run one case. Returns the final answer, or `FinalAnswer.limit()` when a cap is hit."""
     tools_by_name = {tool.name: tool for tool in tools}
-    stable_prefix = _stable_prefix(model, system_prompt, tools, settings)
+    stable_prefix = _stable_prefix(model, system_prompt, tools, settings, provider)
     messages: list[dict[str, Any]] = [{"role": "user", "content": user_input}]
 
     for turn in range(1, settings.max_turns + 1):
@@ -59,6 +60,7 @@ def run_agent(
             turn=turn,
             latency_s=round(time.monotonic() - started, 3),
             finish_reason=response.finish_reason,
+            provider=response.provider,
             message=response.message,
             usage=response.usage,
         )
@@ -104,7 +106,11 @@ def run_agent(
 
 
 def _stable_prefix(
-    model: ModelInfo, system_prompt: str, tools: list[Tool], settings: AgentSettings
+    model: ModelInfo,
+    system_prompt: str,
+    tools: list[Tool],
+    settings: AgentSettings,
+    provider: dict[str, Any],
 ) -> dict[str, Any]:
     """Everything that is identical across turns and cases, so providers can cache it."""
     system_part: dict[str, Any] = {"type": "text", "text": system_prompt}
@@ -115,7 +121,7 @@ def _stable_prefix(
         "messages": [{"role": "system", "content": [system_part]}],
         "tools": [*(tool.schema() for tool in tools), FINAL_ANSWER_TOOL],
         "max_tokens": settings.max_tokens,
-        "provider": {"require_parameters": True},
+        "provider": provider,
     }
     if "temperature" in model.supported_parameters:
         prefix["temperature"] = 0

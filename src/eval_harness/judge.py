@@ -112,6 +112,7 @@ def judge_scorer(
     model: ModelInfo,
     rubric: Rubric,
     settings: JudgeSettings,
+    provider: dict[str, Any],
     on_response: Callable[[ChatResponse], None],
 ) -> Scorer:
     """A scorer that asks the judge for a verdict per criterion; the case passes if all pass.
@@ -121,7 +122,7 @@ def judge_scorer(
 
     def score(case: Case, final: FinalAnswer, trace: Steps) -> Verdict:
         return ask_judge(
-            client, model, rubric, settings, on_response, _material(case, final, trace)
+            client, model, rubric, settings, provider, on_response, _material(case, final, trace)
         )
 
     return score
@@ -133,6 +134,7 @@ def pair_judge(
     model: ModelInfo,
     rubric: Rubric,
     settings: JudgeSettings,
+    provider: dict[str, Any],
     on_response: Callable[[ChatResponse], None],
 ) -> PairScorer:
     """Like `judge_scorer`, for a bilingual pair: the judge sees both questions, both answers and
@@ -142,7 +144,13 @@ def pair_judge(
         case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Steps]
     ) -> Verdict:
         return ask_judge(
-            client, model, rubric, settings, on_response, _pair_material(case, finals, traces)
+            client,
+            model,
+            rubric,
+            settings,
+            provider,
+            on_response,
+            _pair_material(case, finals, traces),
         )
 
     return score
@@ -153,13 +161,14 @@ def ask_judge(
     model: ModelInfo,
     rubric: Rubric,
     settings: JudgeSettings,
+    provider: dict[str, Any],
     on_response: Callable[[ChatResponse], None],
     material: str,
 ) -> Verdict:
     """One judge call on `material`; a failed call or malformed verdict is a failed verdict."""
     details: dict[str, Any] = {"rubric": rubric.name, "model": model.id}
     try:
-        response = client.chat(_payload(model, rubric, settings, material))
+        response = client.chat(_payload(model, rubric, settings, provider, material))
     except OpenRouterError as exc:
         return Verdict(False, details | {"error": str(exc)})
     on_response(response)
@@ -173,7 +182,11 @@ def ask_judge(
 
 
 def _payload(
-    model: ModelInfo, rubric: Rubric, settings: JudgeSettings, material: str
+    model: ModelInfo,
+    rubric: Rubric,
+    settings: JudgeSettings,
+    provider: dict[str, Any],
+    material: str,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "model": model.id,
@@ -186,7 +199,7 @@ def _payload(
             "json_schema": {"name": "verdict", "strict": True, "schema": rubric.schema()},
         },
         "max_tokens": settings.max_tokens,
-        "provider": {"require_parameters": True},
+        "provider": provider,
     }
     if "temperature" in model.supported_parameters:
         payload["temperature"] = 0
