@@ -122,7 +122,7 @@ The gratuity tool takes the worker's own basic wage and the hours ratio, compute
 - **ER Art 30** covers only "a part-time or employment sharing model" (30(1)) and temporary work (30(2)). ER Art 10(4)(d) lists a "Flexible employment contract" as a contract type.
 - Remote work is not a gap: ER Art 5(1)(a) says it applies "whether the work was parttime or fulltime", so the full-time or part-time rule follows.
 
-Is a flexible worker's gratuity computed like part-time under ER Art 30(1), like full-time under Art 51, or not at all? Until this is decided the gratuity tool answers a flexible worker with outcome `flexible_work_undecided`, no amount, and this question.
+Is a flexible worker's gratuity computed like part-time under ER Art 30(1), like full-time under Art 51, or not at all? Given the contracted hours ratio, the gratuity tool computes it like part-time (OQ-008 wage basis, nothing under one year) and returns this question; without hours it answers with outcome `flexible_hours_not_stated`, no amount, and this question.
 
 **Decision:** Flexible work is computed under ER Art 30(1) on the contracted annual hours, with the one-year threshold from Art 51; the result is undetermined only when the contract states no hours. Provisional (research confidence low–medium). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
 

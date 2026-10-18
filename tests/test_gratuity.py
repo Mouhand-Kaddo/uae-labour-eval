@@ -204,8 +204,8 @@ NOT_APPLICABLE = [
     ),
     pytest.param(
         service(*THREE_YEARS, work_pattern="flexible"),
-        "flexible_work_undecided",
-        id="Art52+OQ-009-flexible-work",
+        "flexible_hours_not_stated",
+        id="Art52+OQ-009-flexible-work-without-contracted-hours",
     ),
 ]
 
@@ -242,6 +242,37 @@ TEMPORARY_AMOUNTS = [
         id="ER30(1)+OQ-006-temporary-on-reduced-hours",
     ),
 ]
+
+FLEXIBLE_AMOUNTS = [
+    pytest.param(
+        service(*THREE_YEARS, work_pattern="flexible", part_time_hours_ratio=0.5),
+        "calculated",
+        75600.00,
+        "contracted hours 50%: full-time equivalent 73,000, 63 × 2,400 = 151,200 × 50% = 75,600",
+        id="Art52+ER30(1)+OQ-009-flexible-on-contracted-hours",
+    ),
+    pytest.param(
+        service(
+            date(2023, 1, 1),
+            date(2023, 12, 30),
+            DAILY_1200,
+            work_pattern="flexible",
+            part_time_hours_ratio=0.5,
+        ),
+        "under_one_year",
+        0.00,
+        "364 days < 365: the full-time value is 0 (Art 51(2)), so 50% of it is 0",
+        id="Art51(2)+ER30(1)+OQ-009-flexible-under-one-year",
+    ),
+]
+
+
+@pytest.mark.parametrize(("facts", "outcome", "expected", "working"), FLEXIBLE_AMOUNTS)
+def test_flexible_work_is_pro_rated_on_contracted_hours(facts, outcome, expected, working):
+    result = calculate_gratuity(**facts)
+
+    assert result.outcome == outcome
+    assert result.gratuity == expected, working
 
 
 @pytest.mark.parametrize(("facts", "outcome", "expected", "working"), TEMPORARY_AMOUNTS)
@@ -343,7 +374,31 @@ REFS_AND_QUESTIONS = [
         service(*THREE_YEARS, work_pattern="flexible"),
         {"Labour Law Art 52", "Executive Regulations Art 30(1)"},
         ["OQ-009"],
-        id="Art52+OQ-009-flexible-work",
+        id="Art52+OQ-009-flexible-work-without-contracted-hours",
+    ),
+    pytest.param(
+        service(*THREE_YEARS, work_pattern="flexible", part_time_hours_ratio=0.5),
+        CALCULATED | {"Labour Law Art 52", "Executive Regulations Art 30(1)"},
+        ["OQ-001", "OQ-002", "OQ-008", "OQ-009"],
+        id="Art52+ER30(1)+OQ-009-flexible-on-contracted-hours",
+    ),
+    pytest.param(
+        service(
+            date(2023, 1, 1),
+            date(2023, 12, 30),
+            DAILY_1200,
+            work_pattern="flexible",
+            part_time_hours_ratio=0.5,
+        ),
+        {
+            "Labour Law Art 51(2)",
+            "Labour Law Art 51(3)",
+            "Labour Law Art 52",
+            "Executive Regulations Art 30(1)",
+            "Labour Law Art 67",
+        },
+        ["OQ-009"],
+        id="Art51(2)+Art52+ER30(1)+OQ-009-flexible-under-one-year",
     ),
 ]
 
@@ -430,10 +485,10 @@ def test_tool_rejects_bad_arguments_with_a_message_naming_the_problem(changes, n
         GRATUITY_TOOL.run({**TOOL_ARGS, **changes})
 
 
-def test_tool_answers_flexible_work_with_the_open_question_instead_of_an_amount():
+def test_tool_answers_flexible_work_without_contracted_hours_with_no_amount_OQ_009():
     result = GRATUITY_TOOL.run({**TOOL_ARGS, "work_pattern": "flexible"})
 
-    assert (result["outcome"], result["gratuity"]) == ("flexible_work_undecided", None)
+    assert (result["outcome"], result["gratuity"]) == ("flexible_hours_not_stated", None)
     assert result["open_questions"] == ["OQ-009"]
     assert {"instrument": "Labour Law", "article": "52", "clause": None} in result["refs"]
 
@@ -453,6 +508,14 @@ def test_tool_rejects_missing_required_arguments():
 def test_tool_takes_an_optional_hours_ratio_for_temporary_work_OQ_006(ratio):
     result = GRATUITY_TOOL.run(
         {**TOOL_ARGS, "work_pattern": "temporary", "part_time_hours_ratio": ratio}
+    )
+
+    assert (result["outcome"], result["gratuity"]) == ("calculated", 25200.00)
+
+
+def test_tool_computes_flexible_work_given_the_contracted_hours_ratio_OQ_009():
+    result = GRATUITY_TOOL.run(
+        {**TOOL_ARGS, "work_pattern": "flexible", "part_time_hours_ratio": 0.5}
     )
 
     assert (result["outcome"], result["gratuity"]) == ("calculated", 25200.00)
