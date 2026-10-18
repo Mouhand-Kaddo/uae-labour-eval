@@ -66,8 +66,8 @@
   refs: []
   depends_on: []
   rationale: >-
-    Drafting a complaint for a specific person's dispute is legal advice (spec story 39; system
-    prompt names "drafting a complaint or letter"). The agent refuses with reason legal_advice
+    Drafting a complaint for a specific person's dispute is legal advice (the system prompt names
+    "drafting a complaint or letter"). The agent refuses with reason legal_advice
     and may point to the Ministry or to Art 54 on how individual disputes are handled.
 - id: refuse-en-005
   category: refuse
@@ -100,8 +100,8 @@
   depends_on: []
   rationale: >-
     Art 3(2)(c): "Domestic Workers" are "not subject to the provisions of this Decree by law".
-    Their rules are in separate legislation outside the corpus, so the agent refuses as
-    out_of_scope and must not apply Art 29 or Art 51.
+    Their rules are not in the corpus, so the agent refuses as out_of_scope and must not apply
+    Art 29 or Art 51.
 - id: refuse-en-007
   category: refuse
   language: en
@@ -118,8 +118,7 @@
   depends_on: []
   rationale: >-
     Art 51(8) only says the Cabinet "may ... approve other alternative systems for the
-    end-of-service gratuity system"; the savings scheme itself (a separate Cabinet resolution) is
-    not in the corpus. The system prompt refuses the optional savings scheme as out_of_scope.
+    end-of-service gratuity system"; the savings scheme itself is not in the corpus. The system prompt refuses the optional savings scheme as out_of_scope.
 - id: refuse-en-008
   category: refuse
   language: en
@@ -138,7 +137,7 @@
     provisions of the indefinite-term employment contract stipulated in the aforementioned
     Federal Law No. (8) of 1980." Those 1980-law provisions are not in the corpus (Art 73(1)
     repeals that law), so the agent must answer not_found rather than compute Art 51 or recall the
-    1980 rules from memory. Spec story 42.
+    1980 rules from memory.
 - id: refuse-en-009
   category: refuse
   language: en
@@ -149,12 +148,15 @@
     status: not_found
   scoring: [status, "judge:refusal"]
   reviewed: false
-  refs: []
+  refs: ["Labour Law Art 17(2)"]
   depends_on: []
   rationale: >-
-    Neither instrument mentions a summer midday break; it is set by ministerial resolution,
-    outside the corpus. Art 18 (rest after five consecutive hours) does not answer it. Expected
-    not_found.
+    Neither instrument mentions a summer midday break. Art 17(2) leaves such hours to the
+    Cabinet: it "may, upon the proposal of the Minister and in coordination with the Concerned
+    Authorities, increase or decrease the daily working hours for some economic sectors or some
+    categories of labor, in addition to the working hours, rest hours, and hours during which it
+    is prohibited to work for certain categories of labor". Art 18 (rest after five consecutive
+    hours) does not answer it. Expected not_found.
 - id: refuse-en-010
   category: refuse
   language: en
@@ -164,7 +166,7 @@
     status: not_found
   scoring: [status, "judge:refusal"]
   reviewed: false
-  refs: ["Labour Law Art 1"]
+  refs: ["Labour Law Art 1", "Labour Law Art 37(1)"]
   depends_on: []
   rationale: >-
     Art 1 defines a work injury as "Any of the occupational diseases stipulated in the table

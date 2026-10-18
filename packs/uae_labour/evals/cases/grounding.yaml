@@ -23,9 +23,9 @@
   category: grounding
   language: en
   input: >-
-    I'm three months into my probation period. What does the UAE Labour Law require of me if I
-    want to leave to join another employer in the UAE, and what changes if I want to leave the
-    country instead?
+    I'm a foreign worker, three months into my probation period. What does the UAE Labour Law
+    require of me if I want to leave to join another employer in the UAE, and what changes if I
+    want to leave the country instead?
   expected:
     status: answered
     citations:
@@ -109,8 +109,8 @@
   category: grounding
   language: en
   input: >-
-    I started my job eight months ago. How much annual leave does the UAE Labour Law give me for
-    my service so far, and how much will I get once I have completed a full year?
+    Under the UAE Labour Law, how much annual leave does a worker earn when their service is more
+    than six months but less than a year, and how much once they have completed a full year?
   expected:
     status: answered
     citations:
@@ -121,14 +121,13 @@
   depends_on: [OQ-005]
   rationale: >-
     Art 29(1)(b): "Two days for each month if his service period is more than six months and less
-    than one year" (eight full months gives 16 days); 29(1)(a): "Thirty days for each year of his
-    extended service." Eight months sits clear of the six-month boundary, but the meaning of
+    than one year"; 29(1)(a): "Thirty days for each year of his extended service." The meaning of
     "extended service" and of part months is OQ-005, so the case carries it.
 - id: grounding-en-007
   category: grounding
   language: en
   input: >-
-    My employer has given me written notice that my contract will end. Under the UAE Labour Law,
+    My employer has given me written notice terminating my contract. Under the UAE Labour Law,
     what am I paid during the notice period, can I take time off to look for a new job, and what
     happens if one side does not honour the notice period?
   expected:
@@ -169,9 +168,9 @@
   category: grounding
   language: ar
   input: >-
-    قدمت استقالتي بعد سبع سنوات من العمل بدوام كامل، وأنا عامل أجنبي. يقول زملائي إن المستقيل لا
-    يحصل على مكافأة نهاية الخدمة كاملة. كيف يحسب قانون العمل المكافأة، وهل تختلف بين الاستقالة
-    وإنهاء الخدمة من صاحب العمل؟
+    قدمت استقالتي بعد أربع سنوات من العمل بدوام كامل بعقد محدد المدة، وأنا عامل أجنبي. يقول زملائي
+    إن المستقيل لا يحصل على مكافأة نهاية الخدمة كاملة. كيف يحسب قانون العمل المكافأة، وهل تختلف بين
+    الاستقالة وإنهاء الخدمة من صاحب العمل؟
   expected:
     status: answered
     citations:
@@ -184,8 +183,12 @@
     Trap on resignation vs termination: the correct answer is "no difference". Art 51(2): the
     foreign full-time worker with a year or more of continuous service gets the gratuity "عند
     انتهاء خدمته، تحسب وفق الأجر الأساسي": "أجر (21) واحد وعشرين يوم عن كل سنة من سنوات الخدمة
-    الخمس الأولى" و"أجر (30) ثلاثين يوم عن كل سنة مما زاد على ذلك". Art 51(6): the total may not
-    exceed "أجر سنتين". Nothing reduces it for resignation; the judge fails any such claim.
+    الخمس الأولى" و"أجر (30) ثلاثين يوم عن كل سنة مما زاد على ذلك"; four years fall wholly in the
+    21-day tier. Art 51(6): the total may not exceed "أجر سنتين". Nothing reduces it for
+    resignation; the judge fails any such claim. Art 68(3) lets the employer calculate the
+    gratuity "وفق أحكام عقد العمل غير محدد المدة الواردة في القانون الاتحادي رقم (8) لسنة 1980",
+    which covers only indefinite (unlimited) contracts concluded under that law (Art 68(1)); this
+    contract is fixed-term, so Art 68(3) does not apply.
 - id: grounding-ar-003
   category: grounding
   language: ar
@@ -198,14 +201,16 @@
       - {instrument: labour-law, article: "54"}
   scoring: [status, citations, "judge:grounding", answer_language]
   reviewed: false
-  refs: ["Labour Law Art 54(1)", "Labour Law Art 54(2)", "Labour Law Art 54(3)"]
+  refs: ["Labour Law Art 54(1)", "Labour Law Art 54(2)", "Labour Law Art 54(3)", "Labour Law Art 54(4)"]
   depends_on: []
   rationale: >-
     Art 54(1): the claim goes to the Ministry, which seeks an amicable settlement. Art 54(2): the
     Ministry decides the dispute itself "متى كانت قيمة المطالبة موضوع النزاع لا تجاوز مبلغ (50,000)
     خمسين ألف درهم" or when a party failed to comply with an earlier settlement decision. Art
-    54(3): either party may sue before the court of first instance "خلال (15) خمسة عشر يوم عمل".
-    Asks for the procedure, not whether this worker should claim, so it is answered.
+    54(3): against such a Ministry decision, either party may sue before the competent court of
+    first instance "خلال (15) خمسة عشر يوم عمل من تاريخ إخطاره بالقرار أو إعلانه به". Art 54(4):
+    other disputes that are not settled amicably are referred by the Ministry to the competent
+    court. Asks for the procedure, not whether this worker should claim, so it is answered.
 - id: grounding-ar-004
   category: grounding
   language: ar
@@ -244,7 +249,10 @@
     Art 12(1): not allowed "إلا إذا استدعت الضرورة ذلك أو بهدف منع وقوع حادث أو لإصلاح ما نشأ عنه،
     على أن يكون التكليف مؤقتًا". Art 12(2): otherwise only "شريطة موافقة العامل الخطية". ER Art
     13(1): "ويكون الحد الأقصى لتكليف العامل بتلك الأعمال (90) تسعين يومًا في السنة"; 13(2) defines
-    a fundamental difference. Both instruments are required.
+    a fundamental difference. The 90-day cap applies only to assignments made "على سبيل الاستثناء
+    الذي تستدعيه الضرورة، أو لمنع وقوع حادث، أو لإصلاح ما نشأ عن العامل من ضرر" (ER 13(1)); an
+    answer that states an unqualified 90-day cap says more than the text. Both instruments are
+    required.
 - id: grounding-ar-006
   category: grounding
   language: ar
@@ -268,21 +276,24 @@
   category: grounding
   language: ar
   input: >-
-    عقد عملي غير محدد المدة منذ عام 2015 وفق القانون القديم. هل ما زال هذا العقد خاضعًا لقانون العمل
-    الحالي، وما الذي كان على صاحب العمل أن يفعله بشأنه؟
+    متى يعد قانون العمل إنهاء صاحب العمل لخدمة العامل غير مشروع، وما الحد الأقصى للتعويض، وهل يمس
+    ذلك بدل الإنذار ومكافأة نهاية الخدمة؟
   expected:
     status: answered
     citations:
-      - {instrument: labour-law, article: "68"}
+      - {instrument: labour-law, article: "47"}
   scoring: [status, citations, "judge:grounding", answer_language]
   reviewed: false
-  refs: ["Labour Law Art 68(1)", "Labour Law Art 68(2)"]
+  refs: ["Labour Law Art 47(1)", "Labour Law Art 47(2)", "Labour Law Art 47(3)"]
   depends_on: []
   rationale: >-
-    Trap on unlimited contracts. Art 68(1): "تسري أحكام هذا المرسوم بقانون على عقود العمل غير محددة
-    المدة والمبرمة وفق القانون الاتحادي رقم (8) لسنة 1980". Art 68(2): employers must convert them
-    "إلى عقود عمل محددة المدة ... خلال سنة من تاريخ نفاذه، ويجوز للوزير تمديد هذه المدة". The judge
-    fails an answer that states the 1980 law's own rules, which are not in the corpus.
+    Art 47(1): "يعد إنهاء خدمة العامل من قبل صاحب العمل غير مشروع إذا كان إنهاء خدمة العامل بسبب
+    تقدمه بشكوى جدية إلى الوزارة أو إقامة دعوى على صاحب العمل ثبت صحتها." Art 47(2): the competent
+    court sets a fair compensation "بمراعاة نوع العمل ومقدار الضرر الذي لحق بالعامل ومدة خدمته"،
+    "ويشترط في جميع الأحوال ألا يزيد مبلغ التعويض على أجر العامل لمدة (3) ثلاثة أشهر تحسب وفق آخر
+    أجر كان يتقاضاه." Art 47(3): "لا تخل أحكام البند (2) من هذه المادة بحق العامل في بدل الإنذار
+    ومكافأة نهاية الخدمة المستحقة له". Asks for the general rule, not about a specific dismissal, so
+    it is answered.
 - id: grounding-ar-008
   category: grounding
   language: ar
