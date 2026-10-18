@@ -83,7 +83,12 @@ def test_gratuity_case_hand_worked_figure_agrees_with_the_tool(case):
 
 FIGURES = {
     "calculate_annual_leave": ("entitlement_days", "balance_days", "cash_out"),
-    "check_notice_period": ("pay_in_lieu", "minimum_notice_days", "maximum_notice_days"),
+    "check_notice_period": (
+        "pay_in_lieu",
+        "applicable_notice_days",
+        "minimum_notice_days",
+        "maximum_notice_days",
+    ),
     "check_probation": (
         "required_notice_days",
         "maximum_months",

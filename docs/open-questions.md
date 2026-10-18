@@ -159,7 +159,7 @@ Until this is decided, the annual-leave tool gives no leave for fewer than 180 d
 - **Art 43(3):** pay in lieu of notice equals "the Worker's wage for the entire warning period or the remaining part of it."
 - **Art 65(3):** "Every condition that violates the provisions of this Decree by law ... shall be considered null unless it is more beneficial to the Worker".
 
-When a contract sets, say, 15 or 120 days, which notice period applies: the nearest limit (30 or 90), the contract's figure if it is more beneficial to the worker, or none? And which period does pay in lieu use? The notice tool reports the period as below the minimum or above the maximum, returns OQ-012, and computes no pay in lieu until this is decided.
+When a contract sets, say, 15 or 120 days, which notice period applies: the nearest limit (30 or 90), the contract's figure if it is more beneficial to the worker, or none? And which period does pay in lieu use? Given who terminates, the notice tool applies the decision below: it reports the period as below the minimum or above the maximum, gives the applicable period, prices pay in lieu on it, and returns OQ-012. Without who terminates, an out-of-range result has no applicable period or pay in lieu.
 
 **Decision:** Worker-favourable split: a contract notice term that hurts the worker is replaced by the nearest limit (30 or 90 days); a term that helps the worker stands; pay in lieu uses the period that applies, at the last wage. Research confidence: medium for harmful terms, low for favourable terms (provisional). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
 

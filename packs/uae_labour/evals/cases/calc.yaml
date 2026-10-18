@@ -720,12 +720,14 @@
         notice_days: 14
   scoring: [status, tool_call]
   reviewed: false
-  refs: ["Labour Law Art 43"]
+  refs: ["Labour Law Art 43(1)", "Labour Law Art 65(3)"]
   depends_on: [OQ-012]
   rationale: >-
     Art 43(1): the agreed notice period must be not less than 30 days and not more than 90.
-    14 < 30, so the clause is below the legal minimum. Which period then applies is OQ-012.
-    Expected answer: not allowed; the minimum is 30 days.
+    14 < 30, so the clause is below the legal minimum. OQ-012 (decided): a term that hurts the
+    worker gives way to the nearest limit and one that helps the worker stands (Art 65(3)).
+    Expected answer: not allowed as a term; if the employer ends the contract, 30 days' notice
+    apply; if the worker resigns, the 14 days stand.
 
 - id: calc-notice-en-003
   category: calc
@@ -788,14 +790,17 @@
       name: check_notice_period
       arguments:
         notice_days: 120
-  scoring: [status, tool_call]
+        terminated_by: worker
+    numbers: [90]
+  scoring: [status, numeric, tool_call]
   reviewed: false
-  refs: ["Labour Law Art 43"]
+  refs: ["Labour Law Art 43(1)", "Labour Law Art 65(3)"]
   depends_on: [OQ-012]
   rationale: >-
     Art 43(1): the notice period may not be more than 90 days. 120 > 90, so it exceeds the
-    maximum. What applies instead is OQ-012. Expected answer: not allowed; the maximum is
-    90 days.
+    maximum. OQ-012 (decided): on resignation a longer notice hurts the worker, so the term
+    gives way to the 90-day limit (Art 65(3)). Expected answer: not allowed; on resignation
+    the worker owes at most 90 days' notice.
 
 - id: calc-probation-en-001
   category: calc

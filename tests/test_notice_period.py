@@ -64,7 +64,74 @@ def test_pay_in_lieu_of_notice_is_the_wage_for_the_unserved_days(
     assert result.open_questions == ["OQ-001"]
 
 
-def test_pay_in_lieu_is_left_out_when_the_notice_period_is_outside_the_range():
+APPLICABLE_PERIOD = [
+    pytest.param(
+        15, "employer", 30, id="Art43(1)+Art65(3)+OQ-012-short-term-hurts-worker-employer-ends"
+    ),
+    pytest.param(15, "worker", 15, id="Art65(3)+OQ-012-short-term-helps-resigning-worker-stands"),
+    pytest.param(120, "employer", 120, id="Art65(3)+OQ-012-long-term-helps-worker-employer-ends"),
+    pytest.param(120, "worker", 90, id="Art43(1)+Art65(3)+OQ-012-long-term-hurts-resigning-worker"),
+    pytest.param(60, "employer", 60, id="Art43(1)-in-range-term-applies-employer-ends"),
+    pytest.param(60, "worker", 60, id="Art43(1)-in-range-term-applies-worker-resigns"),
+    pytest.param(60, None, 60, id="Art43(1)-in-range-term-applies-whoever-ends"),
+    pytest.param(15, None, None, id="OQ-012-out-of-range-needs-who-terminates"),
+]
+
+
+@pytest.mark.parametrize(("notice_days", "terminated_by", "applicable"), APPLICABLE_PERIOD)
+def test_applicable_notice_period_follows_the_worker_favourable_split(
+    notice_days, terminated_by, applicable
+):
+    result = check_notice_period(notice_days=notice_days, terminated_by=terminated_by)
+
+    assert result.applicable_notice_days == applicable
+
+
+OUT_OF_RANGE_PAY_IN_LIEU = [
+    pytest.param(
+        {"notice_days": 15, "terminated_by": "employer", "monthly_wage": DAILY_1200},
+        36000.00,
+        "15 days hurts the worker: 30 apply; 30 × 1,200 = 36,000",
+        id="Art43(3)+OQ-012-employer-owes-the-30-day-minimum",
+    ),
+    pytest.param(
+        {"notice_days": 15, "terminated_by": "worker", "monthly_wage": DAILY_1200},
+        18000.00,
+        "15 days helps the resigning worker and stands: 15 × 1,200 = 18,000",
+        id="Art43(3)+OQ-012-resigning-worker-owes-the-shorter-term",
+    ),
+    pytest.param(
+        {"notice_days": 120, "terminated_by": "employer", "monthly_wage": 10000},
+        39452.05,
+        "120 days helps the worker and stands: 120 × 10,000 × 12 / 365 = 14,400,000 / 365",
+        id="Art43(3)+Art43(4)+OQ-012-employer-owes-the-longer-term",
+    ),
+    pytest.param(
+        {
+            "notice_days": 120,
+            "terminated_by": "worker",
+            "monthly_wage": DAILY_1200,
+            "notice_days_worked": 30,
+        },
+        72000.00,
+        "120 days hurts the resigning worker: capped at 90; 90 − 30 worked = 60 × 1,200 = 72,000",
+        id="Art43(3)+OQ-012-resigning-worker-owes-at-most-90-days",
+    ),
+]
+
+
+@pytest.mark.parametrize(("facts", "expected", "working"), OUT_OF_RANGE_PAY_IN_LIEU)
+def test_out_of_range_pay_in_lieu_uses_the_applicable_period_at_the_last_wage(
+    facts, expected, working
+):
+    result = check_notice_period(**facts)
+
+    assert result.pay_in_lieu == expected, working
+    assert result.open_questions == ["OQ-012", "OQ-001"]
+    assert "Labour Law Art 65(3)" in {str(ref) for ref in result.refs}
+
+
+def test_out_of_range_pay_in_lieu_is_left_out_without_who_terminates():
     result = check_notice_period(notice_days=15, monthly_wage=DAILY_1200)
 
     assert result.pay_in_lieu is None
@@ -122,6 +189,12 @@ BAD_ARGUMENTS = [
     pytest.param({"monthly_wage": 0}, "monthly_wage", id="wage-not-positive"),
     pytest.param({"monthly_wage": False}, "monthly_wage", id="wage-bool"),
     pytest.param({"notice_months": 2}, "notice_months", id="unknown-argument"),
+    pytest.param({"terminated_by": "both"}, "terminated_by", id="unknown-terminating-party"),
+    pytest.param(
+        {"notice_days": 15, "terminated_by": "employer", "notice_days_worked": 31},
+        "notice_days_worked",
+        id="worked-over-the-applicable-period",
+    ),
 ]
 
 
@@ -134,3 +207,16 @@ def test_tool_rejects_bad_arguments_with_a_message_naming_the_problem(changes, n
 def test_tool_rejects_missing_required_arguments():
     with pytest.raises(ValueError, match="notice_days"):
         NOTICE_PERIOD_TOOL.run({"monthly_wage": 36500})
+
+
+def test_tool_prices_notice_worked_beyond_a_short_contract_term_against_the_minimum():
+    result = NOTICE_PERIOD_TOOL.run(
+        {
+            "notice_days": 15,
+            "terminated_by": "employer",
+            "notice_days_worked": 20,
+            "monthly_wage": 36500,
+        }
+    )
+
+    assert (result["applicable_notice_days"], result["pay_in_lieu"]) == (30, 12000.00)
