@@ -252,7 +252,7 @@ def test_without_the_questions_doc_a_reviewed_case_with_dependencies_is_rejected
 def test_the_repo_questions_doc_has_every_question_decided():
     questions = load_open_questions(REPO / "docs" / "open-questions.md")
 
-    assert {f"OQ-{n:03d}" for n in range(1, 14)} <= set(questions)
+    assert {f"OQ-{n:03d}" for n in range(1, 16)} <= set(questions)
     assert not [question for question, is_open in questions.items() if is_open]
 
 

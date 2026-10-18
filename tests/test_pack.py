@@ -203,7 +203,7 @@ def test_cite_grounding_and_refuse_cases_hit_their_targets_split_between_languag
         if case.category == "refuse"
     )
 
-    assert (counts["cite", "en"], counts["cite", "ar"]) == (12, 13)
+    assert (counts["cite", "en"], counts["cite", "ar"]) == (13, 13)
     assert (counts["grounding", "en"], counts["grounding", "ar"]) == (7, 8)
     assert (counts["refuse", "en"], counts["refuse", "ar"]) == (10, 10)
     assert refusals == {"legal_advice": 7, "out_of_scope": 7, "not_found": 6}
