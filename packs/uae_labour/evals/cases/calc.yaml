@@ -155,7 +155,7 @@
     gratuity do I get?
   expected:
     status: answered
-    numbers: [6213.70]
+    numbers: [12427.40]
     tolerance: 1
     tool_call:
       name: calculate_gratuity
@@ -171,11 +171,11 @@
   refs: ["Executive Regulations Art 30", "Labour Law Art 51(2)"]
   depends_on: [OQ-001, OQ-002, OQ-008]
   rationale: >-
-    1,095 days = 3 years → 63 days. Full-time value on the worker's own basic wage:
-    63 × 6,000 × 12 / 365 = 4,536,000 / 365 = 12,427.40. ER Art 30(1): 1,040 / 2,080 = 50%;
-    12,427.40 × 50% = AED 6,213.70. Depends on OQ-008 (whether the full-time value uses the
-    worker's own basic wage or a full-time equivalent), so it cannot be reviewed until that
-    is decided.
+    1,095 days = 3 years → 63 days. ER Art 30(1): 1,040 / 2,080 = 50%. OQ-008 (decided): the
+    full-time value is computed on the full-time-equivalent basic wage, 6,000 / 50% = 12,000,
+    so the hours reduction applies once: 63 × 12,000 × 12 / 365 = 9,072,000 / 365 = 24,854.79
+    under a full-time contract; × 50% = 4,536,000 / 365 = AED 12,427.40 (the same as Art 51 on
+    the worker's own 6,000). Cap 24 × 12,000 × 50% = 144,000 not reached.
 
 - id: calc-gratuity-en-007
   category: calc
@@ -402,7 +402,7 @@
     نهاية الخدمة؟
   expected:
     status: answered
-    numbers: [9080.28]
+    numbers: [15133.81]
     tolerance: 1
     tool_call:
       name: calculate_gratuity
@@ -418,10 +418,11 @@
   refs: ["Executive Regulations Art 30", "Labour Law Art 51(2)", "Labour Law Art 51(3)"]
   depends_on: [OQ-001, OQ-002, OQ-008]
   rationale: >-
-    366 + 365 + 365 = 1,096 days. Daily basic wage 7,300 × 12 / 365 = 240. Full-time value
-    1,096 × 21 / 365 × 240 = 5,523,840 / 365 = 15,133.81. ER Art 30(1): 24 / 40 = 60% of
-    the hours (the same ratio per year); 5,523,840 × 0.6 / 365 = 3,314,304 / 365 =
-    AED 9,080.28. Depends on OQ-008.
+    366 + 365 + 365 = 1,096 days. ER Art 30(1): 24 / 40 = 60% of the hours (the same ratio
+    per year). OQ-008 (decided): the full-time value uses the full-time-equivalent basic wage
+    7,300 / 60% = 12,166.67, daily 400, so 1,096 × 21 / 365 × 400 = 9,206,400 / 365 = 25,223.01;
+    × 60% = 5,523,840 / 365 = AED 15,133.81, which equals Art 51 on the worker's own 7,300
+    (daily 240). Cap not reached.
 
 - id: calc-leave-en-001
   category: calc

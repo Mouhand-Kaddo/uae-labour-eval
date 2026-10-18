@@ -126,16 +126,31 @@ THREE_YEARS = (date(2021, 1, 1), date(2023, 12, 31), DAILY_1200)
 PRO_RATA_AMOUNTS = [
     pytest.param(
         service(*THREE_YEARS, work_pattern="part_time", part_time_hours_ratio=0.5),
-        37800.00,
-        "1,095 days → 63 days × 1,200 = 75,600 full time; contracted 1,040 h ÷ full-time 2,080 h "
-        "= 50%; 75,600 × 50% = 37,800",
-        id="ER30(1)-part-time-pro-rata",
+        75600.00,
+        "own basic 36,500 at 50% hours → full-time equivalent 73,000, daily 2,400; "
+        "1,095 days → 63 days × 2,400 = 151,200 under a full-time contract; × 50% = 75,600",
+        id="ER30(1)+OQ-008-part-time-on-the-full-time-equivalent-wage",
     ),
     pytest.param(
         service(*THREE_YEARS, work_pattern="job_sharing", part_time_hours_ratio=0.25),
-        18900.00,
-        "75,600 full time × 25% = 18,900",
-        id="ER30(1)-job-sharing-pro-rata",
+        75600.00,
+        "own basic 36,500 at 25% → full-time equivalent 146,000, daily 4,800; "
+        "63 × 4,800 = 302,400; × 25% = 75,600",
+        id="ER30(1)+ER5(1)(b)+OQ-008-job-sharing-on-the-full-time-equivalent-wage",
+    ),
+    pytest.param(
+        service(
+            date(2020, 1, 1),
+            date(2022, 12, 31),
+            7300,
+            work_pattern="part_time",
+            part_time_hours_ratio=0.6,
+        ),
+        15133.81,
+        "1,096 days; own basic 7,300 is 60% of 12,166.67; under a full-time contract "
+        "1,096 × 21 / 365 days × 12,166.67 × 12 / 365 = 25,223.01; × 60% = 15,133.81 "
+        "(Art 51 on the own wage: 1,096 × 21 / 365 × 240 = 5,523,840 / 365)",
+        id="ER30(1)+OQ-008-hours-reduction-applied-once",
     ),
     pytest.param(
         service(
@@ -145,8 +160,9 @@ PRO_RATA_AMOUNTS = [
             work_pattern="part_time",
             part_time_hours_ratio=0.5,
         ),
-        438000.00,
-        "full-time value is capped at 24 × 36,500 = 876,000; × 50% = 438,000",
+        876000.00,
+        "full-time equivalent 73,000: 855.66 days × 2,400 = 2,053,578.08, capped at "
+        "24 × 73,000 = 1,752,000; × 50% = 876,000",
         id="ER30(1)+Art51(6)-pro-rata-of-the-capped-full-time-value",
     ),
     pytest.param(
@@ -167,6 +183,17 @@ PRO_RATA_AMOUNTS = [
 @pytest.mark.parametrize(("facts", "expected", "working"), PRO_RATA_AMOUNTS)
 def test_part_time_and_job_sharing_gratuity(facts, expected, working):
     assert calculate_gratuity(**facts).gratuity == expected, working
+
+
+def test_er_30_1_result_shows_the_full_time_equivalent_wage_and_full_time_value():
+    result = calculate_gratuity(
+        **service(*THREE_YEARS, work_pattern="part_time", part_time_hours_ratio=0.5)
+    )
+
+    assert result.full_time_equivalent_basic_wage == 73000.00
+    assert result.daily_basic_wage == 2400.00
+    assert result.uncapped_gratuity == 151200.00
+    assert result.gratuity == 75600.00
 
 
 NOT_APPLICABLE = [

@@ -112,7 +112,7 @@ Options:
 - **A.** full-time gratuity computed on the worker's own (part-time) last basic wage, then × the percentage
 - **B.** full-time gratuity computed on the full-time equivalent basic wage for the same job, then × the percentage
 
-Until this is decided, the gratuity tool applies the percentage to a full-time gratuity computed on the basic wage it is given (A when given the worker's own wage), and returns OQ-008 with every part-time or job-sharing result.
+The gratuity tool takes the worker's own basic wage and the hours ratio, computes the full-time value on the full-time-equivalent wage (own wage ÷ ratio), applies the percentage, and returns OQ-008 with every part-time or job-sharing result.
 
 **Decision:** Option B: the full-time gratuity in ER Art 30(1) is computed on the full-time-equivalent basic wage, so the hours reduction applies once (equivalently, Art 51 on the worker's own proportionate wage). Provisional (research confidence low–medium; the text is silent). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
 

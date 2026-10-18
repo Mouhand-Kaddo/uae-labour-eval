@@ -70,6 +70,7 @@ class GratuityResult:
     cap: float | None = None
     cap_applied: bool | None = None
     part_time_hours_ratio: float | None = None
+    full_time_equivalent_basic_wage: float | None = None
 
 
 def calculate_gratuity(
@@ -82,7 +83,13 @@ def calculate_gratuity(
     unpaid_absence_days: int = 0,
     part_time_hours_ratio: float | None = None,
 ) -> GratuityResult:
-    """Gratuity for service from the first day to the last day of service, both inclusive."""
+    """Gratuity for service from the first day to the last day of service, both inclusive.
+
+    `monthly_basic_wage` is the worker's own last basic wage. For part-time and job sharing it
+    is the wage paid for the contracted hours, so ER Art 30(1)'s full-time value is computed
+    on the full-time equivalent (own wage ÷ hours ratio) and the hours reduction applies once
+    (OQ-008).
+    """
     if nationality == "national":
         return GratuityResult("national_worker", None, [NATIONAL_WORKER])
     if work_pattern == TEMPORARY:
@@ -113,7 +120,9 @@ def calculate_gratuity(
     refs += [LAST_BASIC_WAGE, CAP]
     open_questions = [DAILY_RATE_QUESTION, CAP_QUESTION]
 
-    basic = Fraction(str(monthly_basic_wage))
+    pro_rata = work_pattern in PRO_RATA_PATTERNS
+    hours_ratio = Fraction(str(part_time_hours_ratio)) if pro_rata else Fraction(1)
+    basic = Fraction(str(monthly_basic_wage)) / hours_ratio
     daily = daily_rate(basic)
     days_at_21 = min(counted_days, FIRST_YEARS_DAYS)
     days_at_30 = counted_days - days_at_21
@@ -123,12 +132,11 @@ def calculate_gratuity(
     )
     uncapped = gratuity_days * daily
     cap = CAP_MONTHS * basic
-    amount = min(uncapped, cap)
+    amount = min(uncapped, cap) * hours_ratio
 
-    if work_pattern in PRO_RATA_PATTERNS:
+    if pro_rata:
         refs.append(PRO_RATA)
         open_questions.append(PRO_RATA_QUESTION)
-        amount *= Fraction(str(part_time_hours_ratio))
 
     return GratuityResult(
         "calculated",
@@ -144,6 +152,7 @@ def calculate_gratuity(
         cap=money(cap),
         cap_applied=uncapped > cap,
         part_time_hours_ratio=part_time_hours_ratio,
+        full_time_equivalent_basic_wage=money(basic) if pro_rata else None,
     )
 
 
@@ -163,7 +172,11 @@ PARAMETERS: dict[str, Any] = {
         },
         "monthly_basic_wage": {
             "type": "number",
-            "description": "Last monthly basic wage in AED, without allowances.",
+            "description": (
+                "The worker's own last monthly basic wage in AED, without allowances. For "
+                "part-time or job sharing give the wage actually paid for the contracted hours, "
+                "not a full-time equivalent; the tool derives that from part_time_hours_ratio."
+            ),
         },
         "monthly_wage": {
             "type": ["number", "null"],
