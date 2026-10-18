@@ -203,16 +203,53 @@ NOT_APPLICABLE = [
         id="Art51(1)-national-worker-under-pensions-law",
     ),
     pytest.param(
-        service(*THREE_YEARS, work_pattern="temporary"),
-        "temporary_work",
-        id="ER30(2)-temporary-work",
-    ),
-    pytest.param(
         service(*THREE_YEARS, work_pattern="flexible"),
         "flexible_work_undecided",
         id="Art52+OQ-009-flexible-work",
     ),
 ]
+
+
+TEMPORARY_AMOUNTS = [
+    pytest.param(
+        service(date(2023, 1, 1), date(2023, 12, 30), DAILY_1200, work_pattern="temporary"),
+        "temporary_under_one_year",
+        0.00,
+        "364 days < 365: temporary work under a year earns nothing (ER 30(2), Arabic)",
+        id="ER30(2)+OQ-006-temporary-under-one-year",
+    ),
+    pytest.param(
+        service(*THREE_YEARS, work_pattern="temporary"),
+        "calculated",
+        75600.00,
+        "1,095 days on full-time hours: Art 51 as for full time, 63 days × 1,200 = 75,600",
+        id="ER30(2)+OQ-006-temporary-one-year-or-more-on-full-time-hours",
+    ),
+    pytest.param(
+        service(date(2023, 1, 1), date(2024, 6, 30), 9000, work_pattern="temporary"),
+        "calculated",
+        9312.04,
+        "366 + 181 = 547 days; 547 × 21 / 365 = 11,487 / 365 days × (9,000 × 12 / 365) "
+        "= 1,240,596,000 / 133,225 = 9,312.04",
+        id="ER30(2)+Art51(3)+OQ-006-temporary-part-year-after-one-year",
+    ),
+    pytest.param(
+        service(*THREE_YEARS, work_pattern="temporary", part_time_hours_ratio=0.5),
+        "calculated",
+        75600.00,
+        "reduced hours: own basic 36,500 at 50% → full-time equivalent 73,000; "
+        "63 × 2,400 = 151,200 × 50% = 75,600 (Art 51 × hours ratio, OQ-006 and OQ-008)",
+        id="ER30(1)+OQ-006-temporary-on-reduced-hours",
+    ),
+]
+
+
+@pytest.mark.parametrize(("facts", "outcome", "expected", "working"), TEMPORARY_AMOUNTS)
+def test_temporary_work_earns_gratuity_only_from_one_year(facts, outcome, expected, working):
+    result = calculate_gratuity(**facts)
+
+    assert result.outcome == outcome
+    assert result.gratuity == expected, working
 
 
 @pytest.mark.parametrize(("facts", "outcome"), NOT_APPLICABLE)
@@ -268,10 +305,39 @@ REFS_AND_QUESTIONS = [
         id="Art51(1)-national-worker",
     ),
     pytest.param(
+        service(
+            date(2023, 1, 1),
+            date(2023, 12, 30),
+            DAILY_1200,
+            work_pattern="part_time",
+            part_time_hours_ratio=0.5,
+        ),
+        {
+            "Labour Law Art 51(2)",
+            "Labour Law Art 51(3)",
+            "Executive Regulations Art 30(1)",
+            "Labour Law Art 67",
+        },
+        [],
+        id="Art51(2)(3)+ER30(1)-part-time-under-one-year-not-ER30(2)",
+    ),
+    pytest.param(
+        service(date(2023, 1, 1), date(2023, 12, 30), DAILY_1200, work_pattern="temporary"),
+        {"Executive Regulations Art 30(2)", "Labour Law Art 67"},
+        [],
+        id="ER30(2)-temporary-under-one-year-same-in-both-languages",
+    ),
+    pytest.param(
         service(*THREE_YEARS, work_pattern="temporary"),
-        {"Executive Regulations Art 30(2)"},
-        ["OQ-006"],
-        id="ER30(2)-temporary-work",
+        CALCULATED | {"Executive Regulations Art 30(2)"},
+        ["OQ-001", "OQ-002", "OQ-006"],
+        id="ER30(2)+OQ-006-temporary-one-year-or-more",
+    ),
+    pytest.param(
+        service(*THREE_YEARS, work_pattern="temporary", part_time_hours_ratio=0.5),
+        CALCULATED | {"Executive Regulations Art 30(1)", "Executive Regulations Art 30(2)"},
+        ["OQ-001", "OQ-002", "OQ-008", "OQ-006"],
+        id="ER30(1)+ER30(2)+OQ-006+OQ-008-temporary-on-reduced-hours",
     ),
     pytest.param(
         service(*THREE_YEARS, work_pattern="flexible"),
@@ -378,3 +444,15 @@ def test_tool_rejects_missing_required_arguments():
 
     with pytest.raises(ValueError, match="nationality"):
         GRATUITY_TOOL.run(args)
+
+
+@pytest.mark.parametrize(
+    "ratio",
+    [pytest.param(None, id="full-time-hours"), pytest.param(0.5, id="reduced-hours")],
+)
+def test_tool_takes_an_optional_hours_ratio_for_temporary_work_OQ_006(ratio):
+    result = GRATUITY_TOOL.run(
+        {**TOOL_ARGS, "work_pattern": "temporary", "part_time_hours_ratio": ratio}
+    )
+
+    assert (result["outcome"], result["gratuity"]) == ("calculated", 25200.00)

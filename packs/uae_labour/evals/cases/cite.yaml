@@ -412,13 +412,13 @@
   scoring: [status, citations, answer_language]
   reviewed: false
   refs: ["Executive Regulations Art 30(2)"]
-  depends_on: [OQ-006]
+  depends_on: []
   rationale: >-
     Arabic ER Art 30(2): "لا تنطبق مكافأة نهاية الخدمة في حال العمل بنمط التوظيف المؤقت إذا كانت
     مدته أقل من سنة." The English reads "temporary employment model or if its duration is less
-    than a year". An eight-month temporary contract gets no gratuity under either text; the
-    eight months are chosen so the answer does not hinge on OQ-006, but the case rests on ER
-    30(2), so it carries OQ-006.
+    than a year". An eight-month temporary contract gets no gratuity under either text, so the
+    answer does not rest on OQ-006. Expected answer: no gratuity, because the temporary work
+    lasted less than a year.
 - id: cite-ar-011
   category: cite
   language: ar

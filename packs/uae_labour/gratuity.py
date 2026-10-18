@@ -88,12 +88,11 @@ def calculate_gratuity(
     `monthly_basic_wage` is the worker's own last basic wage. For part-time and job sharing it
     is the wage paid for the contracted hours, so ER Art 30(1)'s full-time value is computed
     on the full-time equivalent (own wage ÷ hours ratio) and the hours reduction applies once
-    (OQ-008).
+    (OQ-008). Temporary work earns gratuity from one year (ER Art 30(2), Arabic text, OQ-006),
+    on full-time hours unless `part_time_hours_ratio` gives reduced hours.
     """
     if nationality == "national":
         return GratuityResult("national_worker", None, [NATIONAL_WORKER])
-    if work_pattern == TEMPORARY:
-        return GratuityResult("temporary_work", None, [TEMPORARY_WORK], [TEMPORARY_WORK_QUESTION])
     if work_pattern == FLEXIBLE:
         return GratuityResult(
             "flexible_work_undecided",
@@ -109,18 +108,26 @@ def calculate_gratuity(
         "unpaid_absence_days": unpaid_absence_days,
         "counted_service_days": counted_days,
     }
-    refs = [QUALIFYING_YEAR_AND_RATES, PERIODS]
-    if unpaid_absence_days:
-        refs.append(UNPAID_ABSENCE)
+    temporary = work_pattern == TEMPORARY
+    pro_rata = work_pattern in PRO_RATA_PATTERNS or (
+        temporary and part_time_hours_ratio is not None and part_time_hours_ratio < 1
+    )
+    period_refs = [PERIODS, *([UNPAID_ABSENCE] if unpaid_absence_days else [])]
     if counted_days < DAYS_IN_YEAR:
-        return GratuityResult("under_one_year", 0.0, refs, **service)
+        if temporary:
+            return GratuityResult(
+                "temporary_under_one_year", 0.0, [TEMPORARY_WORK, *period_refs], **service
+            )
+        threshold = [QUALIFYING_YEAR_AND_RATES, *([PART_YEARS, PRO_RATA] if pro_rata else [])]
+        return GratuityResult("under_one_year", 0.0, [*threshold, *period_refs], **service)
+
+    refs = [QUALIFYING_YEAR_AND_RATES, *period_refs]
 
     if counted_days % DAYS_IN_YEAR:
         refs.append(PART_YEARS)
     refs += [LAST_BASIC_WAGE, CAP]
     open_questions = [DAILY_RATE_QUESTION, CAP_QUESTION]
 
-    pro_rata = work_pattern in PRO_RATA_PATTERNS
     hours_ratio = Fraction(str(part_time_hours_ratio)) if pro_rata else Fraction(1)
     basic = Fraction(str(monthly_basic_wage)) / hours_ratio
     daily = daily_rate(basic)
@@ -137,6 +144,9 @@ def calculate_gratuity(
     if pro_rata:
         refs.append(PRO_RATA)
         open_questions.append(PRO_RATA_QUESTION)
+    if temporary:
+        refs.append(TEMPORARY_WORK)
+        open_questions.append(TEMPORARY_WORK_QUESTION)
 
     return GratuityResult(
         "calculated",
@@ -190,8 +200,9 @@ PARAMETERS: dict[str, Any] = {
         "part_time_hours_ratio": {
             "type": ["number", "null"],
             "description": (
-                "Part-time or job sharing only: contracted annual working hours divided by "
-                "full-time annual working hours, between 0 and 1."
+                "Contracted annual working hours divided by full-time annual working hours, "
+                "between 0 and 1. Required for part-time and job sharing; for temporary work "
+                "give it only if the hours are below full time."
             ),
         },
         "nationality": {"type": "string", "enum": list(NATIONALITIES)},
@@ -211,7 +222,7 @@ def _run(args: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("unpaid_absence_days cannot exceed the days of service")
 
     pattern = work_pattern_arg(args, WORK_PATTERNS)
-    ratio = hours_ratio_arg(args, pattern, PRO_RATA_PATTERNS)
+    ratio = hours_ratio_arg(args, pattern, PRO_RATA_PATTERNS, (TEMPORARY,))
     if args["nationality"] not in NATIONALITIES:
         raise ValueError(f"nationality must be one of {list(NATIONALITIES)}")
 

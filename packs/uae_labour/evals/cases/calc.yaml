@@ -186,6 +186,8 @@
     end-of-service gratuity am I owed?
   expected:
     status: answered
+    numbers: [9312.04]
+    tolerance: 1
     tool_call:
       name: calculate_gratuity
       arguments:
@@ -194,14 +196,17 @@
         monthly_basic_wage: 9000
         work_pattern: temporary
         nationality: foreign
-  scoring: [status, tool_call]
+  scoring: [status, numeric, tool_call]
   reviewed: false
-  refs: ["Executive Regulations Art 30"]
-  depends_on: [OQ-006]
+  refs: ["Executive Regulations Art 30(2)", "Labour Law Art 51(2)", "Labour Law Art 51(3)"]
+  depends_on: [OQ-001, OQ-002, OQ-006]
   rationale: >-
-    ER Art 30(2): the end of service pay does not apply to the temporary work pattern,
-    whatever the length of service (547 days here). Expected answer: no gratuity is due under
-    the Executive Regulations.
+    The prevailing Arabic ER Art 30(2) excludes only temporary work "if its duration is less
+    than a year" (OQ-006, decided). 365 (2023) + 31 + 29 + 31 + 30 + 31 + 30 (Jan–Jun 2024) =
+    547 days, so this temporary work earns gratuity, computed under Art 51 on full-time hours
+    (no reduced hours stated). 547 × 21 / 365 = 11,487 / 365 days (part year pro-rated, Art
+    51(3)); daily basic wage 9,000 × 12 / 365; 11,487 × 108,000 / 133,225 = 1,240,596,000 /
+    133,225 = AED 9,312.04. Cap 24 × 9,000 = 216,000 not reached.
 
 - id: calc-gratuity-en-008
   category: calc

@@ -87,7 +87,7 @@ Questions:
 2. If so, is it computed under Art 51 like full-time work?
 3. Does "less than a year" also apply to part-time and job-sharing (only relevant under the English reading)?
 
-Until this is decided, the gratuity tool returns no gratuity for temporary work, cites ER Art 30(2) and returns OQ-006; cases that depend on it carry `depends_on: [OQ-006]`.
+The gratuity tool gives temporary work under one year no gratuity (ER Art 30(2), no OQ: both languages agree) and temporary work of one year or more the Art 51 gratuity × the hours ratio (full-time hours unless a ratio is given), returning OQ-006. Part-time and job sharing under one year get nothing, citing Art 51(2)–(3) and ER Art 30(1).
 
 **Decision:** Arabic reading. (1) Temporary work of one year or more earns gratuity; only temporary work under one year is excluded. (2) It is computed as the Art 51 gratuity × (contracted annual hours ÷ full-time annual hours), which equals plain Art 51 on full-time hours. (3) Part-time and job-sharing work under one year earns nothing through Art 51(2)–(3), not ER Art 30(2). Research confidence: high for (1), low–medium for (2) (provisional), medium–high for (3). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
 

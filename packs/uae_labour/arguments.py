@@ -69,15 +69,22 @@ def work_pattern_arg(
 
 
 def hours_ratio_arg(
-    args: dict[str, Any], pattern: str, pro_rata_patterns: Sequence[str]
+    args: dict[str, Any],
+    pattern: str,
+    required_for: Sequence[str],
+    optional_for: Sequence[str] = (),
 ) -> float | None:
-    """The part-time hours ratio: required in (0, 1] for a pro-rata pattern, else absent."""
+    """The hours ratio in (0, 1]: required for some patterns, optional for others, else absent."""
     ratio = args.get("part_time_hours_ratio")
-    if pattern in pro_rata_patterns:
-        if ratio is None or not 0 < number_arg(args, "part_time_hours_ratio") <= 1:
+    if ratio is None:
+        if pattern in required_for:
             raise ValueError(f"part_time_hours_ratio between 0 and 1 is needed for {pattern}")
-    elif ratio is not None:
-        raise ValueError(f"part_time_hours_ratio applies only to {' or '.join(pro_rata_patterns)}")
+        return None
+    allowed = [*required_for, *optional_for]
+    if pattern not in allowed:
+        raise ValueError(f"part_time_hours_ratio applies only to {' or '.join(allowed)}")
+    if not 0 < number_arg(args, "part_time_hours_ratio") <= 1:
+        raise ValueError("part_time_hours_ratio must be between 0 and 1")
     return ratio
 
 
