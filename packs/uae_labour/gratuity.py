@@ -85,9 +85,9 @@ def calculate_gratuity(
 ) -> GratuityResult:
     """Gratuity for service from the first day to the last day of service, both inclusive.
 
-    `monthly_basic_wage` is the worker's own last basic wage. For part-time and job sharing it
-    is the wage paid for the contracted hours, so ER Art 30(1)'s full-time value is computed
-    on the full-time equivalent (own wage ÷ hours ratio) and the hours reduction applies once
+    `monthly_basic_wage` is the worker's own last basic wage. On reduced hours it is the wage
+    paid for the contracted hours, so ER Art 30(1)'s full-time value is computed on the
+    full-time equivalent (own wage ÷ hours ratio) and the hours reduction applies once
     (OQ-008). Temporary work earns gratuity from one year (ER Art 30(2), Arabic text, OQ-006),
     on full-time hours unless `part_time_hours_ratio` gives reduced hours. Flexible work is
     pro-rated like part-time on its contracted hours (Art 52, ER Art 30(1), OQ-009).
@@ -132,7 +132,6 @@ def calculate_gratuity(
         )
 
     refs = [QUALIFYING_YEAR_AND_RATES, *period_refs]
-
     if counted_days % DAYS_IN_YEAR:
         refs.append(PART_YEARS)
     refs += [LAST_BASIC_WAGE, CAP]
