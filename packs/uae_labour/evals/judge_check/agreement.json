@@ -1,7 +1,7 @@
 {
   "n": 122,
-  "agreement": 0.9016393442622951,
-  "kappa": 0.7603143418467584,
+  "agreement": 0.9098360655737705,
+  "kappa": 0.7597565341926243,
   "threshold": 0.6,
   "items": 50,
   "unlabelled": 0,
@@ -9,8 +9,8 @@
   "rubrics": {
     "bilingual": {
       "n": 16,
-      "agreement": 0.875,
-      "kappa": 0.75,
+      "agreement": 0.9375,
+      "kappa": 0.8461538461538461,
       "trusted": true,
       "categories": [
         "bilingual"
@@ -23,8 +23,8 @@
         },
         "same_details": {
           "n": 8,
-          "agreement": 0.75,
-          "kappa": 0.0
+          "agreement": 0.875,
+          "kappa": 0.7142857142857143
         }
       }
     },
