@@ -821,11 +821,12 @@
   scoring: [status, numeric, tool_call]
   reviewed: false
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
-  depends_on: [OQ-013]
+  depends_on: []
   rationale: >-
     Art 9(1): probation may not exceed six months from the start of work; a month is 30 days
     (Art 67), so at most 180 days. 1 Feb to 30 Sep 2025 inclusive = 28 + 31 + 30 + 31 + 30 + 31
-    + 31 + 30 = 242 days, which exceeds the maximum. The employer may end the contract during
+    + 31 + 30 = 242 days, which exceeds the maximum (and six calendar months, so OQ-013 does
+    not arise). The employer may end the contract during
     probation with at least 14 days' written notice. Expected answer: 14 days' notice; probation
     may be at most 180 days (six 30-day months).
 
@@ -852,7 +853,7 @@
   scoring: [status, numeric, tool_call]
   reviewed: false
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
-  depends_on: [OQ-001, OQ-013]
+  depends_on: [OQ-001]
   rationale: >-
     1 Mar to 15 May 2025 = 76 days, within the 180-day probation maximum (Art 9(1), Art 67).
     Moving to another UAE employer during probation needs at least one month's written notice
@@ -883,7 +884,7 @@
   scoring: [status, numeric, tool_call]
   reviewed: false
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
-  depends_on: [OQ-001, OQ-013]
+  depends_on: [OQ-001]
   rationale: >-
     1 Dec 2024 to 17 Feb 2025 = 79 days, within the 180-day probation maximum (Art 9(1),
     Art 67). Art 9(1): the employer must give at least 14 days' written notice. 10 Feb to 17 Feb = 7
@@ -908,7 +909,7 @@
   scoring: [status, numeric, tool_call]
   reviewed: false
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
-  depends_on: [OQ-013]
+  depends_on: []
   rationale: >-
     1 Jun to 31 Aug 2025 = 30 + 31 + 31 = 92 days, within the six-month maximum of 180 days
     (Art 9(1), Art 67). A foreign worker ending the contract
@@ -934,7 +935,7 @@
   scoring: [status, tool_call]
   reviewed: false
   refs: ["Labour Law Art 9", "Labour Law Art 67"]
-  depends_on: [OQ-013]
+  depends_on: []
   rationale: >-
     1 Jan to 31 Mar 2025 = 90 days, within the 180-day probation maximum (Art 9(1), Art 67).
     Moving to another UAE employer needs at least one month's notice (Art 9(3)) = 30 days

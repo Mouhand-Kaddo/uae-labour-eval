@@ -172,7 +172,7 @@ Options:
 - **A.** six months = 180 days (Art 67's 30-day month), so a probation from 1 January to 30 June (181 days) is too long
 - **B.** six calendar months from the start date (Gregorian calendar, Art 67), so 1 January to 30 June is within the limit
 
-The probation tool uses A for now and returns OQ-013 with every result; the probation cases carry `depends_on: [OQ-013]`.
+The probation tool uses A and returns OQ-013 only for probations of 181–184 days, where six calendar months could give the other answer; only cases in that window carry `depends_on: [OQ-013]`.
 
 **Decision:** Option A: six months of probation is 180 days (Art 67's 30-day month). Only probations ending on days 181–184 differ from the calendar reading. Research confidence: medium. Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
 

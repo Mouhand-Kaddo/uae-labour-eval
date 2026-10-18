@@ -64,6 +64,41 @@ def test_probation_may_not_exceed_six_30_day_months_from_the_start_of_work(
     assert {"Labour Law Art 9(1)", "Labour Law Art 67"} <= {str(r) for r in result.refs}
 
 
+CALENDAR_READING_WINDOW = [
+    pytest.param(date(2025, 6, 29), 180, [], id="Art9(1)+Art67-180-days-same-under-both-readings"),
+    pytest.param(
+        date(2025, 6, 30),
+        181,
+        ["OQ-013"],
+        id="Art9(1)+OQ-013-181-days-within-six-calendar-months",
+    ),
+    pytest.param(
+        date(2025, 7, 3),
+        184,
+        ["OQ-013"],
+        id="Art9(1)+OQ-013-184-days-longest-six-calendar-months-jul-to-dec",
+    ),
+    pytest.param(
+        date(2025, 7, 4),
+        185,
+        [],
+        id="Art9(1)-185-days-too-long-under-both-readings",
+    ),
+]
+
+
+@pytest.mark.parametrize(("end", "days", "open_questions"), CALENDAR_READING_WINDOW)
+def test_oq_013_is_returned_only_where_180_days_and_six_calendar_months_differ(
+    end, days, open_questions
+):
+    result = check_probation(
+        start_date=date(2025, 1, 1), probation_end_date=end, ended_by="employer"
+    )
+
+    assert result.probation_days == days
+    assert result.open_questions == open_questions
+
+
 def test_without_a_probation_end_date_the_probation_runs_to_the_termination_date():
     result = check_probation(
         start_date=date(2025, 1, 1), termination_date=date(2025, 3, 15), ended_by="employer"
@@ -161,7 +196,7 @@ def test_short_notice_costs_the_wage_for_the_missing_days(facts, given, short, e
     assert result.notice_shortfall_days == short
     assert result.compensation == expected, working
     assert "Labour Law Art 9(5)" in {str(r) for r in result.refs}
-    assert result.open_questions == ["OQ-013", "OQ-001"]
+    assert result.open_questions == ["OQ-001"]
 
 
 def test_shortfall_without_a_wage_has_no_compensation_figure():
@@ -187,7 +222,7 @@ def test_without_notice_dates_only_the_required_notice_is_given():
     assert result.notice_days_given is None
     assert result.compensation is None
     assert {str(r) for r in result.refs} == {"Labour Law Art 9(1)", "Labour Law Art 67"}
-    assert result.open_questions == ["OQ-013"]
+    assert result.open_questions == []
 
 
 TOOL_ARGS = {

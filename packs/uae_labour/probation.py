@@ -24,6 +24,7 @@ SHORT_NOTICE_COMPENSATION = Ref(LABOUR_LAW, "9", "5")
 
 MAXIMUM_MONTHS = 6
 MAXIMUM_DAYS = MAXIMUM_MONTHS * DAYS_IN_MONTH
+LONGEST_SIX_CALENDAR_MONTHS_DAYS = 184
 MAXIMUM_QUESTION = "OQ-013"
 NOTICE = {
     "employer": (14, [MAXIMUM_AND_EMPLOYER_NOTICE]),
@@ -63,7 +64,8 @@ def check_probation(
     """Check the probation length and the written notice owed by the party ending it.
 
     The probation runs from the first day of work to its last day in the contract or, without
-    one, to the termination date, both inclusive. Six months are 180 days (Art 67).
+    one, to the termination date, both inclusive. Six months are 180 days (Art 67). OQ-013 is
+    returned only for 181–184 days, where six calendar months could still allow the probation.
     """
     last_day = probation_end_date or termination_date
     if last_day is None:
@@ -71,6 +73,11 @@ def check_probation(
     required, notice_refs = NOTICE[ended_by]
     refs = [*notice_refs, *([] if PERIODS in notice_refs else [PERIODS])]
     probation_days = (last_day - start_date).days + 1
+    questions = (
+        [MAXIMUM_QUESTION]
+        if MAXIMUM_DAYS < probation_days <= LONGEST_SIX_CALENDAR_MONTHS_DAYS
+        else []
+    )
     checked = {
         "probation_within_maximum": probation_days <= MAXIMUM_DAYS,
         "required_notice_days": required,
@@ -78,20 +85,18 @@ def check_probation(
         "ended_by": ended_by,
     }
     if notice_date is None or termination_date is None:
-        return ProbationResult(refs=list(refs), open_questions=[MAXIMUM_QUESTION], **checked)
+        return ProbationResult(refs=list(refs), open_questions=questions, **checked)
 
     given = (termination_date - notice_date).days
     shortfall = max(required - given, 0)
     notice = {"notice_days_given": given, "notice_shortfall_days": shortfall}
     if monthly_wage is None:
-        return ProbationResult(
-            refs=list(refs), open_questions=[MAXIMUM_QUESTION], **checked, **notice
-        )
+        return ProbationResult(refs=list(refs), open_questions=questions, **checked, **notice)
 
     daily = daily_rate(Fraction(str(monthly_wage)))
     return ProbationResult(
         refs=[*refs, SHORT_NOTICE_COMPENSATION],
-        open_questions=[MAXIMUM_QUESTION, DAILY_RATE_QUESTION],
+        open_questions=[*questions, DAILY_RATE_QUESTION],
         **checked,
         **notice,
         daily_wage=money(daily),
