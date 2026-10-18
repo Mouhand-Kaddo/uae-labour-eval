@@ -91,11 +91,11 @@
       "criteria": {
         "claims_supported": {
           "passed": true,
-          "reason": "All stated entitlements, pay periods, illness-related absences, conditions, effects on service, leave rights, and dismissal protections are directly supported by Article 30."
+          "reason": "All stated maternity-leave durations, pay levels, medical conditions, post-leave absence rights, and protections follow directly from Article 30."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "The sole citation, Article 30, directly supports multiple material claims in the answer and is not padding."
+          "reason": "The sole citation, Labour Law Article 30, directly supports every substantive claim in the answer."
         }
       }
     }
@@ -113,11 +113,11 @@
       "criteria": {
         "claims_supported": {
           "passed": true,
-          "reason": "الجواب يطابق نص المادة 53 مباشرةً في إلزام صاحب العمل بأداء الأجور وجميع المستحقات الأخرى خلال 14 يومًا من تاريخ انتهاء العقد."
+          "reason": "الإجابة تطابق نص المادة 53 في إلزام صاحب العمل بسداد الأجور وجميع المستحقات الأخرى خلال 14 يوماً من تاريخ انتهاء العقد."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "الاستشهاد بالمادة 53 ذو صلة مباشرة لأنه النص الذي يحدد مهلة سداد الأجور والمستحقات عند انتهاء العقد."
+          "reason": "الاستشهاد بالمادة 53 ذو صلة مباشرة لأنه ينص تحديداً على مهلة سداد مستحقات العامل عند انتهاء العقد."
         }
       }
     }
@@ -161,11 +161,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "Although the core 16-day estimate, 30-day annual entitlement, and paid-leave statements are supported by Article 29, the answer additionally says that cash-value calculation depends on monthly basic and total wage/allowances and that the law leaves part of the calculation unsettled, neither of which is stated or directly established by the retrieved text."
+          "reason": "Although Article 29 supports the two-days-per-month, 30-days-per-year, and paid-leave statements, the answer’s request for monthly basic wage and total wage to calculate cash value, and its assertion that the law leaves part of the calculation unsettled, are not supported by the cited text."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "Article 29 directly supports the answer’s cited claims about two days per month after six months, thirty days after a year, full pay, and entitlement to wages during annual leave."
+          "reason": "Article 29 directly supports the answer’s stated annual-leave accrual rates and entitlement to wages during annual leave."
         }
       }
     }
@@ -184,11 +184,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "تدعم المادة 51 استحقاق العامل الأجنبي بدوام كامل بعد سنة وطريقة احتساب 21 و30 يوماً، لكنها لا تذكر أي تخفيض للمكافأة عند الاستقالة إلى الثلثين ولا تفرق بين الاستقالة وإنهاء صاحب العمل للخدمة أو تشترط عشر سنوات للمكافأة الكاملة."
+          "reason": "المادة 51 تدعم استحقاق العامل الأجنبي بدوام كامل بعد سنة وطريقة احتساب 21 يوماً لأول خمس سنوات و30 يوماً لما زاد، لكنها لا تنص على تخفيض المكافأة عند الاستقالة إلى الثلثين أو اشتراط عشر سنوات لاستحقاق كاملها، بل تقرر الاستحقاق عند انتهاء الخدمة دون هذا التفريق."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "المادة 51 ذات صلة مباشرة بادعاءات الاستحقاق الأساسي وطريقة حساب مكافأة نهاية الخدمة للعامل الأجنبي بدوام كامل."
+          "reason": "الاستشهاد بالمادة 51 ذو صلة مباشرة بادعاءات شروط استحقاق مكافأة نهاية الخدمة للعامل الأجنبي وطريقة حسابها على أساس الأجر الأساسي."
         }
       }
     }
@@ -206,11 +206,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "The answer makes unsupported assertions that accrual is calculated day-by-day to 16.2 days, that the law leaves this unsettled, and that no leave accrues at all during the first six months; none follows directly from the retrieved provisions."
+          "reason": "The answer makes unsupported assertions that no annual-leave accrual runs during the first six months and that the two-days-per-month entitlement may be prorated day by day to 16.2 days (and that the law expressly leaves this unsettled), whereas the cited text states only the entitlement for service exceeding six months and provides no such accrual-start or daily-proration rule."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "Each cited article supports at least one discussed point, including annual-leave rates and conditions, period calculation, carry-forward/cash payment, and part-time leave calculation."
+          "reason": "Each cited provision is relevant to at least one stated point: Article 29 addresses annual leave and related rights, Article 67 addresses the 30-day-month calculation premise, and Regulations Articles 18 and 19 address part-time leave and carry-forward/cash compensation respectively."
         }
       }
     }
@@ -228,11 +228,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "مع أن معظم تفاصيل الاستحقاق والحساب مدعومة بالمادة 51 وحالات الترك دون إنذار مدعومة بالمادة 45، فإن الجواب يجزم بأنه لم يجد نصًا في اللائحة التنفيذية يخفض مكافأة المستقيل رغم عدم تقديم أي نص من اللائحة التنفيذية ضمن المواد المستشهد بها، كما أن عبارة «دون البدلات» ليست واردة صراحة في النص المعروض."
+          "reason": "مع أن المادة 51 تدعم معدلات الحساب والسقف، فإن القول إن الأجر الأساسي هو «دون البدلات» والقول بعدم العثور على أي نص في القانون أو اللائحة التنفيذية يخفض مكافأة المستقيل لا يردان صراحةً في النصوص المستشهد بها ولا يلزمان مباشرةً منها."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "المادة 51 تدعم قواعد استحقاق وحساب مكافأة نهاية الخدمة، والمادة 45 تدعم البيان المتعلق بحالات ترك العامل العمل دون إنذار مع الاحتفاظ بالحقوق."
+          "reason": "المادة 51 تدعم طريقة احتساب مكافأة العامل الأجنبي بدوام كامل، والمادة 45 تدعم الإشارة إلى حالات ترك العمل دون إنذار مع الاحتفاظ بالحقوق."
         }
       }
     }
@@ -299,11 +299,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "المهلة البالغة 14 يومًا ووجوب دفع الأجور والمستحقات الأخرى مدعومة بالمادة 53، لكن القول بأنه يمكن التواصل مع وزارة الموارد البشرية والتوطين لمتابعة شكوى عند التأخر غير وارد في النص المستشهد به."
+          "reason": "The 14-day payment deadline and the scope of wages and other entitlements are supported by Article 53, but the statement that the worker can contact the Ministry of Human Resources and Emiratisation to pursue a delayed-payment complaint is not supported by the cited text."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "المادة 53 ذات صلة مباشرة لأنها تدعم الادعاء الأساسي بشأن التزام صاحب العمل بسداد الأجور والمستحقات خلال 14 يومًا من انتهاء العقد."
+          "reason": "Article 53 directly supports the answer’s claim that the employer must pay wages and other specified entitlements within fourteen days of contract end."
         }
       }
     }
@@ -397,11 +397,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "Although Article 30 supports the 60-day leave, 45 days full pay, 15 days half pay, and up to 45 days unpaid absence for qualifying illness with a medical certificate, it does not state that the employer must pay a one-off maternity allowance or that the unpaid days can be converted to paid leave after two years of service."
+          "reason": "Although Article 30 supports the 60-day entitlement, its full- and half-pay allocation, and up to 45 unpaid days for qualifying illness supported by a medical certificate, it does not support the claimed one-off maternity allowance or conversion of unpaid days into paid leave after two years."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "The cited Article 30 directly supports the answer's maternity-leave entitlement, pay structure, and qualifying additional unpaid absence claim."
+          "reason": "Article 30 directly supports the answer's maternity-leave duration, pay structure, and the qualifying additional unpaid absence for illness related to pregnancy or childbirth."
         }
       }
     }
@@ -413,17 +413,17 @@
       "model": "google/gemini-3.1-flash-lite"
     },
     "verdict": {
-      "passed": true,
+      "passed": false,
       "rubric": "grounding",
       "model": "openai/gpt-5.6-terra",
       "criteria": {
         "claims_supported": {
-          "passed": true,
-          "reason": "All substantive claims—the 90-day annual entitlement after probation, the 15-day full-pay and 30-day half-pay portions, the remaining 45 unpaid days, the three-working-day notification and medical-report requirements, and the misconduct exception—are stated in or directly calculated from Article 31."
+          "passed": false,
+          "reason": "معظم الإجابات واردة في المادة 31 أو تتبع مباشرةً من حد الـ90 يوماً، لكن وصف الجهة الطبية بأنها «المعتمدة» غير وارد في النص المسترجع الذي يكتفي بعبارة «الجهة الطبية»."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "The sole citation, Article 31, directly supports every legal point made in the answer."
+          "reason": "المادة 31 تدعم جميع الموضوعات الأساسية المذكورة، بما فيها مدة الإجازة المرضية وأجرها وواجب الإبلاغ والتقرير الطبي واستثناء سوء سلوك العامل."
         }
       }
     }
@@ -441,11 +441,11 @@
       "criteria": {
         "claims_supported": {
           "passed": true,
-          "reason": "Article 29(1)(a) provides at least 30 days of annual leave with full pay for each year of service, and Article 29(1)(b) provides two days per month where service exceeds six months but is less than one year, so 16 days for eight months follows directly."
+          "reason": "Article 29(1)(a) expressly provides 30 days of annual leave with full pay per year, and Article 29(1)(b) provides two days per month for service exceeding six months but under one year, from which 16 days for eight months follows directly."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "The cited Article 29 directly governs annual-leave entitlement for both a completed year of service and service exceeding six months but less than one year."
+          "reason": "The sole citation, Article 29 of the Labour Law, directly supports both the full-year entitlement and the entitlement for eight months of service."
         }
       }
     }
@@ -489,11 +489,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "الجواب مدعوم في معظم تفاصيله بالمادة 51، لكنه يضيف أن الأجر الأساسي «بدون البدلات» رغم أن النص المستشهد به لا يذكر البدلات أو يستبعدها صراحةً."
+          "reason": "الجواب يضيف أن الأجر الأساسي يكون «بدون البدلات»، بينما النص المستشهد به يذكر فقط احتساب المكافأة وفق الأجر الأساسي ولا يعرّف هذا المصطلح أو ينص صراحةً على استبعاد البدلات."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "المادة 51 ذات صلة مباشرة بكل المطالبات الأساسية في الجواب، إذ تنظم استحقاق العامل الأجنبي بالدوام الكامل لمكافأة نهاية الخدمة وطريقة حسابها وحدها الأقصى."
+          "reason": "المادة 51 ذات صلة مباشرة بجميع عناصر الجواب الأساسية، بما في ذلك استحقاق العامل الأجنبي بدوام كامل، وطريقة الحساب، وأجزاء السنة، والأجر الأساسي، والحد الأقصى."
         }
       }
     }
@@ -511,11 +511,11 @@
       "criteria": {
         "claims_supported": {
           "passed": true,
-          "reason": "The answer’s conclusion and supporting distinctions are grounded in Article 19(2)’s express basic-salary rule on termination, with the cited definitions and Article 29 provisions supporting the surrounding explanation."
+          "reason": "The answer’s statements about termination compensation being calculated using basic salary, the contrasting in-employment cash-equivalent rule, the definitions of basic wage and wage, and the cited annual-leave provisions are stated in or directly follow from the retrieved texts."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "Article 19 supports the termination and during-employment payment bases, Article 1 supports the basic-wage versus wage distinction, and Article 29 supports the related annual-leave and regulatory-delegation discussion."
+          "reason": "Article 19 directly supports the termination-payment answer, while Articles 1 and 29 support the explanation of the wage definitions and related annual-leave provisions."
         }
       }
     }
@@ -559,11 +559,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "Although the core 14-day payment rule and most procedural statements are supported, the answer states that Article 53 covers entitlements under the “executive regulations” and gives gratuities and allowances as examples, whereas the retrieved text specifies the Decree-Law, implementing resolutions, contract, or establishment rules and does not itself establish those examples."
+          "reason": "Although the 14-day payment rule and the notice/dispute statements are supported, the answer specifically gives gratuity and allowances as included entitlements without the cited text itself establishing that either is owed in the worker’s circumstances."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "Each cited article is relevant to at least one statement in the answer: Article 53 to final payments, Articles 43 and 42 to notice and contract ending, Article 54 to dispute procedures and limitation, and Executive Regulations Article 31 to the 14-day referral period."
+          "reason": "Each cited article supports at least one statement in the answer, including payment on termination, notice-period effects, termination cases, dispute procedures, and the limitation period."
         }
       }
     }
@@ -604,11 +604,11 @@
       "criteria": {
         "claims_supported": {
           "passed": true,
-          "reason": "The answer’s statements about the seven-day reporting threshold, Article 44’s listed dismissal grounds, and the investigation/two-warning requirement for continued breach of basic contractual duties are supported by the retrieved text."
+          "reason": "The answer’s statements about the seven-consecutive-day reporting threshold, the absence of absence as a listed standalone Article 44 ground in the retrieved text, and the written-investigation/two-warning requirements for failure of basic duties are supported by the cited provisions."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "Article 44 directly supports the discussion of dismissal without notice and procedural requirements, while Executive Regulations Article 28 directly supports the seven-consecutive-day absence reporting requirement."
+          "reason": "Article 44 supports the discussion of dismissal without warning and procedural requirements, while Executive Regulations Article 28 supports the seven-day absence reporting requirement."
         }
       }
     }
@@ -724,11 +724,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "المادة 51 المسترجعة تتناول مكافأة نهاية الخدمة وشروط وحسابها، ولا تنص على التزام صاحب العمل بدفع الأجور وجميع المستحقات خلال 14 يوماً من انتهاء العقد."
+          "reason": "النص المستشهد به في المادة 51 يتناول استحقاق وحساب مكافأة نهاية الخدمة، ولا يذكر التزام صاحب العمل بدفع الأجور وجميع المستحقات خلال 14 يوماً من انتهاء العقد."
         },
         "citations_relevant": {
           "passed": false,
-          "reason": "الاستشهاد بالمادة 51 لا يدعم المهلة الزمنية أو واجب دفع جميع الأجور والمستحقات المذكورين في الإجابة."
+          "reason": "المادة 51 المستشهد بها لا تدعم المدة أو واجب السداد المذكورين في الإجابة، ولذلك لا تُعد ذات صلة كافية بالادعاء الوارد."
         }
       }
     }
@@ -747,11 +747,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "The cited text of Article 18 only addresses calculating annual leave entitlement for part-time workers and does not state that unused leave paid on termination is calculated using basic salary."
+          "reason": "The cited Article 18 only addresses calculation of annual leave for part-time workers and does not state that unused leave on termination is paid based on basic salary."
         },
         "citations_relevant": {
           "passed": false,
-          "reason": "Article 18 as retrieved concerns part-time annual-leave duration and working-hour calculations, not cash payment for unused annual leave when service ends."
+          "reason": "Article 18 concerns part-time workers’ annual-leave entitlement and does not support the answer’s claim about cash payment for unused leave when service ends."
         }
       }
     }
@@ -891,11 +891,11 @@
       "criteria": {
         "claims_supported": {
           "passed": true,
-          "reason": "All stated maternity-leave durations, pay rates, illness-related unpaid absence conditions, medical-proof requirements, and sick-or-disabled-child leave entitlements follow directly from Article 30."
+          "reason": "All substantive claims—60 days’ leave, 45 days at full pay, 15 days at half pay, up to 45 unpaid days for qualifying illness supported by a medical certificate, and the 30-day paid plus 30-day unpaid extension for a sick or disabled child requiring constant companionship—are stated directly in Article 30."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "The sole citation, Article 30 of the Labour Law, directly supports every substantive claim in the answer."
+          "reason": "The sole citation, Article 30 of the Labour Law, directly supports every substantive point in the answer concerning maternity leave and post-maternity absence or leave."
         }
       }
     }
@@ -939,11 +939,11 @@
       "criteria": {
         "claims_supported": {
           "passed": false,
-          "reason": "The answer’s statement that Article 44 dismissal is not listed in the Law as a ground for forfeiting gratuity is not established by the retrieved excerpts, which do not provide an exhaustive account of all potential gratuity-forfeiture grounds."
+          "reason": "Although the dismissal thresholds, written-investigation requirements, reporting rule, work-permit consequence, wage consequence, and service-calculation rule are supported, the assertion that Article 44 dismissal is not listed anywhere in the Law as a ground for forfeiting gratuity is broader than the retrieved Article 51 text and is therefore unsupported."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "Each cited provision supports at least one substantive statement in the answer, including the dismissal thresholds and conditions, reporting and permit consequences, post-leave wages, and service-length calculation."
+          "reason": "Each cited article supports at least one substantive statement in the answer, including the dismissal criteria, post-leave wage rule, unlawful-absence permit consequences, gratuity service calculation, and Ministry-reporting controls."
         }
       }
     }
@@ -1007,17 +1007,17 @@
       "model": "qwen/qwen3.8-flash"
     },
     "verdict": {
-      "passed": true,
+      "passed": false,
       "rubric": "grounding",
       "model": "openai/gpt-5.6-terra",
       "criteria": {
         "claims_supported": {
-          "passed": true,
-          "reason": "The answer’s substantive statements on maternity leave, pay, post-maternity illness absence, sick/disabled-child leave, ordinary sick leave, parental leave, dismissal protection, work for another employer, and breastfeeding breaks are stated in or directly follow from the retrieved provisions."
+          "passed": false,
+          "reason": "The answer overstates that all illness not connected to pregnancy or childbirth is governed by the ordinary Article 31 sick-leave rules, whereas Article 31 applies only where the illness is not caused by a work injury and therefore does not support that unqualified statement."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "Articles 30, 31, 32, and Executive Regulations Article 21 each support at least one specific claim made in the answer."
+          "reason": "Each cited article supports at least one substantive proposition in the answer, including maternity leave, ordinary sick leave, parental leave, and the permitted combination of specified leaves."
         }
       }
     }
@@ -1109,11 +1109,11 @@
       "criteria": {
         "claims_supported": {
           "passed": true,
-          "reason": "Article 19(2) expressly provides that, upon termination, the cash equivalent for annual leave due by law is calculated according to the worker’s basic salary, while Article 1 supports the stated distinction between basic wage and allowances; Article 19(1) also supports the separate statement about cash payment during service."
+          "reason": "Article 19(2) directly provides that, upon termination, the statutory annual-leave balance is paid as a cash equivalent according to the worker’s basic salary, while Article 1 supports the explanation that the basic wage excludes allowances; the Article 19(1) distinction is also accurately stated."
         },
         "citations_relevant": {
           "passed": true,
-          "reason": "Executive Regulations Article 19 directly supports the termination and during-service leave-payment claims, and Labour Law Article 1 supports the explanation that basic wage excludes allowances and benefits in kind."
+          "reason": "Executive Regulations Article 19 supports both the termination calculation and the separate in-service cash-equivalent point, and Labour Law Article 1 supports the stated meaning of basic wage."
         }
       }
     }
