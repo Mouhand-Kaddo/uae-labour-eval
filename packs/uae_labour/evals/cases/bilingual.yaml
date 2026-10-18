@@ -15,6 +15,7 @@
       status: answered
       numbers: [15133.81]
       tolerance: 1
+      citations: [{instrument: labour-law, article: "51"}]
       tool_call:
         name: calculate_gratuity
         arguments:
@@ -24,7 +25,7 @@
           work_pattern: full_time
           nationality: foreign
     ar: *gratuity-001
-  scoring: [status, numeric, tool_call, answer_language, consistency]
+  scoring: [status, numeric, citations, tool_call, answer_language, consistency]
   reviewed: false
   refs: ["Labour Law Art 51(2)", "Labour Law Art 51(3)", "Labour Law Art 67"]
   depends_on: [OQ-001, OQ-002]
@@ -33,8 +34,8 @@
     all within the first five years at 21 days a year (Art 51(2)(a)), the part year pro-rated
     (Art 51(3)). On the basic wage, not the AED 10,000: daily basic wage (OQ-001) = 7,300 × 12 /
     365 = 240. 1,096 × 21 / 365 × 240 = 5,523,840 / 365 = AED 15,133.81. Cap 24 × 7,300 =
-    175,200 not reached. Both halves state the same facts, so both must give AED 15,133.81, cite
-    the same articles and mean the same.
+    175,200 not reached. Both halves state the same facts, so both must give AED 15,133.81, both
+    cite Art 51 and mean the same.
 
 - id: bilingual-leave-001
   category: bilingual
@@ -53,6 +54,7 @@
       status: answered
       numbers: [4800]
       tolerance: 1
+      citations: [{instrument: executive-regulations, article: "19"}]
       tool_call:
         name: calculate_annual_leave
         arguments:
@@ -61,7 +63,7 @@
           leave_days_taken: 10
           monthly_basic_wage: 7300
     ar: *leave-001
-  scoring: [status, numeric, tool_call, answer_language, consistency]
+  scoring: [status, numeric, citations, tool_call, answer_language, consistency]
   reviewed: false
   refs: ["Labour Law Art 29(1)", "Executive Regulations Art 19(2)"]
   depends_on: [OQ-001, OQ-003]
@@ -69,8 +71,8 @@
     Apr–Dec 2024 = 275 days, plus 31 + 28 + 31 = 365 days = one year (Art 67): 30 days' leave
     (Art 29(1)). Balance 30 − 10 = 20 days. On termination the cash-out is on the basic wage
     (ER Art 19(2), OQ-003): daily basic wage (OQ-001) = 7,300 × 12 / 365 = 240. 20 × 240 =
-    AED 4,800 (the AED 10,000 wage would give 6,575.34). Both halves must give AED 4,800, cite
-    the same articles and mean the same.
+    AED 4,800 (the AED 10,000 wage would give 6,575.34). Both halves must give AED 4,800, both
+    cite ER Art 19 and mean the same.
 
 - id: bilingual-notice-001
   category: bilingual
@@ -90,6 +92,7 @@
       status: answered
       numbers: [6000]
       tolerance: 1
+      citations: [{instrument: labour-law, article: "43"}]
       tool_call:
         name: check_notice_period
         arguments:
@@ -97,7 +100,7 @@
           notice_days_worked: 10
           monthly_wage: 9125
     ar: *notice-001
-  scoring: [status, numeric, tool_call, answer_language, consistency]
+  scoring: [status, numeric, citations, tool_call, answer_language, consistency]
   reviewed: false
   refs: ["Labour Law Art 43(1)", "Labour Law Art 43(3)", "Labour Law Art 43(4)"]
   depends_on: [OQ-001]
@@ -105,8 +108,8 @@
     30 days is within 30–90 (Art 43(1)). The employer did not honour the rest of the notice
     period, so it owes the wage for the remaining part (Art 43(3)): 30 − 10 = 20 days, on the
     last wage including allowances, not the basic wage (Art 43(4)). Daily wage (OQ-001) =
-    9,125 × 12 / 365 = 300. 20 × 300 = AED 6,000. Both halves must give AED 6,000, cite the same
-    articles and mean the same.
+    9,125 × 12 / 365 = 300. 20 × 300 = AED 6,000. Both halves must give AED 6,000, both cite
+    Art 43 and mean the same.
 
 - id: bilingual-probation-001
   category: bilingual
@@ -126,6 +129,7 @@
       status: answered
       numbers: [2160]
       tolerance: 1
+      citations: [{instrument: labour-law, article: "9"}]
       tool_call:
         name: check_probation
         arguments:
@@ -135,7 +139,7 @@
           termination_date: "2025-03-06"
           monthly_wage: 7300
     ar: *probation-001
-  scoring: [status, numeric, tool_call, answer_language, consistency]
+  scoring: [status, numeric, citations, tool_call, answer_language, consistency]
   reviewed: false
   refs: ["Labour Law Art 9(1)", "Labour Law Art 9(5)", "Labour Law Art 67"]
   depends_on: [OQ-001]
@@ -144,8 +148,8 @@
     Art 9(1): the employer must give at least 14 days' written notice during probation. 1 to
     6 March is 5 days, 9 days short. Art 9(5): compensation equals the worker's wage for the
     remaining notice period. Daily wage (OQ-001) = 7,300 × 12 / 365 = 240. 9 × 240 =
-    AED 2,160. Both halves must say the notice was not enough, give AED 2,160, cite the same
-    articles and mean the same.
+    AED 2,160. Both halves must say the notice was not enough, give AED 2,160, both cite Art 9
+    and mean the same.
 
 - id: bilingual-cite-probation-001
   category: bilingual
@@ -175,8 +179,8 @@
     recruiting or contracting with the Worker, unless agreed otherwise." Arabic: "يجب عليه إخطار
     صاحب العمل الأصلي بذلك خطيًّا بمدة لا تقل عن شهر ... ويلتزم صاحب العمل الجديد بتعويض صاحب
     العمل الأصلي بتكاليف الاستقدام أو التعاقد مع العامل، ما لم يتم الاتفاق على خلاف ذلك." Both
-    halves must cite Labour Law Art 9 (retrieved in that half), cite the same articles, and say
-    the same thing: at least one month, the new employer pays unless agreed otherwise.
+    halves must cite Art 9 (retrieved in that half) and say the same thing: at least one
+    month, the new employer pays unless agreed otherwise.
 
 - id: bilingual-cite-notice-001
   category: bilingual
@@ -201,8 +205,7 @@
   rationale: >-
     Art 43(1): "provided that the period is not less than thirty (30) days, and not more than
     ninety (90) days." Arabic: "على ألا تقل المدة عن (30) ثلاثين يومًا، ولا تزيد على (90) تسعين
-    يومًا." Both halves must cite Labour Law Art 43, cite the same articles, and give 30 and 90
-    days.
+    يومًا." Both halves must cite Art 43 and give 30 and 90 days.
 
 - id: bilingual-cite-gratuity-001
   category: bilingual
@@ -230,8 +233,7 @@
     (21) days for each year of the first five years of service. b. The wage of thirty (30) days
     for each year in excess of that." Arabic: "تحسب وفق الأجر الأساسي ... أ. أجر (21) واحد
     وعشرين يوم عن كل سنة من سنوات الخدمة الخمس الأولى. ب. أجر (30) ثلاثين يوم عن كل سنة مما زاد
-    على ذلك." Both halves must cite Labour Law Art 51, cite the same articles, and give 21 days,
-    30 days and the basic wage.
+    على ذلك." Both halves must cite Art 51 and give 21 days, 30 days and the basic wage.
 
 - id: bilingual-cite-leave-001
   category: bilingual
@@ -260,8 +262,8 @@
     he shall be entitled to receive a cash equivalent of the balance of his annual leaves due by
     law in accordance with his basic salary." Arabic: "يجوز للعامل ترحيل ما لا يزيد على نصف
     الإجازة السنوية للسنة التي تليها" and "في حالة انتهاء خدمة العامل يصرف له بدل نقدي عن رصيد
-    إجازاته السنوية المستحقة قانونًا وفقًا للأجر الأساسي." Both halves must cite Executive
-    Regulations Art 19, cite the same articles, and give half the leave and the basic wage.
+    إجازاته السنوية المستحقة قانونًا وفقًا للأجر الأساسي." Both halves must cite ER Art 19 and
+    give half the leave and the basic wage.
 
 - id: bilingual-refuse-advice-001
   category: bilingual

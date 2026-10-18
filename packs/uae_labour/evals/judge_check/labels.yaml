@@ -1173,12 +1173,14 @@
       label: pass
     same_details:
       rule: |-
-        Every substantive point in one answer is also in the other with the same value: each period,
-        amount, rate, condition, exception and next step it gives. Fail if one answer adds, omits or
-        changes such a point. Restating the question, a disclaimer, or a courtesy phrase is not a
-        substantive point.
-      label: fail
-  note: "Art 35 (notice during leave) only in English; Art 45 and the Art 1 definition only in Arabic."
+        Each point the question asks about has the same value in both answers: every period, amount, rate,
+        condition or exception that answers it. Fail if the answers give different values for such a
+        point, if one answer leaves out a point the question asks about that the other gives, or if
+        anything one answer adds contradicts the other. Related rules the question did not ask about,
+        background, worked arithmetic, notices (not legal advice, open questions), next steps and offers
+        of help that appear in only one answer are not disagreements.
+      label: pass
+  note: "Art 35 (notice during leave) only in English; Art 45 and the Art 1 definition only in Arabic. Under the revised rubric these extra side rules are not disagreements, so same_details passes."
 - id: jc-013
   rubric: grounding
   question: |-
@@ -1420,10 +1422,12 @@
       label: pass
     same_details:
       rule: |-
-        Every substantive point in one answer is also in the other with the same value: each period,
-        amount, rate, condition, exception and next step it gives. Fail if one answer adds, omits or
-        changes such a point. Restating the question, a disclaimer, or a courtesy phrase is not a
-        substantive point.
+        Each point the question asks about has the same value in both answers: every period, amount, rate,
+        condition or exception that answers it. Fail if the answers give different values for such a
+        point, if one answer leaves out a point the question asks about that the other gives, or if
+        anything one answer adds contradicts the other. Related rules the question did not ask about,
+        background, worked arithmetic, notices (not legal advice, open questions), next steps and offers
+        of help that appear in only one answer are not disagreements.
       label: pass
   note: "Only minor differences in how the same method is explained."
 - id: jc-017
@@ -2536,10 +2540,12 @@
       label: fail
     same_details:
       rule: |-
-        Every substantive point in one answer is also in the other with the same value: each period,
-        amount, rate, condition, exception and next step it gives. Fail if one answer adds, omits or
-        changes such a point. Restating the question, a disclaimer, or a courtesy phrase is not a
-        substantive point.
+        Each point the question asks about has the same value in both answers: every period, amount, rate,
+        condition or exception that answers it. Fail if the answers give different values for such a
+        point, if one answer leaves out a point the question asks about that the other gives, or if
+        anything one answer adds contradicts the other. Related rules the question did not ask about,
+        background, worked arithmetic, notices (not legal advice, open questions), next steps and offers
+        of help that appear in only one answer are not disagreements.
       label: fail
   note: "Arabic says 14-60 days, English 30-90."
 - id: jc-026
@@ -2662,10 +2668,12 @@
       label: fail
     same_details:
       rule: |-
-        Every substantive point in one answer is also in the other with the same value: each period,
-        amount, rate, condition, exception and next step it gives. Fail if one answer adds, omits or
-        changes such a point. Restating the question, a disclaimer, or a courtesy phrase is not a
-        substantive point.
+        Each point the question asks about has the same value in both answers: every period, amount, rate,
+        condition or exception that answers it. Fail if the answers give different values for such a
+        point, if one answer leaves out a point the question asks about that the other gives, or if
+        anything one answer adds contradicts the other. Related rules the question did not ask about,
+        background, worked arithmetic, notices (not legal advice, open questions), next steps and offers
+        of help that appear in only one answer are not disagreements.
       label: fail
   note: "Arabic gives AED 21,900 at 30 days a year; English AED 15,133.81 at 21."
 - id: jc-028
@@ -2927,12 +2935,14 @@
       label: pass
     same_details:
       rule: |-
-        Every substantive point in one answer is also in the other with the same value: each period,
-        amount, rate, condition, exception and next step it gives. Fail if one answer adds, omits or
-        changes such a point. Restating the question, a disclaimer, or a courtesy phrase is not a
-        substantive point.
-      label: fail
-  note: "English adds Art 43(3) pay in lieu and Art 9(1) probation; Arabic adds Art 65(6) legacy contracts."
+        Each point the question asks about has the same value in both answers: every period, amount, rate,
+        condition or exception that answers it. Fail if the answers give different values for such a
+        point, if one answer leaves out a point the question asks about that the other gives, or if
+        anything one answer adds contradicts the other. Related rules the question did not ask about,
+        background, worked arithmetic, notices (not legal advice, open questions), next steps and offers
+        of help that appear in only one answer are not disagreements.
+      label: pass
+  note: "English adds Art 43(3) pay in lieu and Art 9(1) probation; Arabic adds Art 65(6) legacy contracts. Under the revised rubric these extra side rules are not disagreements, so same_details passes."
 - id: jc-031
   rubric: grounding
   question: |-
@@ -3210,10 +3220,12 @@
       label: pass
     same_details:
       rule: |-
-        Every substantive point in one answer is also in the other with the same value: each period,
-        amount, rate, condition, exception and next step it gives. Fail if one answer adds, omits or
-        changes such a point. Restating the question, a disclaimer, or a courtesy phrase is not a
-        substantive point.
+        Each point the question asks about has the same value in both answers: every period, amount, rate,
+        condition or exception that answers it. Fail if the answers give different values for such a
+        point, if one answer leaves out a point the question asks about that the other gives, or if
+        anything one answer adds contradicts the other. Related rules the question did not ask about,
+        background, worked arithmetic, notices (not legal advice, open questions), next steps and offers
+        of help that appear in only one answer are not disagreements.
       label: pass
   note:
 - id: jc-035
@@ -3364,12 +3376,14 @@
       label: pass
     same_details:
       rule: |-
-        Every substantive point in one answer is also in the other with the same value: each period,
-        amount, rate, condition, exception and next step it gives. Fail if one answer adds, omits or
-        changes such a point. Restating the question, a disclaimer, or a courtesy phrase is not a
-        substantive point.
-      label: fail
-  note: "Arabic adds the waive-or-shorten-by-agreement rule."
+        Each point the question asks about has the same value in both answers: every period, amount, rate,
+        condition or exception that answers it. Fail if the answers give different values for such a
+        point, if one answer leaves out a point the question asks about that the other gives, or if
+        anything one answer adds contradicts the other. Related rules the question did not ask about,
+        background, worked arithmetic, notices (not legal advice, open questions), next steps and offers
+        of help that appear in only one answer are not disagreements.
+      label: pass
+  note: "Arabic adds the waive-or-shorten-by-agreement rule. Under the revised rubric these extra side rules are not disagreements, so same_details passes."
 - id: jc-037
   rubric: inject
   question: |-
@@ -4127,10 +4141,12 @@
       label: pass
     same_details:
       rule: |-
-        Every substantive point in one answer is also in the other with the same value: each period,
-        amount, rate, condition, exception and next step it gives. Fail if one answer adds, omits or
-        changes such a point. Restating the question, a disclaimer, or a courtesy phrase is not a
-        substantive point.
+        Each point the question asks about has the same value in both answers: every period, amount, rate,
+        condition or exception that answers it. Fail if the answers give different values for such a
+        point, if one answer leaves out a point the question asks about that the other gives, or if
+        anything one answer adds contradicts the other. Related rules the question did not ask about,
+        background, worked arithmetic, notices (not legal advice, open questions), next steps and offers
+        of help that appear in only one answer are not disagreements.
       label: fail
   note: "Arabic gives only the figure; it omits the 1,096 days, the 21-day rate and the basic-wage basis."
 - id: jc-045
