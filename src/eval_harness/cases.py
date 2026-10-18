@@ -61,28 +61,30 @@ QUESTION_ID = re.compile(r"OQ-\d{3}")
 QUESTION_HEADING = re.compile(r"^## (?=OQ-\d{3}:)", re.MULTILINE)
 DECISION_LINE = re.compile(r"^\*\*Decision:\*\*\s*(.*)$", re.MULTILINE)
 
-FIELD_TYPES: dict[str, type | tuple[type, ...]] = {
-    "id": str,
-    "category": str,
-    "language": str,
-    "input": (str, dict),
-    "expected": dict,
-    "scoring": list,
-    "reviewed": bool,
-    "refs": list,
-    "depends_on": list,
-    "rationale": str,
-}
-OPTIONAL_FIELD_TYPES: dict[str, type] = {"planted_chunks": list}
+FIELD_TYPES: frozendict[str, type | tuple[type, ...]] = frozendict(
+    id=str,
+    category=str,
+    language=str,
+    input=(str, dict),
+    expected=dict,
+    scoring=list,
+    reviewed=bool,
+    refs=list,
+    depends_on=list,
+    rationale=str,
+)
+OPTIONAL_FIELD_TYPES: frozendict[str, type] = frozendict(planted_chunks=list)
 PLANTED_FIELDS = ("instrument", "article", "language", "text")
 PLANTED_LANGUAGES = ("en", "ar")
 
-TYPE_NAMES: dict[type, str] = {
-    str: "a string",
-    dict: "a mapping",
-    list: "a list",
-    bool: "a boolean",
-}
+TYPE_NAMES: frozendict[type, str] = frozendict(
+    {
+        str: "a string",
+        dict: "a mapping",
+        list: "a list",
+        bool: "a boolean",
+    }
+)
 
 
 def load_cases(

@@ -48,7 +48,7 @@ from eval_harness.refs import article_label
 
 STRATA = ("grounding", "refuse", "inject", "bilingual", "cite")
 TRUSTED_KAPPA = 0.6
-LABELS = {"pass": True, "fail": False}
+LABELS = frozendict({"pass": True, "fail": False})
 FREE_TEXT_RUBRIC = "grounding"
 PAIR_RUBRIC_NAME = PAIR_RUBRIC.removeprefix(SCORER_PREFIX)
 BROKEN_FILE = "broken.yaml"
@@ -122,7 +122,7 @@ def sample_check_set(
     the check set into the pack. Returns the items in the order written."""
     rubrics = pack_rubrics(config.pack)
     cases = _pack_cases(config, rubrics)
-    candidates = [c for run_dir in run_dirs for c in read_candidates(run_dir, cases)]
+    candidates = [*read_candidates(run_dir, cases) for run_dir in run_dirs]
     directory = check_dir(config.pack)
     rng = random.Random(seed)
     chosen = sample(candidates, size, rng)
@@ -459,7 +459,7 @@ def judge_agreement(pack: Path) -> dict[str, Any]:
         )
     by_rubric: dict[str, dict[str, Any]] = {}
     for name, by_criterion in decisions.items():
-        overall = measure([pair for pairs in by_criterion.values() for pair in pairs])
+        overall = measure([*pairs for pairs in by_criterion.values()])
         by_rubric[name] = asdict(overall) | {
             "trusted": overall.kappa is not None and overall.kappa >= TRUSTED_KAPPA,
             "categories": sorted(
@@ -474,7 +474,7 @@ def judge_agreement(pack: Path) -> dict[str, Any]:
         "unjudged": unjudged,
         "rubrics": by_rubric,
         "untrusted_categories": sorted(
-            {c for r in by_rubric.values() if not r["trusted"] for c in r["categories"]}
+            {*r["categories"] for r in by_rubric.values() if not r["trusted"]}
         ),
     }
     write_json(directory / AGREEMENT_FILE, result)

@@ -144,14 +144,14 @@ def score_answer_language(case: Case, final: FinalAnswer, trace: Steps) -> Verdi
 
 Scorer = Callable[[Case, FinalAnswer, Steps], Verdict]
 
-SCORERS: dict[str, Scorer] = {
-    "status": score_status,
-    "citations": score_citations,
-    "numeric": score_numeric,
-    "tool_call": score_tool_call,
-    "inject": score_inject,
-    "answer_language": score_answer_language,
-}
+SCORERS: frozendict[str, Scorer] = frozendict(
+    status=score_status,
+    citations=score_citations,
+    numeric=score_numeric,
+    tool_call=score_tool_call,
+    inject=score_inject,
+    answer_language=score_answer_language,
+)
 
 
 SKIPPED = "a deterministic scorer already failed"
@@ -197,7 +197,7 @@ def consistency_scorer(judge: PairScorer) -> PairScorer:
     def score(
         case: Case, finals: Mapping[str, FinalAnswer], traces: Mapping[str, Steps]
     ) -> Verdict:
-        expected = sorted({n for lang in finals for n in case.expected[lang].get("numbers", [])})
+        expected = sorted({*case.expected[lang].get("numbers", []) for lang in finals})
         reported = {
             lang: [
                 _reported(number, final.answer, case.expected[lang].get("tolerance", 0))

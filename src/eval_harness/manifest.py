@@ -38,16 +38,16 @@ class Manifest:
         return [s for s in self.sources if s.indexed]
 
 
-REQUIRED_FIELDS: dict[str, type] = {
-    "id": str,
-    "instrument": str,
-    "language": str,
-    "official_url": str,
-    "wayback_url": str,
-    "retrieved": dt.date,
-    "sha256": str,
-    "indexed": bool,
-}
+REQUIRED_FIELDS: frozendict[str, type] = frozendict(
+    id=str,
+    instrument=str,
+    language=str,
+    official_url=str,
+    wayback_url=str,
+    retrieved=dt.date,
+    sha256=str,
+    indexed=bool,
+)
 PATTERN_FIELDS = ("heading_pattern", "drop_line_pattern")
 SHA256 = re.compile(r"[0-9a-f]{64}")
 

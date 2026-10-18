@@ -7,7 +7,9 @@ from typing import Any
 
 ROUTING_LISTS = frozenset({"order", "only", "ignore", "quantizations"})
 ROUTING_FLAGS = frozenset({"allow_fallbacks", "require_parameters", "zdr"})
-ROUTING_CHOICES = {"sort": ("price", "throughput", "latency"), "data_collection": ("allow", "deny")}
+ROUTING_CHOICES = frozendict(
+    sort=("price", "throughput", "latency"), data_collection=("allow", "deny")
+)
 
 
 class ConfigError(Exception):

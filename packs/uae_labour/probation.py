@@ -26,14 +26,14 @@ MAXIMUM_MONTHS = 6
 MAXIMUM_DAYS = MAXIMUM_MONTHS * DAYS_IN_MONTH
 LONGEST_SIX_CALENDAR_MONTHS_DAYS = 184
 MAXIMUM_QUESTION = "OQ-013"
-NOTICE = {
-    "employer": (14, [MAXIMUM_AND_EMPLOYER_NOTICE]),
-    "worker_moving_in_uae": (
+NOTICE = frozendict(
+    employer=(14, [MAXIMUM_AND_EMPLOYER_NOTICE]),
+    worker_moving_in_uae=(
         DAYS_IN_MONTH,
         [MAXIMUM_AND_EMPLOYER_NOTICE, WORKER_MOVING_IN_UAE, PERIODS],
     ),
-    "worker_leaving_uae": (14, [MAXIMUM_AND_EMPLOYER_NOTICE, WORKER_LEAVING_UAE]),
-}
+    worker_leaving_uae=(14, [MAXIMUM_AND_EMPLOYER_NOTICE, WORKER_LEAVING_UAE]),
+)
 
 
 class ProbationChecks(TypedDict):
