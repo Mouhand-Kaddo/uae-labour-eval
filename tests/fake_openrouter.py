@@ -19,7 +19,7 @@ MODELS = [
         "supported_parameters": ["max_tokens", "reasoning", "temperature", "tools"],
     },
     {
-        "id": "deepseek/deepseek-v4.1-flash-1017",
+        "id": "deepseek/deepseek-v4.1-flash",
         "pricing": {
             "prompt": "0.00000015",
             "completion": "0.0000006",

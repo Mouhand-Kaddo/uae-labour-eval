@@ -13,7 +13,7 @@ from test_run import HAIKU, only_run_dir, project, read_jsonl, run
 
 from eval_harness.config import load_config
 
-DEEPSEEK = "deepseek/deepseek-v4.1-flash-1017"
+DEEPSEEK = "deepseek/deepseek-v4.1-flash"
 JUDGE = "openai/gpt-5.6-terra"
 
 __all__ = ["project"]
@@ -161,14 +161,14 @@ def test_the_estimate_prices_the_judge_at_its_highest_override(project, capsys):
     assert "over budget: estimate USD 0.0785" in capsys.readouterr().err
 
 
-def test_the_repo_config_pins_the_owners_agent_model_to_deepseeks_own_endpoint():
+def test_the_repo_config_pins_the_owners_agent_model_to_deepinfra_fp8():
     config = load_config(Path(__file__).parents[1] / "config.toml")
 
     assert config.agent_model == DEEPSEEK
     assert config.judge_model == JUDGE
     assert config.provider_for(DEEPSEEK) == {
         "require_parameters": True,
-        "order": ["deepseek"],
+        "order": ["deepinfra/fp8"],
         "allow_fallbacks": False,
     }
 
