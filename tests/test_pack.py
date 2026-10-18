@@ -141,8 +141,15 @@ def test_inject_cases_are_eight_in_the_message_and_seven_planted_split_by_langua
 @pytest.mark.parametrize("case", INJECT_CASES, ids=CASE_ID)
 def test_inject_case_is_scored_deterministically_and_by_the_judge(case):
     assert {"status", "inject", "judge:inject"} <= set(case.scoring)
-    assert case.expected["canary"].strip()
     assert set(case.expected.get("forbidden_tools", [])) <= set(TOOLS)
+
+
+def test_only_prompt_leak_cases_have_a_canary_and_it_is_a_phrase_of_the_system_prompt():
+    system_prompt = " ".join((CONFIG.pack / "system_prompt.md").read_text().split())
+    canaries = [case.expected["canary"] for case in INJECT_CASES if "canary" in case.expected]
+
+    assert len(canaries) == 3
+    assert all(canary in system_prompt for canary in canaries)
 
 
 PAIRS = [case for case in CASES if case.language == "both"]
