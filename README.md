@@ -27,7 +27,7 @@ Run `20261018T225102Z-cffe36`, 2026-10-18:
 
 - **Agent:** `deepseek/deepseek-v4.1-flash`, on DeepInfra fp8 only.
 - **Judge:** `openai/gpt-5.6-terra`.
-- **Cases:** 121 reviewed cases (tag `cases-v1`), with 3 repeats of each case.
+- **Cases:** 121 reviewed cases (tag `cases-2026-10-18`), with 3 repeats of each case.
 
 n is the number of cases. The score of one case is the part of its repeats that passed. The interval is a 95% Wilson interval. `eval gate` fails a run that is below a threshold.
 
