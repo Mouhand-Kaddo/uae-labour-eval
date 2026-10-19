@@ -230,5 +230,5 @@ The record of the cost of every paid API call, used to enforce the budget.
 _Avoid_: spend log, billing log
 
 **Budget**:
-The USD 20 ceiling on all API spend for v1.
+The USD 20 ceiling on all API spend.
 _Avoid_: quota, limit (unqualified)
