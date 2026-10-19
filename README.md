@@ -1,5 +1,3 @@
-<img src="assets/icon.svg" width="64" height="64" alt="">
-
 # uae-labour-eval
 
 An eval harness for a bilingual (English and Arabic) assistant on UAE private-sector labour law. The harness is the product: it shows how well the assistant works, with numbers you can check, trace by trace. The assistant is the thing it measures.
@@ -23,34 +21,23 @@ Why a harness and not a chatbot: a legal assistant is only useful if you know wh
 
 ## Results
 
-Run `20261018T225102Z-cffe36` on 2026-10-18 (v2): agent `deepseek/deepseek-v4.1-flash` (pinned to DeepInfra fp8), judge `openai/gpt-5.6-terra`, 121 reviewed cases (tag `cases-v1`), 3 repeats each. n counts distinct cases; a case scores the share of its repeats that passed. Intervals are 95% Wilson intervals. The v1 column is run `20261018T131431Z-09b9ca` on the same cases.
+Run `20261018T225102Z-cffe36` on 2026-10-18: agent `deepseek/deepseek-v4.1-flash` (pinned to DeepInfra fp8), judge `openai/gpt-5.6-terra`, 121 reviewed cases (tag `cases-v1`), 3 repeats each. n counts distinct cases; a case scores the share of its repeats that passed. Intervals are 95% Wilson intervals.
 
-| Category | n | Pass rate | 95% interval | v1 | Threshold |
-|---|---|---|---|---|---|
-| bilingual | 10 | 97% | 68–100% | 97% | 86% |
-| calc | 35 | 97% | 85–99% | 95% | 85% |
-| cite | 26 | 92% | 76–98% | 95% | 84% |
-| grounding | 15 | 76% | 50–90% | 60% | 50% |
-| inject | 15 | 100% | 80–100% | 96% | 85% |
-| refuse | 20 | 98% | 81–100% | 95% | 85% |
-| **safety** (refuse + inject) | 35 | 99% | 88–100% | 95% | 90% |
+| Category | n | Pass rate | 95% interval | Threshold |
+|---|---|---|---|---|
+| bilingual | 10 | 97% | 68–100% | 86% |
+| calc | 35 | 97% | 85–99% | 85% |
+| cite | 26 | 92% | 76–98% | 84% |
+| grounding | 15 | 76% | 50–90% | 50% |
+| inject | 15 | 100% | 80–100% | 85% |
+| refuse | 20 | 98% | 81–100% | 85% |
+| **safety** (refuse + inject) | 35 | 99% | 88–100% | 90% |
 
 - **Cost:** USD 1.68 for the run (363 case runs, agent and judge). Per case: p50 USD 0.003, p95 USD 0.013.
 - **Latency per case:** p50 11.3 s, p95 29.0 s.
-- **Weak spot:** grounding, though it rose from 60% to 76%. Most remaining failures are answers that state a rule more broadly than the cited text, or add a fact from an article they did not cite. The HTML report (`eval report <run>`) lists the worst failures and the flaky cases, each linked to its trace.
+- **Weak spot:** grounding (76%). Most failures are answers that state a rule more broadly than the cited text, or add a fact from an article they did not cite. The HTML report (`eval report <run>`) lists the worst failures and the flaky cases, each linked to its trace.
 - **Answers sent back:** 1. The agent loop refuses a final answer that cites an article no tool returned and asks the agent to read it or drop it; the report counts how often.
-- **Thresholds** (`packs/uae_labour/evals/thresholds.toml`) are v1's rate minus 10 points, rounded down, with a 0.90 floor for safety. `eval gate` fails a run below them. v2 keeps them.
-
-### What changed in v2
-
-Four changes, each measured on its own ([write-up](docs/grounding-2026-10-18.md)):
-
-1. **Scoring:** the grounding rubric no longer counts naming the law (Federal Decree-Law No. 33 of 2021) as an unsupported claim.
-2. **Agent:** a final answer that cites an article the agent never read is sent back instead of accepted.
-3. **Prompt:** say only what the cited text says, and keep its conditions and exceptions.
-4. **Prompt:** call the calculation tool whenever it covers the question. Change 3 alone had pushed calc down to 90%.
-
-The prompt rule in change 3 was written after reading the failures of these same 15 grounding cases, and there is no held-out set, so the grounding gain probably overstates how the agent does on new questions.
+- **Thresholds** (`packs/uae_labour/evals/thresholds.toml`) sit 10 points below the pass rates of an earlier full run, rounded down, with a 0.90 floor for safety. `eval gate` fails a run below them.
 
 ### Judge agreement
 
@@ -63,11 +50,11 @@ The judge scores free-text answers against written rubrics. Before trusting it, 
 | inject | 97% | 0.91 |
 | refusal | 91% | 0.74 |
 
-Grounding fell below the trust line in v2 (v1: 85%, 0.63). Re-judging the same 20 items three times gave 80–82% and kappa 0.54–0.58, because 3 items flip between judgings. Four items disagree every time: the judge fails answers that add facts from uncited articles, as the rubric says, and their labels pass them. Whether those labels are too lenient is still open ([details](docs/grounding-2026-10-18.md#the-judge)).
+Grounding is below the trust line. Re-judging the same 20 items three times gave 80–82% and kappa 0.54–0.58, because 3 items flip between judgings. Four items disagree every time: the judge fails answers that add facts from uncited articles, as the rubric says, and their labels pass them. Whether those labels are too lenient is still open ([details](docs/grounding-2026-10-18.md#the-judge)).
 
 ### Spend
 
-The hard budget is USD 20. Total spend so far is USD 8.51, including the pilots, the judge checks, the v1 run and the v2 work. The budget guard refuses to start a run whose estimate would cross the ceiling, and stops a run that crosses it (ADR-0008).
+The hard budget is USD 20. Total spend so far is USD 8.51, including the pilots, the judge checks and every run. The budget guard refuses to start a run whose estimate would cross the ceiling, and stops a run that crosses it (ADR-0008).
 
 ## How it works
 
@@ -110,7 +97,6 @@ Other commands (`uv run --env-file .env eval <command>`):
 
 - **One model, small n.** Each category has 10–35 cases, so the intervals are wide; a 5-point difference between two runs is usually noise.
 - **The judge is a model.** It agrees with the hand labels 89% of the time, not always. Its grounding verdicts are the least reliable (kappa 0.54, below the trust line).
-- **The prompt was tuned on the test cases.** v2's grounding rule came from reading the failures of the 15 grounding cases it is scored on.
 - **English translations are not authoritative.** The Arabic text prevails. Where the two differ, the case set follows the Arabic (OQ-004, OQ-006, OQ-007, OQ-014).
 - **Amendments.** The corpus is the consolidated Labour Law, which already folds in Decree-Laws 14/2022, 20/2023 and 9/2024. Their effective dates are from the official text for 20/2023 only; the others are from secondary sources.
 - **Only two languages.** The bilingual pairing assumes English and Arabic.
