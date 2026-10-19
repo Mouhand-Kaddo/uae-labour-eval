@@ -33,7 +33,7 @@ H4 fixed a side effect of H3. On the first full run, calc fell from 95% to 90%: 
 
 H1 changed the rubric, so the 20 grounding items of the judge-check set were re-judged, three times. Grounding agreement was 80–82%, kappa 0.54–0.58, against 85% and 0.63 in v1. The drop is not from H1. Three of the 20 items flip from one judging to the next, none over the law's name. v1's 0.63 caught those items on a good day.
 
-Four items disagree with their labels every time: jc-007, jc-010, jc-021 and jc-040. In each, the answer says something the cited text doesn't (for example "basic wage, without allowances", from Art 1, uncited), and the judge fails it as the rubric says to. The labels, drafted by Claude, pass them. One item, jc-026, is a judge error: it treats a partial Art 44 list as complete. The labels are unchanged here; whether to relabel the four is the owner's call. Until then the grounding judge counts as untrusted (kappa below 0.6).
+Four items disagree with their labels every time: jc-007, jc-010, jc-021 and jc-040. In each, the answer says something the cited text doesn't (for example "basic wage, without allowances", from Art 1, uncited), and the judge fails it as the rubric says to. The labels, drafted by Claude, pass them. One item, jc-026, is a judge error: it treats a partial Art 44 list as complete. On 2026-10-19 the owner relabelled the four as fail. Grounding agreement is now 90%, kappa 0.78 (the claims check alone 80%, 0.59).
 
 ## Review
 
@@ -42,5 +42,4 @@ The code changes (H2 and the reporting) went through three rounds of independent
 ## Not tried
 
 - A held-out grounding set, written after this work, to measure H3 without the tuning bias.
-- Relabelling the four lenient judge-check items (owner's decision).
 - `calc-gratuity-ar-001` still fails 3/3, as in v1: the agent answers "not found" for a national worker.
