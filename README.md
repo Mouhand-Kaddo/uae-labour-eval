@@ -41,16 +41,16 @@ Run `20261018T225102Z-cffe36` on 2026-10-18: agent `deepseek/deepseek-v4.1-flash
 
 ### Judge agreement
 
-The judge scores free-text answers against written rubrics. Before trusting it, 50 real and deliberately broken answers were hand-labelled without seeing its verdicts (the judge-check set). The owner labelled 7 items and approved labels drafted by Claude for the other 43. Agreement over 122 decisions is 89%, Cohen's kappa 0.72. A rubric counts as trusted at kappa 0.6 or above.
+The judge scores free-text answers against written rubrics. Before trusting it, 50 real and deliberately broken answers were hand-labelled without seeing its verdicts (the judge-check set). The owner labelled 7 items and approved labels drafted by Claude for the other 43. Agreement over 122 decisions is 93%, Cohen's kappa 0.81. A rubric counts as trusted at kappa 0.6 or above.
 
 | Rubric | Agreement | Kappa |
 |---|---|---|
 | bilingual | 94% | 0.85 |
-| grounding | 80% | 0.54 (untrusted) |
+| grounding | 90% | 0.78 |
 | inject | 97% | 0.91 |
 | refusal | 91% | 0.74 |
 
-Grounding is below the trust line. Re-judging the same 20 items three times gave 80–82% and kappa 0.54–0.58, because 3 items flip between judgings. Four items disagree every time: the judge fails answers that add facts from uncited articles, as the rubric says, and their labels pass them. Whether those labels are too lenient is still open ([details](docs/grounding-2026-10-18.md#the-judge)).
+Four grounding labels (jc-007, jc-010, jc-021, jc-040) were changed from pass to fail after review: each answer states a fact the cited text does not hold, which the rubric fails. They were changed after seeing the judge's verdicts, so the grounding figure is somewhat flattering. The judge is also noisy on grounding: re-judging the same 20 items three times changes the verdict on 3 of them, and its main check (every claim supported) reaches only kappa 0.59 on its own; the citation check, at 100%, lifts the total.
 
 ### Spend
 
@@ -96,7 +96,7 @@ Other commands (`uv run --env-file .env eval <command>`):
 ## Known limits
 
 - **One model, small n.** Each category has 10–35 cases, so the intervals are wide; a 5-point difference between two runs is usually noise.
-- **The judge is a model.** It agrees with the hand labels 89% of the time, not always. Its grounding verdicts are the least reliable (kappa 0.54, below the trust line).
+- **The judge is a model.** It agrees with the hand labels 93% of the time, not always. Its grounding verdicts are the least reliable: the claims check alone is at kappa 0.59, just under the trust line.
 - **English translations are not authoritative.** The Arabic text prevails. Where the two differ, the case set follows the Arabic (OQ-004, OQ-006, OQ-007, OQ-014).
 - **Amendments.** The corpus is the consolidated Labour Law, which already folds in Decree-Laws 14/2022, 20/2023 and 9/2024. Their effective dates are from the official text for 20/2023 only; the others are from secondary sources.
 - **Only two languages.** The bilingual pairing assumes English and Arabic.

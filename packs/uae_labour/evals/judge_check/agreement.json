@@ -1,7 +1,7 @@
 {
   "n": 122,
-  "agreement": 0.8934426229508197,
-  "kappa": 0.7224361218060903,
+  "agreement": 0.9262295081967213,
+  "kappa": 0.8148397976391232,
   "threshold": 0.6,
   "items": 50,
   "unlabelled": 0,
@@ -30,9 +30,9 @@
     },
     "grounding": {
       "n": 40,
-      "agreement": 0.8,
-      "kappa": 0.5362318840579712,
-      "trusted": false,
+      "agreement": 0.9,
+      "kappa": 0.7808219178082193,
+      "trusted": true,
       "categories": [
         "cite",
         "grounding"
@@ -40,8 +40,8 @@
       "criteria": {
         "claims_supported": {
           "n": 20,
-          "agreement": 0.6,
-          "kappa": 0.26605504587155965
+          "agreement": 0.8,
+          "kappa": 0.5876288659793816
         },
         "citations_relevant": {
           "n": 20,
@@ -103,8 +103,5 @@
       }
     }
   },
-  "untrusted_categories": [
-    "cite",
-    "grounding"
-  ]
+  "untrusted_categories": []
 }

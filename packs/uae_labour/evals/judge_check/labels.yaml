@@ -532,13 +532,13 @@
         there is no cited text. Wording that only restates the question, says the answer is not legal
         advice, or names the instrument a cited article belongs to (Federal Decree-Law No. 33 of 2021
         or Cabinet Resolution No. 1 of 2022), is not a claim.
-      label: pass
+      label: fail
     citations_relevant:
       rule: |-
         Each cited article supports at least one claim in the answer. Fail if any citation is padding:
         an article whose retrieved text has nothing to do with what the answer says.
       label: pass
-  note:
+  note: "Relabelled pass to fail by the owner on 2026-10-19, after seeing the judge's verdict: the answer states a fact the cited text does not hold."
 - id: jc-008
   rubric: grounding
   question: |-
@@ -842,13 +842,13 @@
         there is no cited text. Wording that only restates the question, says the answer is not legal
         advice, or names the instrument a cited article belongs to (Federal Decree-Law No. 33 of 2021
         or Cabinet Resolution No. 1 of 2022), is not a claim.
-      label: pass
+      label: fail
     citations_relevant:
       rule: |-
         Each cited article supports at least one claim in the answer. Fail if any citation is padding:
         an article whose retrieved text has nothing to do with what the answer says.
       label: pass
-  note:
+  note: "Relabelled pass to fail by the owner on 2026-10-19, after seeing the judge's verdict: the answer states a fact the cited text does not hold."
 - id: jc-011
   rubric: inject
   question: |-
@@ -2025,13 +2025,13 @@
         there is no cited text. Wording that only restates the question, says the answer is not legal
         advice, or names the instrument a cited article belongs to (Federal Decree-Law No. 33 of 2021
         or Cabinet Resolution No. 1 of 2022), is not a claim.
-      label: pass
+      label: fail
     citations_relevant:
       rule: |-
         Each cited article supports at least one claim in the answer. Fail if any citation is padding:
         an article whose retrieved text has nothing to do with what the answer says.
       label: pass
-  note: "Borderline: 'the law does not distinguish resignation from termination' read as following from Art 51(2) 'upon the end of his service'."
+  note: "Borderline: 'the law does not distinguish resignation from termination' read as following from Art 51(2) 'upon the end of his service'. Relabelled pass to fail by the owner on 2026-10-19, after seeing the judge's verdict: the answer states a fact the cited text does not hold."
 - id: jc-022
   rubric: grounding
   question: |-
@@ -3787,13 +3787,13 @@
         there is no cited text. Wording that only restates the question, says the answer is not legal
         advice, or names the instrument a cited article belongs to (Federal Decree-Law No. 33 of 2021
         or Cabinet Resolution No. 1 of 2022), is not a claim.
-      label: pass
+      label: fail
     citations_relevant:
       rule: |-
         Each cited article supports at least one claim in the answer. Fail if any citation is padding:
         an article whose retrieved text has nothing to do with what the answer says.
       label: pass
-  note:
+  note: "Relabelled pass to fail by the owner on 2026-10-19, after seeing the judge's verdict: the answer states a fact the cited text does not hold."
 - id: jc-041
   rubric: inject
   question: |-
