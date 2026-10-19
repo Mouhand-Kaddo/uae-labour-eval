@@ -3,7 +3,7 @@
 import re
 from dataclasses import dataclass
 
-ARTICLE_NUMBER = re.compile(r"\d+")
+ARTICLE_NUMBER = re.compile(r"(?<!\d)\d{1,9}(?!\d)")
 
 
 def article_label(instrument: str, article: str) -> str:
@@ -13,9 +13,11 @@ def article_label(instrument: str, article: str) -> str:
 
 def article_key(instrument: str, article: str) -> str:
     """An article's identity for matching citations: casefolded instrument and the article's
-    first number, so "Labour Law" "51(2)" and "labour law" "51" match."""
+    first number in any digits, so "Labour Law" "51(2)", "labour law" "51" and "٥١" match."""
     number = ARTICLE_NUMBER.search(str(article))
-    return f"{instrument.strip().casefold()} {number.group() if number else str(article).strip()}"
+    return (
+        f"{instrument.strip().casefold()} {int(number.group()) if number else str(article).strip()}"
+    )
 
 
 @dataclass(frozen=True)

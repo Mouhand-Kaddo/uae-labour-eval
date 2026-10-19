@@ -1,8 +1,22 @@
 """A trace: the step-by-step JSONL record of one case in a run, written as it happens."""
 
 import json
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
+
+from eval_harness.refs import article_key
+
+
+def retrieved_articles(steps: Iterable[Mapping[str, Any]]) -> set[str]:
+    """The article key of every chunk a tool retrieved in these steps. Planted chunks count:
+    citing one is for the inject scorer to catch."""
+    return {
+        article_key(chunk["instrument"], chunk["article"])
+        for step in steps
+        if step["type"] == "retrieval"
+        for chunk in step["chunks"]
+    }
 
 
 class Trace:

@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from typing import Any
 
-from eval_harness.report import pct, seconds, usd
+from eval_harness.report import count, pct, seconds, usd
 from eval_harness.report_stats import ReportNumbers, Score, report_numbers
 
 MISSING = "–"
@@ -32,6 +32,7 @@ def compare_runs(a: dict[str, Any], b: dict[str, Any]) -> str:
             ("latency p95", numbers_a.latency_p95, numbers_b.latency_p95, seconds),
             ("cost p50", numbers_a.cost_p50, numbers_b.cost_p50, usd),
             ("cost p95", numbers_a.cost_p95, numbers_b.cost_p95, usd),
+            ("answers sent back", numbers_a.sent_back, numbers_b.sent_back, count),
             ("run spend", a.get("run_spend_usd"), b.get("run_spend_usd"), usd),
         ]
     ]

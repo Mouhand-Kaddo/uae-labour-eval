@@ -59,7 +59,7 @@ Options:
 
 The Arabic prevails per the portal. Question: should the agent quote the Arabic rule when answering in English, and should English `cite` cases expect the pro-rata rule?
 
-**Decision:** Treat the Arabic Art 29(9) sentence as law in both languages: leave pay for parts of the year is pro rata and on basic wage, and English answers state it (citing Art 29(9), noting the Arabic prevails). Research confidence: high (MOHRE's English translation, MOHRE guidance and u.ae all carry the sentence). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
+**Decision:** Treat the Arabic Art 29(9) sentence as law in both languages: leave pay for parts of the year is pro rata and on basic wage, and English answers state it (citing Art 29(9), noting the Arabic prevails). Research confidence: high (MOHRE's English translation, MOHRE guidance and u.ae all carry the sentence). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `research_notes/UAE labour law open questions.md`.
 
 ## OQ-005: Annual-leave boundaries in Art 29(1)
 
@@ -73,7 +73,7 @@ Questions:
 
 The annual-leave tool gives nothing for exactly 180 days of service, counts part months under (b) pro rata (service days × 2 ÷ 30), gives 30 days per completed 365-day year plus part years pro rata (days × 30 ÷ 365), and returns OQ-005 with every result that rests on one of these readings.
 
-**Decision:** Keep the annual-leave tool's reading: nothing at exactly six months ("more than six months"); part months pro rata; 30 days per completed year, with part years at 30/365. Provisional (research confidence low–medium; no official worked example). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
+**Decision:** Keep the annual-leave tool's reading: nothing at exactly six months ("more than six months"); part months pro rata; 30 days per completed year, with part years at 30/365. Provisional (research confidence low–medium; no official worked example). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `research_notes/UAE labour law open questions.md`.
 
 ## OQ-006: Temporary work and "less than a year" in ER Art 30(2); English and Arabic differ
 
@@ -89,7 +89,7 @@ Questions:
 
 The gratuity tool gives temporary work under one year no gratuity (ER Art 30(2), no OQ: both languages agree) and temporary work of one year or more the Art 51 gratuity × the hours ratio (full-time hours unless a ratio is given), returning OQ-006. Part-time and job sharing under one year get nothing, citing Art 51(2)–(3) and ER Art 30(1).
 
-**Decision:** Arabic reading. (1) Temporary work of one year or more earns gratuity; only temporary work under one year is excluded. (2) It is computed as the Art 51 gratuity × (contracted annual hours ÷ full-time annual hours), which equals plain Art 51 on full-time hours. (3) Part-time and job-sharing work under one year earns nothing through Art 51(2)–(3), not ER Art 30(2). Research confidence: high for (1), low–medium for (2) (provisional), medium–high for (3). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
+**Decision:** Arabic reading. (1) Temporary work of one year or more earns gratuity; only temporary work under one year is excluded. (2) It is computed as the Art 51 gratuity × (contracted annual hours ÷ full-time annual hours), which equals plain Art 51 on full-time hours. (3) Part-time and job-sharing work under one year earns nothing through Art 51(2)–(3), not ER Art 30(2). Research confidence: high for (1), low–medium for (2) (provisional), medium–high for (3). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `research_notes/UAE labour law open questions.md`.
 
 ## OQ-007: English Art 60 contradicts itself
 
@@ -97,7 +97,7 @@ The gratuity tool gives temporary work under one year no gratuity (ER Art 30(2),
 
 Not used by any calculation tool. Recorded so `cite` cases on penalties use the Arabic figure.
 
-**Decision:** The Art 60(1) maximum fine is AED 1,000,000 (Arabic text, the English numeral, English Art 60(2)). Research confidence: high. Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
+**Decision:** The Art 60(1) maximum fine is AED 1,000,000 (Arabic text, the English numeral, English Art 60(2)). Research confidence: high. Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `research_notes/UAE labour law open questions.md`.
 
 ## OQ-008: Which basic wage does ER Art 30(1) pro-rate for part-time and job-sharing workers?
 
@@ -114,7 +114,7 @@ Options:
 
 The gratuity tool takes the worker's own basic wage and the hours ratio, computes the full-time value on the full-time-equivalent wage (own wage ÷ ratio), applies the percentage, and returns OQ-008 with every part-time or job-sharing result.
 
-**Decision:** Option B: the full-time gratuity in ER Art 30(1) is computed on the full-time-equivalent basic wage, so the hours reduction applies once (equivalently, Art 51 on the worker's own proportionate wage). Provisional (research confidence low–medium; the text is silent). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
+**Decision:** Option B: the full-time gratuity in ER Art 30(1) is computed on the full-time-equivalent basic wage, so the hours reduction applies once (equivalently, Art 51 on the worker's own proportionate wage). Provisional (research confidence low–medium; the text is silent). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `research_notes/UAE labour law open questions.md`.
 
 ## OQ-009: Gratuity for flexible work
 
@@ -124,7 +124,7 @@ The gratuity tool takes the worker's own basic wage and the hours ratio, compute
 
 Is a flexible worker's gratuity computed like part-time under ER Art 30(1), like full-time under Art 51, or not at all? Given the contracted hours ratio, the gratuity tool computes it like part-time (OQ-008 wage basis, nothing under one year) and returns this question; without hours it answers with outcome `flexible_hours_not_stated`, no amount, and this question.
 
-**Decision:** Flexible work is computed under ER Art 30(1) on the contracted annual hours, with the one-year threshold from Art 51; the result is undetermined only when the contract states no hours. Provisional (research confidence low–medium). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
+**Decision:** Flexible work is computed under ER Art 30(1) on the contracted annual hours, with the one-year threshold from Art 51; the result is undetermined only when the contract states no hours. Provisional (research confidence low–medium). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `research_notes/UAE labour law open questions.md`.
 
 ## OQ-010: How ER Art 18 turns part-time hours into annual leave
 
@@ -139,7 +139,7 @@ Questions:
 
 The annual-leave tool takes the full-time entitlement for the same service, multiplies it by the hours percentage (but not less than 5 ÷ 30, the five-day minimum as a share of a 30-day year), rounds the total up to a whole day, and returns OQ-010 with every part-time result.
 
-**Decision:** Keep the tool's reading: full-time entitlement × hours ratio, the five-day floor pro-rated for part years, total rounded up. Provisional (research confidence low). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
+**Decision:** Keep the tool's reading: full-time entitlement × hours ratio, the five-day floor pro-rated for part years, total rounded up. Provisional (research confidence low). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `research_notes/UAE labour law open questions.md`.
 
 ## OQ-011: Annual leave for six months' service or less
 
@@ -151,7 +151,7 @@ Read alone, (b) gives a worker with six months' service or less no leave. (c) an
 
 The annual-leave tool gives no leave for fewer than 180 days of service and returns OQ-011 with that result (exactly 180 days is OQ-005).
 
-**Decision:** Keep "no annual leave or leave pay for six months' service or less" as the default. Provisional and weakest of the decisions (research confidence low): Art 29(3) and the Arabic Art 29(9) arguably point the other way. Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
+**Decision:** Keep "no annual leave or leave pay for six months' service or less" as the default. Provisional and weakest of the decisions (research confidence low): Art 29(3) and the Arabic Art 29(9) arguably point the other way. Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `research_notes/UAE labour law open questions.md`.
 
 ## OQ-012: A contract notice period outside 30–90 days
 
@@ -161,7 +161,7 @@ The annual-leave tool gives no leave for fewer than 180 days of service and retu
 
 When a contract sets, say, 15 or 120 days, which notice period applies: the nearest limit (30 or 90), the contract's figure if it is more beneficial to the worker, or none? And which period does pay in lieu use? Given who terminates, the notice tool applies the decision below: it reports the period as below the minimum or above the maximum, gives the applicable period, prices pay in lieu on it, and returns OQ-012. Without who terminates, an out-of-range result has no applicable period or pay in lieu.
 
-**Decision:** Worker-favourable split: a contract notice term that hurts the worker is replaced by the nearest limit (30 or 90 days); a term that helps the worker stands; pay in lieu uses the period that applies, at the last wage. Research confidence: medium for harmful terms, low for favourable terms (provisional). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
+**Decision:** Worker-favourable split: a contract notice term that hurts the worker is replaced by the nearest limit (30 or 90 days); a term that helps the worker stands; pay in lieu uses the period that applies, at the last wage. Research confidence: medium for harmful terms, low for favourable terms (provisional). Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `research_notes/UAE labour law open questions.md`.
 
 ## OQ-013: How long is "six months" of probation?
 
@@ -174,7 +174,7 @@ Options:
 
 The probation tool uses A and returns OQ-013 only for probations of 181–184 days, where six calendar months could give the other answer; only cases in that window carry `depends_on: [OQ-013]`.
 
-**Decision:** Option A: six months of probation is 180 days (Art 67's 30-day month). Only probations ending on days 181–184 differ from the calendar reading. Research confidence: medium. Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `reports/UAE labour law open questions.md`.
+**Decision:** Option A: six months of probation is 180 days (Art 67's 30-day month). Only probations ending on days 181–184 differ from the calendar reading. Research confidence: medium. Decided by the project owner on 2026-10-18 by adopting the recommendation in the research report `research_notes/UAE labour law open questions.md`.
 
 ## OQ-014: Arabic and English Art 44(8) differ on "within one year"
 
@@ -202,7 +202,7 @@ Options:
 
 ## Facts still to verify (agent work, not owner decisions)
 
-Verified on 2026-10-18 by the research report `reports/UAE labour law open questions.md` (archived official copies; the live portal and MOHRE still refuse scripts):
+Verified on 2026-10-18 by the research report `research_notes/UAE labour law open questions.md` (archived official copies; the live portal and MOHRE still refuse scripts):
 
 - **Three amending decree-laws, no more.** The Ministry of Justice's consolidated Arabic compilation of the labour legislation, current to December 2025, marks every changed provision and attributes changes only to 14/2022, 20/2023 and 9/2024 ([MOJ 2025 compilation](https://www.moj.gov.ae/assets/966b93b0/تشريعات-تنظيم-علاقات-العمل-2025-النسخة-الالكترونية-639015001687388768.aspx)).
   - **14/2022:** changed Art 8(3) (removed the three-year cap on fixed-term contracts). Issued 15 Sep 2022, Official Gazette No. 736 of 28 Sep 2022, in force 29 Sep 2022. Article change primary (MOJ compilation note); dates secondary only (Eastlaws index title, Lexis).

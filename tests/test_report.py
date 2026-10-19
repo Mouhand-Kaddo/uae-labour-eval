@@ -162,6 +162,7 @@ def write_run(run_dir: Path, cases: list[dict], **summary_fields) -> None:
                 "passed": c["passed"],
                 "cost_usd": c["cost"],
                 "latency_s": c["latency"],
+                **({"sent_back": c["sent_back"]} if "sent_back" in c else {}),
             }
             for c in cases
         ],
@@ -231,6 +232,24 @@ def test_report_shows_latency_cost_and_spend(project):
     assert "10.00 s" in cost and "19.00 s" in cost
     assert "USD 0.010000" in cost and "USD 0.019000" in cost
     assert "USD 0.012300" in cost and "USD 1.500000" in cost
+
+
+def test_report_counts_answers_sent_back_for_unread_citations(project):
+    write_run(
+        project / "runs" / "run-a",
+        [fixture_case(f"c-{i}", "cite", True, sent_back=i) for i in range(3)],
+    )
+    write_run(project / "runs" / "run-b", [fixture_case("c-1", "cite", True)])
+
+    report(project, "run-a")
+    report(project, "run-b")
+
+    def tile(run):
+        html = (project / "runs" / run / "report" / "index.html").read_text()
+        return section(html, "cost").split("Answers sent back")[1].split("</div>")[1]
+
+    assert tile("run-a").endswith(">3")
+    assert tile("run-b").endswith(">–")
 
 
 def test_report_escapes_case_and_trace_text_in_failure_details(project):

@@ -10,8 +10,9 @@ text is unsupported.
 Every claim in the answer (each period, amount, percentage, condition, duty, right and
 exception) is stated in, or follows directly from, the cited text. Fail if any claim is missing
 from the cited text, contradicts it, or is broader or more certain than the text allows. Fail if
-there is no cited text. Wording that only restates the question, or says the answer is not legal
-advice, is not a claim.
+there is no cited text. Wording that only restates the question, says the answer is not legal
+advice, or names the instrument a cited article belongs to (Federal Decree-Law No. 33 of 2021
+or Cabinet Resolution No. 1 of 2022), is not a claim.
 
 ## citations_relevant
 Each cited article supports at least one claim in the answer. Fail if any citation is padding:
